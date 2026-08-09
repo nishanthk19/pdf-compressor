@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visual PDF Editor - Glass Overlay</title>
+  <title>Visual PDF Editor - Whiteout & Overlay</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +25,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .glass-box {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
     }
@@ -33,87 +33,143 @@
       content: "Type text here...";
       color: #94a3b8;
     }
+    .whiteout-box {
+      background-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .font-helvetica {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+    }
+    .font-times {
+      font-family: 'Times New Roman', 'Times', serif;
+    }
+    .font-courier {
+      font-family: 'Courier New', 'Courier', monospace;
+    }
   </style>
 </head>
 <body class="h-full bg-slate-900 text-slate-100 flex flex-col min-h-screen">
 
-  <!-- Top Navigation Bar -->
-  <header class="h-16 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-30 shadow-md">
-    <div class="flex items-center gap-4">
-      <a href="/" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all border border-slate-700/60">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
-        <span>Back to Tools</span>
-      </a>
-      <div class="h-5 w-px bg-slate-800 hidden sm:block"></div>
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md shadow-indigo-600/30">
-          ✍
+  <!-- Sticky Main Navigation & Toolbar -->
+  <header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shadow-md">
+    
+    <!-- Top Row: Navigation & Export -->
+    <div class="h-16 px-6 flex items-center justify-between gap-4 border-b border-slate-800/80">
+      <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all border border-slate-700/60">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span>Back to Tools</span>
+        </a>
+        <div class="h-5 w-px bg-slate-800 hidden sm:block"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md shadow-indigo-600/30">
+            ✍
+          </div>
+          <span class="text-sm font-extrabold tracking-tight">Visual <span class="text-indigo-400">PDF Editor</span></span>
+          <span class="hidden md:inline-block px-2 py-0.5 bg-indigo-500/10 text-indigo-400 text-[10px] font-bold rounded-full border border-indigo-500/20">Whiteout &amp; Overlay</span>
         </div>
-        <span class="text-sm font-extrabold tracking-tight">Visual <span class="text-indigo-400">PDF Editor</span></span>
-        <span class="hidden md:inline-block px-2 py-0.5 bg-indigo-500/10 text-indigo-400 text-[10px] font-bold rounded-full border border-indigo-500/20">Glass Overlay</span>
+      </div>
+
+      <!-- File Meta & Clear Buttons -->
+      <div class="flex items-center gap-3">
+        <button 
+          type="button" 
+          id="clearOverlaysBtn" 
+          disabled 
+          class="bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-xs py-2 px-3 rounded-xl border border-slate-700/60 transition-all cursor-pointer hidden sm:block"
+        >
+          Clear All Overlays
+        </button>
+
+        <!-- Save & Export PDF Button -->
+        <button 
+          type="button" 
+          id="saveExportBtn" 
+          disabled 
+          class="bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs py-2 px-4 rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-2 cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span>Save &amp; Export PDF</span>
+        </button>
       </div>
     </div>
 
-    <!-- Toolbar Action Buttons -->
-    <div class="flex items-center gap-3">
-      <!-- Add Text Button -->
-      <button 
-        type="button" 
-        id="addTextBtn" 
-        disabled 
-        class="bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs py-2 px-4 rounded-xl border border-slate-700 transition-all flex items-center gap-2 shadow-sm cursor-pointer"
-      >
-        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
-        </svg>
-        <span>Add Text</span>
-      </button>
+    <!-- Toolbar Row: Tools & Formatting Controls -->
+    <div class="px-6 py-2 bg-slate-900/90 flex flex-wrap items-center justify-between gap-4 text-xs">
+      
+      <!-- Left: Editor Tools -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Add Text Button -->
+        <button 
+          type="button" 
+          id="addTextBtn" 
+          disabled 
+          class="bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs py-2 px-3.5 rounded-xl border border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+        >
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Add Text</span>
+        </button>
 
-      <!-- Clear Overlays Button -->
-      <button 
-        type="button" 
-        id="clearOverlaysBtn" 
-        disabled 
-        class="bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-xs py-2 px-3 rounded-xl border border-slate-700/60 transition-all cursor-pointer hidden sm:block"
-      >
-        Clear All
-      </button>
+        <!-- Whiteout / Erase Tool Toggle -->
+        <button 
+          type="button" 
+          id="whiteoutToolBtn" 
+          disabled 
+          class="bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs py-2 px-3.5 rounded-xl border border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+        >
+          <span class="w-3.5 h-3.5 bg-white border border-slate-400 rounded-sm shadow-inner inline-block"></span>
+          <span>Whiteout / Erase</span>
+        </button>
 
-      <!-- Save & Export PDF Button -->
-      <button 
-        type="button" 
-        id="saveExportBtn" 
-        disabled 
-        class="bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs py-2 px-4 rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-2 cursor-pointer"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-        </svg>
-        <span>Save &amp; Export PDF</span>
-      </button>
+        <div class="h-4 w-px bg-slate-800 mx-1"></div>
+
+        <!-- Color Picker -->
+        <div class="flex items-center gap-1.5 bg-slate-800/60 border border-slate-700 px-2 py-1 rounded-xl">
+          <label for="textColorPicker" class="text-[11px] font-semibold text-slate-400">Color:</label>
+          <input 
+            type="color" 
+            id="textColorPicker" 
+            value="#000000" 
+            title="Choose text color" 
+            class="w-6 h-6 rounded border border-slate-600 bg-transparent cursor-pointer p-0"
+          />
+        </div>
+
+        <!-- Font Dropdown -->
+        <div class="flex items-center gap-1.5 bg-slate-800/60 border border-slate-700 px-2 py-1 rounded-xl">
+          <label for="fontSelect" class="text-[11px] font-semibold text-slate-400">Font:</label>
+          <select 
+            id="fontSelect" 
+            class="bg-slate-800 text-slate-200 text-xs font-semibold rounded-lg px-2 py-0.5 border border-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+          >
+            <option value="Helvetica">Helvetica (Sans-Serif)</option>
+            <option value="TimesRoman">Times Roman (Serif)</option>
+            <option value="Courier">Courier (Monospace)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right: File Selector -->
+      <div class="flex items-center gap-3">
+        <label class="bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-lg font-bold cursor-pointer transition-all flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span id="selectPdfLabel">Choose PDF File</span>
+          <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" class="hidden" />
+        </label>
+        <span id="fileMeta" class="text-slate-400 font-medium italic text-xs max-w-[200px] truncate">No PDF loaded</span>
+      </div>
+
     </div>
   </header>
-
-  <!-- Sub-bar File Selector / Document Info -->
-  <div class="bg-slate-950 border-b border-slate-800 px-6 py-2.5 flex flex-wrap items-center justify-between gap-4 text-xs">
-    <div class="flex items-center gap-3">
-      <label class="bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-lg font-bold cursor-pointer transition-all flex items-center gap-2">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-        </svg>
-        <span id="selectPdfLabel">Choose PDF File</span>
-        <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" class="hidden" />
-      </label>
-      <span id="fileMeta" class="text-slate-400 font-medium italic">No PDF loaded</span>
-    </div>
-
-    <div class="flex items-center gap-4 text-slate-400 text-[11px]">
-      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Client-side Sandbox</span>
-      <span class="hidden md:inline">Page 1 Canvas Mode</span>
-    </div>
-  </div>
 
   <!-- Workspace Container -->
   <main class="flex-1 bg-slate-900 overflow-auto p-6 flex items-center justify-center relative min-h-[500px]">
@@ -127,20 +183,20 @@
         </svg>
       </div>
       <h2 class="text-lg font-bold text-slate-100">Load a PDF to Start Editing</h2>
-      <p class="text-xs text-slate-400 mt-1">Select or drop a PDF file to render page 1 onto the canvas stage. All edits run 100% in your browser.</p>
+      <p class="text-xs text-slate-400 mt-1">Select or drop a PDF file to render onto the stage. Draw whiteout blocks to redact text or overlay formatted text anywhere.</p>
       <span class="mt-5 px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/30 group-hover:bg-indigo-500 transition-all pointer-events-none">
         Select PDF File
       </span>
     </div>
 
     <!-- Canvas Stage Container -->
-    <div id="stageContainer" class="hidden relative my-auto shadow-2xl rounded-lg overflow-hidden border border-slate-700/80 bg-slate-950">
-      <div id="canvasWrapper" class="relative inline-block leading-none">
+    <div id="stageContainer" class="hidden relative my-auto shadow-2xl rounded-lg border border-slate-700/80 bg-slate-950">
+      <div id="canvasWrapper" class="relative inline-block leading-none select-none">
         <!-- Rendered Page Canvas -->
         <canvas id="pdfCanvas" class="block bg-white"></canvas>
 
         <!-- Glass Overlay Elements Container -->
-        <div id="overlayLayer" class="absolute inset-0 pointer-events-none z-20"></div>
+        <div id="overlayLayer" class="absolute inset-0 z-20"></div>
       </div>
     </div>
 
@@ -161,18 +217,24 @@
     const overlayLayer = document.getElementById('overlayLayer');
 
     const addTextBtn = document.getElementById('addTextBtn');
+    const whiteoutToolBtn = document.getElementById('whiteoutToolBtn');
+    const textColorPicker = document.getElementById('textColorPicker');
+    const fontSelect = document.getElementById('fontSelect');
+
     const clearOverlaysBtn = document.getElementById('clearOverlaysBtn');
     const saveExportBtn = document.getElementById('saveExportBtn');
     const selectPdfLabel = document.getElementById('selectPdfLabel');
     const fileMeta = document.getElementById('fileMeta');
 
-    // State
+    // State Variables
     let rawPdfArrayBuffer = null;
     let loadedFileName = 'document.pdf';
     let pdfDocObject = null;
     let pdfPageWidthPoints = 0;
     let pdfPageHeightPoints = 0;
     let textBoxCounter = 0;
+    let isWhiteoutModeActive = false;
+    let activeTextBox = null;
 
     // File Selection Handlers
     pdfFileInput.addEventListener('change', handleFileSelect);
@@ -198,7 +260,7 @@
         pdfPageWidthPoints = unscaledViewport.width;
         pdfPageHeightPoints = unscaledViewport.height;
 
-        // Use scale 1.5 for crisp canvas rendering
+        // Render scale 1.5 for crisp canvas rendering
         const renderScale = 1.5;
         const viewport = page.getViewport({ scale: renderScale });
 
@@ -218,16 +280,36 @@
 
         // Enable Action Buttons
         addTextBtn.disabled = false;
+        whiteoutToolBtn.disabled = false;
         clearOverlaysBtn.disabled = false;
         saveExportBtn.disabled = false;
 
         // Reset Overlay Layer
         overlayLayer.innerHTML = '';
         textBoxCounter = 0;
+        setWhiteoutMode(false);
 
       } catch (err) {
         console.error('Failed to load PDF:', err);
         alert('Could not render PDF. Please select a valid PDF file.');
+      }
+    }
+
+    // Toggle Whiteout Mode
+    whiteoutToolBtn.addEventListener('click', () => {
+      setWhiteoutMode(!isWhiteoutModeActive);
+    });
+
+    function setWhiteoutMode(active) {
+      isWhiteoutModeActive = active;
+      if (isWhiteoutModeActive) {
+        whiteoutToolBtn.classList.remove('bg-slate-800', 'text-slate-200');
+        whiteoutToolBtn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500', 'ring-2', 'ring-indigo-400/30');
+        overlayLayer.style.cursor = 'crosshair';
+      } else {
+        whiteoutToolBtn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500', 'ring-2', 'ring-indigo-400/30');
+        whiteoutToolBtn.classList.add('bg-slate-800', 'text-slate-200');
+        overlayLayer.style.cursor = 'default';
       }
     }
 
@@ -238,16 +320,47 @@
 
     // Add Text Button Handler
     addTextBtn.addEventListener('click', () => {
+      setWhiteoutMode(false);
       createDraggableTextBox();
     });
 
+    // Toolbar Formatting Listeners (Update active text box if selected)
+    textColorPicker.addEventListener('input', (e) => {
+      if (activeTextBox) {
+        const textEl = activeTextBox.querySelector('.text-content');
+        if (textEl) textEl.style.color = e.target.value;
+      }
+    });
+
+    fontSelect.addEventListener('change', (e) => {
+      if (activeTextBox) {
+        const textEl = activeTextBox.querySelector('.text-content');
+        if (textEl) applyFontFamily(textEl, e.target.value);
+      }
+    });
+
+    function applyFontFamily(element, fontValue) {
+      element.dataset.font = fontValue;
+      if (fontValue === 'TimesRoman') {
+        element.style.fontFamily = "'Times New Roman', 'Times', serif";
+      } else if (fontValue === 'Courier') {
+        element.style.fontFamily = "'Courier New', 'Courier', monospace";
+      } else {
+        element.style.fontFamily = "'Helvetica', 'Arial', sans-serif";
+      }
+    }
+
+    // Create Draggable Text Box
     function createDraggableTextBox(initialText = 'Click to edit text') {
       textBoxCounter++;
       const box = document.createElement('div');
       box.className = 'draggable-text-box absolute glass-box rounded-lg border border-indigo-500/60 text-slate-900 shadow-xl pointer-events-auto select-none transition-shadow duration-150 focus-within:ring-2 focus-within:ring-indigo-500';
       box.style.left = '40px';
-      box.style.top = `${40 + (textBoxCounter * 20) % 200}px`;
+      box.style.top = `${40 + (textBoxCounter * 24) % 200}px`;
       box.style.zIndex = '30';
+
+      const selectedColor = textColorPicker.value || '#000000';
+      const selectedFont = fontSelect.value || 'Helvetica';
 
       box.innerHTML = `
         <div class="drag-handle flex items-center justify-between px-2 py-1 bg-indigo-600/10 hover:bg-indigo-600/20 rounded-t-lg border-b border-indigo-200/60 cursor-move">
@@ -255,21 +368,33 @@
             <svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
               <path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-12a2 2 0 10.001 4.001A2 2 0 0013 2zm0 6a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z"></path>
             </svg>
-            <span>Text Overlay</span>
+            <span>Text</span>
           </div>
           <button type="button" class="delete-btn text-slate-400 hover:text-red-600 font-bold text-xs leading-none px-1 py-0.5 rounded transition-colors" title="Remove text box">&times;</button>
         </div>
         <div class="p-2">
-          <div class="text-content font-sans text-sm font-semibold text-slate-900 min-w-[140px] min-h-[28px] outline-none cursor-text select-text" contenteditable="true" spellcheck="false">${initialText}</div>
+          <div class="text-content text-sm font-semibold min-w-[120px] min-h-[24px] outline-none cursor-text select-text" contenteditable="true" spellcheck="false">${initialText}</div>
         </div>
       `;
 
+      const textEl = box.querySelector('.text-content');
+      textEl.style.color = selectedColor;
+      applyFontFamily(textEl, selectedFont);
+
       overlayLayer.appendChild(box);
+
+      // Track Active Text Box
+      box.addEventListener('mousedown', () => {
+        activeTextBox = box;
+        textColorPicker.value = rgbToHex(textEl.style.color) || selectedColor;
+        fontSelect.value = textEl.dataset.font || 'Helvetica';
+      });
 
       // Delete handler
       const deleteBtn = box.querySelector('.delete-btn');
       deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (activeTextBox === box) activeTextBox = null;
         box.remove();
       });
 
@@ -300,7 +425,6 @@
         let newLeft = initialLeft + dx;
         let newTop = initialTop + dy;
 
-        // Constrain inside canvas
         const maxLeft = pdfCanvas.width - box.offsetWidth;
         const maxTop = pdfCanvas.height - box.offsetHeight;
 
@@ -318,11 +442,164 @@
         document.removeEventListener('mouseup', onMouseUp);
       }
 
-      // Auto-focus text field
-      const textContent = box.querySelector('.text-content');
+      // Focus text field
       setTimeout(() => {
-        textContent.focus();
+        textEl.focus();
+        activeTextBox = box;
       }, 50);
+    }
+
+    // Whiteout Drawing Logic on Canvas Wrapper / Overlay Layer
+    let isDrawingWhiteout = false;
+    let whiteoutStartX = 0;
+    let whiteoutStartY = 0;
+    let activeWhiteoutEl = null;
+
+    overlayLayer.addEventListener('mousedown', (e) => {
+      if (!isWhiteoutModeActive) return;
+      if (e.target.closest('.draggable-text-box') || e.target.closest('.whiteout-box')) return;
+
+      isDrawingWhiteout = true;
+      const rect = overlayLayer.getBoundingClientRect();
+      whiteoutStartX = e.clientX - rect.left;
+      whiteoutStartY = e.clientY - rect.top;
+
+      activeWhiteoutEl = createWhiteoutElement(whiteoutStartX, whiteoutStartY, 4, 4);
+      
+      document.addEventListener('mousemove', onWhiteoutMouseMove);
+      document.addEventListener('mouseup', onWhiteoutMouseUp);
+    });
+
+    function onWhiteoutMouseMove(e) {
+      if (!isDrawingWhiteout || !activeWhiteoutEl) return;
+      const rect = overlayLayer.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+
+      const left = Math.max(0, Math.min(whiteoutStartX, currentX));
+      const top = Math.max(0, Math.min(whiteoutStartY, currentY));
+      const width = Math.min(pdfCanvas.width - left, Math.abs(currentX - whiteoutStartX));
+      const height = Math.min(pdfCanvas.height - top, Math.abs(currentY - whiteoutStartY));
+
+      activeWhiteoutEl.style.left = `${left}px`;
+      activeWhiteoutEl.style.top = `${top}px`;
+      activeWhiteoutEl.style.width = `${width}px`;
+      activeWhiteoutEl.style.height = `${height}px`;
+    }
+
+    function onWhiteoutMouseUp() {
+      if (!isDrawingWhiteout) return;
+      isDrawingWhiteout = false;
+
+      if (activeWhiteoutEl) {
+        const w = parseFloat(activeWhiteoutEl.style.width) || 0;
+        const h = parseFloat(activeWhiteoutEl.style.height) || 0;
+        // If click was too small, make default size block
+        if (w < 10 || h < 10) {
+          activeWhiteoutEl.style.width = '120px';
+          activeWhiteoutEl.style.height = '32px';
+        }
+      }
+
+      activeWhiteoutEl = null;
+      document.removeEventListener('mousemove', onWhiteoutMouseMove);
+      document.removeEventListener('mouseup', onWhiteoutMouseUp);
+    }
+
+    function createWhiteoutElement(left, top, width, height) {
+      const box = document.createElement('div');
+      box.className = 'whiteout-box absolute bg-white border border-dashed border-slate-400 group select-none pointer-events-auto shadow-md rounded-sm';
+      box.style.left = `${left}px`;
+      box.style.top = `${top}px`;
+      box.style.width = `${width}px`;
+      box.style.height = `${height}px`;
+      box.style.zIndex = '25';
+
+      box.innerHTML = `
+        <div class="drag-bar absolute inset-0 cursor-move"></div>
+        <button type="button" class="delete-btn absolute -top-2.5 -right-2.5 w-5 h-5 bg-red-600 text-white font-bold text-xs rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer" title="Remove Whiteout">&times;</button>
+      `;
+
+      overlayLayer.appendChild(box);
+
+      // Delete Button
+      const deleteBtn = box.querySelector('.delete-btn');
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        box.remove();
+      });
+
+      // Draggable Whiteout Box
+      const dragBar = box.querySelector('.drag-bar');
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      dragBar.addEventListener('mousedown', (e) => {
+        if (isWhiteoutModeActive) return; // Allow new drawing if mode active
+        e.stopPropagation();
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = box.offsetLeft;
+        initialTop = box.offsetTop;
+
+        box.classList.add('ring-2', 'ring-indigo-500');
+
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('mouseup', onDragUp);
+      });
+
+      function onDragMove(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
+
+        const maxLeft = pdfCanvas.width - box.offsetWidth;
+        const maxTop = pdfCanvas.height - box.offsetHeight;
+
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+
+        box.style.left = `${newLeft}px`;
+        box.style.top = `${newTop}px`;
+      }
+
+      function onDragUp() {
+        isDragging = false;
+        box.classList.remove('ring-2', 'ring-indigo-500');
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('mouseup', onDragUp);
+      }
+
+      return box;
+    }
+
+    // Color conversion helper
+    function rgbToHex(rgbStr) {
+      if (!rgbStr) return '#000000';
+      if (rgbStr.startsWith('#')) return rgbStr;
+      const match = rgbStr.match(/\d+/g);
+      if (!match || match.length < 3) return '#000000';
+      const r = parseInt(match[0]).toString(16).padStart(2, '0');
+      const g = parseInt(match[1]).toString(16).padStart(2, '0');
+      const b = parseInt(match[2]).toString(16).padStart(2, '0');
+      return `#${r}${g}${b}`;
+    }
+
+    function hexToPdfRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const num = parseInt(hex, 16);
+      return {
+        r: ((num >> 16) & 255) / 255,
+        g: ((num >> 8) & 255) / 255,
+        b: (num & 255) / 255
+      };
     }
 
     // Save & Export PDF using pdf-lib
@@ -347,51 +624,89 @@
         const firstPage = pages[0];
         const { width: pdfWidth, height: pdfHeight } = firstPage.getSize();
 
-        const fontHelvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-        // Canvas dimensions
+        // Canvas dimensions & scale factors
         const canvasWidth = pdfCanvas.width;
         const canvasHeight = pdfCanvas.height;
 
-        // Scale factors between canvas pixels and PDF points
         const scaleX = canvasWidth / pdfWidth;
         const scaleY = canvasHeight / pdfHeight;
 
-        const overlayBoxes = document.querySelectorAll('.draggable-text-box');
+        // Cache embedded fonts
+        const fontCache = {};
+        async function getFont(fontName) {
+          if (fontCache[fontName]) return fontCache[fontName];
+          let fontType = StandardFonts.Helvetica;
+          if (fontName === 'TimesRoman') fontType = StandardFonts.TimesRoman;
+          if (fontName === 'Courier') fontType = StandardFonts.Courier;
+          const embedded = await pdfDoc.embedFont(fontType);
+          fontCache[fontName] = embedded;
+          return embedded;
+        }
+
+        // 1. Process Whiteout Blocks (Redaction rectangles)
+        const whiteoutBoxes = document.querySelectorAll('.whiteout-box');
+        whiteoutBoxes.forEach(box => {
+          const leftPx = box.offsetLeft;
+          const topPx = box.offsetTop;
+          const widthPx = box.offsetWidth;
+          const heightPx = box.offsetHeight;
+
+          if (widthPx <= 0 || heightPx <= 0) return;
+
+          // Convert DOM top-left to PDF bottom-left coordinates
+          const pdfX = leftPx / scaleX;
+          const pdfBoxWidth = widthPx / scaleX;
+          const pdfBoxHeight = heightPx / scaleY;
+          const pdfY = pdfHeight - ((topPx + heightPx) / scaleY);
+
+          firstPage.drawRectangle({
+            x: Math.max(0, pdfX),
+            y: Math.max(0, pdfY),
+            width: pdfBoxWidth,
+            height: pdfBoxHeight,
+            color: rgb(1, 1, 1) // Solid White
+          });
+        });
+
+        // 2. Process Text Overlays
+        const textOverlayBoxes = document.querySelectorAll('.draggable-text-box');
         const canvasRect = pdfCanvas.getBoundingClientRect();
 
-        overlayBoxes.forEach(box => {
+        for (const box of textOverlayBoxes) {
           const textEl = box.querySelector('.text-content');
-          if (!textEl) return;
+          if (!textEl) continue;
+
           const textContent = textEl.innerText.trim();
-          if (!textContent) return;
+          if (!textContent) continue;
 
           const textRect = textEl.getBoundingClientRect();
 
-          // Top-left coordinates of the text content relative to the canvas
+          // Top-left coordinates of the text content relative to canvas
           const leftPx = textRect.left - canvasRect.left;
           const topPx = textRect.top - canvasRect.top;
 
-          // Font size in pixels
           const computedStyle = window.getComputedStyle(textEl);
           const fontSizePx = parseFloat(computedStyle.fontSize) || 14;
 
-          // Translate DOM pixels to PDF points
+          const fontKey = textEl.dataset.font || 'Helvetica';
+          const font = await getFont(fontKey);
+
+          const colorHex = rgbToHex(textEl.style.color || computedStyle.color);
+          const { r, g, b } = hexToPdfRgb(colorHex);
+
+          // Translate coordinates to PDF points
           const pdfX = leftPx / scaleX;
           const fontSizePt = fontSizePx / scaleY;
-
-          // DOM Y-axis top-left -> PDF-lib Y-axis bottom-left
           const pdfY = pdfHeight - (topPx / scaleY) - fontSizePt;
 
-          // Draw text on first page
           firstPage.drawText(textContent, {
             x: Math.max(0, pdfX),
             y: Math.max(0, pdfY),
             size: fontSizePt,
-            font: fontHelvetica,
-            color: rgb(0, 0, 0)
+            font: font,
+            color: rgb(r, g, b)
           });
-        });
+        }
 
         // Save PDF and trigger download
         const pdfBytes = await pdfDoc.save();
