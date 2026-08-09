@@ -4,7 +4,7 @@ import fitz  # PyMuPDF
 
 def main():
     if len(sys.argv) < 2:
-        print(json.dumps({"error": "Missing input PDF path"}), file=sys.stderr)
+        sys.stderr.write("Error: Missing input PDF path\n")
         sys.exit(1)
 
     input_pdf_path = sys.argv[1]
@@ -12,14 +12,11 @@ def main():
     try:
         doc = fitz.open(input_pdf_path)
         if len(doc) == 0:
-            print(json.dumps({"error": "PDF has no pages"}))
+            doc.close()
+            print(json.dumps([]))
             sys.exit(0)
 
         page = doc[0]
-        rect = page.rect
-        page_width = rect.width
-        page_height = rect.height
-
         page_dict = page.get_text("dict")
         spans = []
 
@@ -32,29 +29,18 @@ def main():
                             continue
                         bbox = span.get("bbox")  # (x0, y0, x1, y1)
                         size = span.get("size", 11)
-                        font = span.get("font", "Helvetica")
-                        color = span.get("color", 0)
 
                         spans.append({
                             "text": span.get("text", ""),
                             "bbox": [bbox[0], bbox[1], bbox[2], bbox[3]],
-                            "size": size,
-                            "font": font,
-                            "color": color
+                            "size": size
                         })
 
         doc.close()
-
-        result = {
-            "page_width": page_width,
-            "page_height": page_height,
-            "spans": spans
-        }
-
-        print(json.dumps(result))
+        print(json.dumps(spans))
 
     except Exception as e:
-        print(json.dumps({"error": str(e)}), file=sys.stderr)
+        sys.stderr.write(f"Error extracting coordinates: {str(e)}\n")
         sys.exit(1)
 
 if __name__ == "__main__":

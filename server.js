@@ -523,38 +523,31 @@ app.post('/extract-html', (req, res) => {
 // ==========================================
 // 11. EXTRACT COORDS FOR OVERLAY EDITOR (/extract-coords)
 // ==========================================
-app.post('/extract-coords', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ error: `Upload error: ${err.message || 'File upload failed.'}` });
+app.post('/extract-coords', upload.single('pdf'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Please select a PDF file.' });
+  }
+
+  const inputPath = req.file.path;
+
+  try {
+    const stdout = execSync(`python3 extract_coords.py "${inputPath}"`, { encoding: 'utf-8' });
+
+    if (fs.existsSync(inputPath)) {
+      fs.unlinkSync(inputPath);
     }
-    if (!req.file) {
-      return res.status(400).json({ error: 'Please select a PDF file.' });
+
+    res.setHeader('Content-Type', 'application/json');
+    res.send(stdout);
+  } catch (cmdErr) {
+    console.error('Coordinates extraction error:', cmdErr.message);
+
+    if (fs.existsSync(inputPath)) {
+      fs.unlinkSync(inputPath);
     }
 
-    const inputPath = req.file.path;
-
-    try {
-      const pythonCmd = `python3 extract_coords.py "${inputPath}"`;
-      const stdout = execSync(pythonCmd, { encoding: 'utf-8' });
-
-      // Aggressively delete input PDF from server
-      safeUnlinkSync([inputPath]);
-
-      let coordsData;
-      try {
-        coordsData = JSON.parse(stdout);
-      } catch (pErr) {
-        return res.status(500).json({ error: 'Invalid JSON returned from Python extractor.' });
-      }
-
-      res.json(coordsData);
-    } catch (cmdErr) {
-      console.error('Coordinates extraction error:', cmdErr.message);
-      safeUnlinkSync([inputPath]);
-      res.status(500).json({ error: 'Failed to extract text coordinates from PDF.' });
-    }
-  });
+    res.status(500).json({ error: 'Failed to extract text coordinates from PDF.' });
+  }
 });
 
 // Global Error Handler
