@@ -24,6 +24,13 @@
       background: #334155;
       border-radius: 3px;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
   </style>
 </head>
 <body class="h-full bg-slate-50 text-slate-900 flex flex-col overflow-x-hidden md:overflow-hidden">
@@ -56,7 +63,7 @@
       <form id="compressForm" action="/compress" method="POST" enctype="multipart/form-data" class="flex flex-col gap-6">
         
         <!-- File Dropzone -->
-        <div id="dropZone" class="border-2 border-dashed border-slate-200 hover:border-indigo-500 transition-all rounded-2xl flex flex-col items-center justify-center bg-slate-50/70 p-8 md:p-12 text-center group relative cursor-pointer min-h-[200px]">
+        <div id="dropZone" class="border-2 border-dashed border-slate-200 hover:border-indigo-500 transition-all rounded-2xl flex flex-col items-center justify-center bg-slate-50/70 p-8 md:p-10 text-center group relative cursor-pointer min-h-[180px]">
           <input type="file" id="pdfInput" name="pdf" accept=".pdf,application/pdf" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
           
           <div id="uploadPrompt" class="flex flex-col items-center space-y-3 pointer-events-none">
@@ -79,7 +86,18 @@
             </div>
             <h3 id="fileName" class="text-base font-bold text-slate-900 truncate max-w-xs md:max-w-md">filename.pdf</h3>
             <p id="fileSize" class="text-sm text-slate-500 font-medium">Original: 0.00 MB</p>
-            <span class="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm mt-2 pointer-events-auto">Replace File</span>
+            <span class="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm mt-1 pointer-events-auto">Replace File</span>
+          </div>
+        </div>
+
+        <!-- Real-Time Upload Progress Container -->
+        <div id="uploadProgressContainer" class="hidden p-4 bg-indigo-50/60 border border-indigo-100 rounded-xl space-y-2">
+          <div class="flex justify-between items-center text-xs font-semibold text-slate-700">
+            <span id="uploadProgressLabel">Uploading PDF...</span>
+            <span id="uploadProgressPercent" class="text-indigo-600 font-bold">0%</span>
+          </div>
+          <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+            <div id="uploadProgressBar" class="bg-indigo-600 h-full transition-all duration-150" style="width: 0%"></div>
           </div>
         </div>
 
@@ -117,15 +135,46 @@
           </button>
         </div>
 
+        <!-- Download Ready Card (Shown after compression completes without auto-download) -->
+        <div id="downloadReadySection" class="hidden p-6 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex flex-col gap-4 animate-fadeIn">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase tracking-wider">Compression Ready</span>
+              </div>
+              <h3 id="readyFileName" class="text-base font-bold text-slate-900 truncate mt-1">document_compressed.pdf</h3>
+              <div id="readyStats" class="flex flex-wrap items-center gap-2 text-xs text-slate-600 mt-1 font-medium">
+                <!-- Size details inserted via JS -->
+              </div>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            id="downloadFileBtn" 
+            class="w-full bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 active:bg-emerald-800 transition-all uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Download Compressed PDF</span>
+          </button>
+        </div>
+
         <!-- Error Message Display -->
         <div id="errorBox" class="hidden p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium"></div>
 
       </form>
 
-      <!-- History Modal / Container -->
+      <!-- History Container -->
       <div id="historyModal" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
         <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-400">
-          <span>Recent Downloads</span>
+          <span>Recent Compressions</span>
           <button id="clearHistoryBtn" class="text-indigo-600 hover:underline">Clear</button>
         </div>
         <div id="historyList" class="text-xs text-slate-600 space-y-1 max-h-32 overflow-y-auto">
@@ -190,6 +239,16 @@
     const btnSpinner = document.getElementById('btnSpinner');
     const errorBox = document.getElementById('errorBox');
 
+    const uploadProgressContainer = document.getElementById('uploadProgressContainer');
+    const uploadProgressLabel = document.getElementById('uploadProgressLabel');
+    const uploadProgressPercent = document.getElementById('uploadProgressPercent');
+    const uploadProgressBar = document.getElementById('uploadProgressBar');
+
+    const downloadReadySection = document.getElementById('downloadReadySection');
+    const readyFileName = document.getElementById('readyFileName');
+    const readyStats = document.getElementById('readyStats');
+    const downloadFileBtn = document.getElementById('downloadFileBtn');
+
     const consoleLog = document.getElementById('consoleLog');
     const statusBadge = document.getElementById('statusBadge');
     const progressBar = document.getElementById('progressBar');
@@ -200,6 +259,8 @@
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
     let historyData = JSON.parse(localStorage.getItem('pdf_compress_history') || '[]');
+    let currentDownloadUrl = null;
+    let currentDownloadName = 'compressed_document.pdf';
 
     function renderHistory() {
       if (historyData.length === 0) {
@@ -209,7 +270,7 @@
       historyList.innerHTML = historyData.map(item => `
         <div class="flex justify-between items-center py-1 border-b border-slate-100 last:border-0">
           <span class="font-medium text-slate-800 truncate max-w-[180px]">${item.name}</span>
-          <span class="text-indigo-600 font-bold">${item.target}MB</span>
+          <span class="text-indigo-600 font-bold">${item.target}MB → ${item.finalSize || '?'}MB</span>
         </div>
       `).join('');
     }
@@ -235,6 +296,7 @@
         uploadPrompt.classList.add('hidden');
         fileInfo.classList.remove('hidden');
         errorBox.classList.add('hidden');
+        downloadReadySection.classList.add('hidden');
 
         // Log to console
         consoleLog.innerHTML += `
@@ -244,13 +306,32 @@
       }
     });
 
-    // Form submit handler with binary search log rendering
-    compressForm.addEventListener('submit', async (e) => {
+    // Handle Manual Download Button Click
+    downloadFileBtn.addEventListener('click', () => {
+      if (currentDownloadUrl) {
+        const a = document.createElement('a');
+        a.href = currentDownloadUrl;
+        a.download = currentDownloadName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    });
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.remove('hidden');
+      statusBadge.textContent = 'STATUS: ERROR';
+      statusBadge.className = 'text-red-400 font-semibold';
+      progressBar.style.width = '0%';
+    }
+
+    // Form submit handler with XMLHttpRequest for upload progress & blob response
+    compressForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
       if (!pdfInput.files[0]) {
-        errorBox.textContent = 'Please select a PDF file.';
-        errorBox.classList.remove('hidden');
+        showError('Please select a PDF file.');
         return;
       }
 
@@ -258,131 +339,181 @@
       const targetMB = parseFloat(document.getElementById('targetSize').value) || 2.0;
 
       errorBox.classList.add('hidden');
+      downloadReadySection.classList.add('hidden');
       submitBtn.disabled = true;
-      btnText.textContent = 'PROCESSING...';
+      btnText.textContent = 'UPLOADING & COMPRESSING...';
       btnSpinner.classList.remove('hidden');
-      statusBadge.textContent = 'STATUS: PROCESSING';
-      statusBadge.className = 'text-amber-400 font-semibold animate-pulse';
-      progressBar.style.width = '30%';
+
+      // Show upload progress container
+      uploadProgressContainer.classList.remove('hidden');
+      uploadProgressPercent.textContent = '0%';
+      uploadProgressBar.style.width = '0%';
+      uploadProgressLabel.textContent = 'Uploading PDF...';
+
+      statusBadge.textContent = 'STATUS: UPLOADING (0%)';
+      statusBadge.className = 'text-indigo-400 font-semibold animate-pulse';
+      progressBar.style.width = '5%';
 
       // Reset and initialize console output
       consoleLog.innerHTML = `
-        <div class="text-emerald-400">[SYSTEM] Initialization started...</div>
-        <div class="text-slate-400">[UPLOAD] input_file: ${file.name}</div>
+        <div class="text-emerald-400">[SYSTEM] Starting process...</div>
+        <div class="text-slate-400">[UPLOAD] input_file: ${file.name} (${(file.size / (1024*1024)).toFixed(2)} MB)</div>
         <div class="text-slate-400">[PARAMS] target_size: ${targetMB} MB (${(targetMB * 1024 * 1024).toLocaleString()} bytes)</div>
-        <div class="text-slate-400">[GS] Executing Ghostscript binary search loop (36-300 DPI range)...</div>
       `;
       consoleLog.scrollTop = consoleLog.scrollHeight;
 
       const formData = new FormData(compressForm);
+      const xhr = new XMLHttpRequest();
 
-      try {
-        const response = await fetch('/compress', {
-          method: 'POST',
-          body: formData
-        });
+      // Track Upload Progress
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          uploadProgressPercent.textContent = `${percent}%`;
+          uploadProgressBar.style.width = `${percent}%`;
 
-        progressBar.style.width = '80%';
+          const uploadedMB = (event.loaded / (1024 * 1024)).toFixed(1);
+          const totalMB = (event.total / (1024 * 1024)).toFixed(1);
 
-        if (!response.ok) {
-          let errorMsg = 'Failed to compress PDF.';
-          try {
-            const errData = await response.json();
-            if (errData.error) errorMsg = errData.error;
-          } catch (_) {}
-          throw new Error(errorMsg);
+          if (percent < 100) {
+            uploadProgressLabel.textContent = `Uploading PDF (${uploadedMB} MB / ${totalMB} MB)...`;
+            statusBadge.textContent = `STATUS: UPLOADING (${percent}%)`;
+            progressBar.style.width = `${Math.round(percent * 0.4)}%`; // 0 to 40%
+          } else {
+            uploadProgressLabel.textContent = 'Upload complete! Running Ghostscript binary search...';
+            statusBadge.textContent = 'STATUS: COMPRESSING';
+            statusBadge.className = 'text-amber-400 font-semibold animate-pulse';
+            progressBar.style.width = '60%';
+            
+            consoleLog.innerHTML += `
+              <div class="text-indigo-400">[GS] Upload complete. Executing Ghostscript binary search loop (36-300 DPI range)...</div>
+            `;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+          }
         }
+      };
 
-        // Check for iteration log header
-        const logsHeader = response.headers.get('X-Compression-Log');
-        if (logsHeader) {
-          try {
-            const logs = JSON.parse(logsHeader);
-            if (logs.iterations && logs.iterations.length > 0) {
-              logs.iterations.forEach((item) => {
-                const isBest = item.isBest;
-                const cardBg = isBest ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-slate-800/50 border-slate-700';
-                const textTitle = isBest ? 'text-indigo-300 font-bold' : 'text-indigo-400';
-                const sizeText = isBest ? 'text-emerald-400 font-bold' : 'text-slate-400';
+      xhr.open('POST', '/compress', true);
+      xhr.responseType = 'blob';
 
-                consoleLog.innerHTML += `
-                  <div class="mt-3 p-3 rounded border ${cardBg}">
-                    <div class="flex justify-between mb-1">
-                      <span class="${textTitle}">Iteration #${item.iteration} (${item.dpi} DPI)</span>
-                      <span class="${sizeText}">${item.sizeMB} MB</span>
+      xhr.onload = function () {
+        uploadProgressContainer.classList.add('hidden');
+
+        if (xhr.status === 200) {
+          const blob = xhr.response;
+          const finalSizeMB = (blob.size / (1024 * 1024)).toFixed(2);
+          const origSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+          // Parse X-Compression-Log header
+          const logsHeader = xhr.getResponseHeader('X-Compression-Log');
+          if (logsHeader) {
+            try {
+              const logs = JSON.parse(logsHeader);
+              if (logs.iterations && logs.iterations.length > 0) {
+                logs.iterations.forEach((item) => {
+                  const isBest = item.isBest;
+                  const cardBg = isBest ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-slate-800/50 border-slate-700';
+                  const textTitle = isBest ? 'text-indigo-300 font-bold' : 'text-indigo-400';
+                  const sizeText = isBest ? 'text-emerald-400 font-bold' : 'text-slate-400';
+
+                  consoleLog.innerHTML += `
+                    <div class="mt-3 p-3 rounded border ${cardBg}">
+                      <div class="flex justify-between mb-1">
+                        <span class="${textTitle}">Iteration #${item.iteration} (${item.dpi} DPI)</span>
+                        <span class="${sizeText}">${item.sizeMB} MB</span>
+                      </div>
+                      <div class="text-xs ${isBest ? 'text-indigo-300' : 'text-slate-400'}">${item.note || ''}</div>
                     </div>
-                    <div class="text-xs ${isBest ? 'text-indigo-300' : 'text-slate-400'}">${item.note || ''}</div>
-                  </div>
-                `;
-              });
+                  `;
+                });
+              }
+            } catch (pErr) {
+              console.error('Failed to parse compression log header', pErr);
             }
-          } catch (pErr) {
-            console.error('Failed to parse compression log header', pErr);
           }
+
+          consoleLog.innerHTML += `
+            <div class="mt-4 flex items-center gap-3 text-emerald-400">
+              <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+              <div>[SUCCESS] Compression complete! Click 'Download Compressed PDF' to save file.</div>
+            </div>
+          `;
+          consoleLog.scrollTop = consoleLog.scrollHeight;
+
+          progressBar.style.width = '100%';
+          statusBadge.textContent = 'STATUS: READY FOR DOWNLOAD';
+          statusBadge.className = 'text-emerald-400 font-semibold';
+
+          // Extract output filename from Content-Disposition header
+          const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+          let downloadFilename = `${file.name.replace(/\.pdf$/i, '')}_compressed_${targetMB}MB.pdf`;
+          if (contentDisposition && contentDisposition.includes('filename=')) {
+            const match = contentDisposition.match(/filename="?([^";]+)"?/);
+            if (match && match[1]) {
+              downloadFilename = match[1];
+            }
+          }
+
+          // Clean up prior object URL if any
+          if (currentDownloadUrl) {
+            window.URL.revokeObjectURL(currentDownloadUrl);
+          }
+
+          currentDownloadUrl = window.URL.createObjectURL(blob);
+          currentDownloadName = downloadFilename;
+
+          // Populate Download Ready UI section
+          readyFileName.textContent = downloadFilename;
+          const diffBytes = file.size - blob.size;
+          const diffPct = (((diffBytes) / file.size) * 100).toFixed(1);
+          readyStats.innerHTML = `
+            <span>Original: <strong>${origSizeMB} MB</strong></span>
+            <span>→</span>
+            <span class="text-emerald-700 font-bold">Final: ${finalSizeMB} MB</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">${diffPct >= 0 ? '-' : '+'}${Math.abs(diffPct)}%</span>
+          `;
+
+          downloadReadySection.classList.remove('hidden');
+
+          // Save to local history
+          historyData.unshift({
+            name: file.name,
+            target: targetMB,
+            finalSize: finalSizeMB,
+            time: new Date().toLocaleTimeString()
+          });
+          if (historyData.length > 10) historyData.pop();
+          localStorage.setItem('pdf_compress_history', JSON.stringify(historyData));
+          renderHistory();
+
+        } else {
+          // Handle error response from server
+          let errorMsg = 'Failed to compress PDF.';
+          const reader = new FileReader();
+          reader.onload = function () {
+            try {
+              const errJson = JSON.parse(reader.result);
+              if (errJson.error) errorMsg = errJson.error;
+            } catch (_) {}
+            showError(errorMsg);
+          };
+          reader.readAsText(xhr.response);
         }
 
-        consoleLog.innerHTML += `
-          <div class="mt-4 flex items-center gap-3 text-emerald-400">
-            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-            <div>[SUCCESS] Compression complete! Delivering output stream...</div>
-          </div>
-        `;
-        consoleLog.scrollTop = consoleLog.scrollHeight;
-
-        progressBar.style.width = '100%';
-        statusBadge.textContent = 'STATUS: COMPLETE';
-        statusBadge.className = 'text-emerald-400 font-semibold';
-
-        // Save history item
-        historyData.unshift({
-          name: file.name,
-          target: targetMB,
-          time: new Date().toLocaleTimeString()
-        });
-        if (historyData.length > 10) historyData.pop();
-        localStorage.setItem('pdf_compress_history', JSON.stringify(historyData));
-        renderHistory();
-
-        // Download binary file
-        const blob = await response.blob();
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let downloadName = `${file.name.replace(/\.pdf$/i, '')}_compressed_${targetMB}MB.pdf`;
-
-        if (contentDisposition && contentDisposition.includes('filename=')) {
-          const match = contentDisposition.match(/filename="?([^";]+)"?/);
-          if (match && match[1]) {
-            downloadName = match[1];
-          }
-        }
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = downloadName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-
-      } catch (err) {
-        consoleLog.innerHTML += `
-          <div class="mt-4 p-3 bg-red-950/50 border border-red-800 rounded text-red-400">
-            [ERROR] ${err.message || 'Compression failed.'}
-          </div>
-        `;
-        consoleLog.scrollTop = consoleLog.scrollHeight;
-
-        errorBox.textContent = err.message || 'An error occurred during compression.';
-        errorBox.classList.remove('hidden');
-
-        statusBadge.textContent = 'STATUS: ERROR';
-        statusBadge.className = 'text-red-400 font-semibold';
-        progressBar.style.width = '0%';
-      } finally {
         submitBtn.disabled = false;
         btnText.textContent = 'START COMPRESSION';
         btnSpinner.classList.add('hidden');
-      }
+      };
+
+      xhr.onerror = function () {
+        uploadProgressContainer.classList.add('hidden');
+        showError('Network error occurred during PDF upload.');
+        submitBtn.disabled = false;
+        btnText.textContent = 'START COMPRESSION';
+        btnSpinner.classList.add('hidden');
+      };
+
+      xhr.send(formData);
     });
   </script>
 </body>
