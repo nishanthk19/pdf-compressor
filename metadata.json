@@ -1,0 +1,6 @@
+{
+  "name": "PDF Target Size Compressor",
+  "description": "Compress uploaded PDFs to an exact target file size in MB using Ghostscript binary search.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
