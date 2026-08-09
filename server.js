@@ -74,6 +74,11 @@ app.get('/edit', (req, res) => {
   res.sendFile(path.join(publicDir, 'editor.html'));
 });
 
+// Serve Smart Flowable Editor
+app.get('/flow-editor', (req, res) => {
+  res.sendFile(path.join(publicDir, 'flow-editor.html'));
+});
+
 // ==========================================
 // 1. COMPRESS PDF (/compress)
 // ==========================================
@@ -468,6 +473,44 @@ app.post('/ocr', (req, res) => {
       if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
       if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
       res.status(500).json({ error: 'Failed to perform OCR on PDF document.' });
+    }
+  });
+});
+
+// ==========================================
+// 10. EXTRACT HTML FOR FLOW EDITOR (/extract-html)
+// ==========================================
+app.post('/extract-html', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).send(`Upload error: ${err.message || 'File upload failed.'}`);
+    }
+    if (!req.file) {
+      return res.status(400).send('Please select a PDF file.');
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `extracted_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.html`);
+
+    try {
+      const pythonCmd = `python3 extract_html.py "${inputPath}" "${outputPath}"`;
+      execSync(pythonCmd);
+
+      if (!fs.existsSync(outputPath)) {
+        safeUnlinkSync([inputPath, outputPath]);
+        return res.status(500).send('HTML extraction failed.');
+      }
+
+      const htmlContent = fs.readFileSync(outputPath, 'utf-8');
+
+      // Aggressively delete both input PDF and output HTML from server
+      safeUnlinkSync([inputPath, outputPath]);
+
+      res.send(htmlContent);
+    } catch (cmdErr) {
+      console.error('HTML extraction error:', cmdErr.message);
+      safeUnlinkSync([inputPath, outputPath]);
+      res.status(500).send('Failed to extract HTML from PDF.');
     }
   });
 });

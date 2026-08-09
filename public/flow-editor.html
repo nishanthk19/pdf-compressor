@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Flowable Editor - PDF Precision</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Quill.js WYSIWYG Editor CDN -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+  <!-- html2pdf.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .ql-toolbar.ql-snow {
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      border-color: #334155;
+      background-color: #0f172a;
+    }
+    .ql-container.ql-snow {
+      border-bottom-left-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
+      border-color: #334155;
+      background-color: #ffffff;
+      color: #0f172a;
+      min-height: 450px;
+      font-size: 15px;
+    }
+    .ql-snow .ql-stroke {
+      stroke: #94a3b8;
+    }
+    .ql-snow .ql-fill {
+      fill: #94a3b8;
+    }
+    .ql-snow .ql-picker {
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-900 text-slate-100 flex flex-col min-h-screen">
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shadow-md">
+    <div class="h-16 px-6 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all border border-slate-700/60">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span>Back to Tools</span>
+        </a>
+        <div class="h-5 w-px bg-slate-800 hidden sm:block"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md shadow-teal-600/30">
+            📝
+          </div>
+          <span class="text-sm font-extrabold tracking-tight">Smart <span class="text-teal-400">Flowable Editor</span></span>
+          <span class="hidden md:inline-block px-2 py-0.5 bg-teal-500/10 text-teal-400 text-[10px] font-bold rounded-full border border-teal-500/20">WYSIWYG Flow</span>
+        </div>
+      </div>
+
+      <!-- Export Button -->
+      <button 
+        type="button" 
+        id="savePdfBtn" 
+        class="bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-lg shadow-teal-600/25 transition-all flex items-center gap-2 cursor-pointer"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        <span>Save as new PDF</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-6 flex flex-col gap-6">
+
+    <!-- Upload & Control Bar -->
+    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shadow-sm">
+          <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          </svg>
+          <span id="selectPdfLabel">Select PDF Document</span>
+          <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" class="hidden" />
+        </label>
+
+        <span id="fileMeta" class="text-xs text-slate-400 font-medium italic">No PDF loaded</span>
+      </div>
+
+      <button 
+        type="button" 
+        id="extractTextBtn" 
+        disabled 
+        class="bg-teal-600 hover:bg-teal-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs py-2 px-5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+        </svg>
+        <span id="extractBtnText">Extract Text</span>
+      </button>
+    </div>
+
+    <!-- Loading / Status Banner -->
+    <div id="statusBanner" class="hidden p-4 rounded-xl bg-teal-950/60 border border-teal-500/30 text-teal-300 text-xs font-semibold flex items-center gap-3">
+      <svg class="w-4 h-4 animate-spin text-teal-400 shrink-0" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <span id="statusMessage">Extracting PDF content to HTML...</span>
+    </div>
+
+    <!-- Quill Editor Container -->
+    <div class="flex-1 flex flex-col min-h-[500px] shadow-2xl rounded-2xl">
+      <div id="editor"></div>
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Quill Editor
+    const quill = new Quill('#editor', {
+      theme: 'snow',
+      placeholder: 'Extracted PDF text will appear here for flowable editing...',
+      modules: {
+        toolbar: [
+          [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'color': [] }, { 'background': [] }],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          [{ 'align': [] }],
+          ['blockquote', 'code-block'],
+          ['clean']
+        ]
+      }
+    });
+
+    // DOM Elements
+    const pdfFileInput = document.getElementById('pdfFileInput');
+    const selectPdfLabel = document.getElementById('selectPdfLabel');
+    const fileMeta = document.getElementById('fileMeta');
+    const extractTextBtn = document.getElementById('extractTextBtn');
+    const extractBtnText = document.getElementById('extractBtnText');
+    const savePdfBtn = document.getElementById('savePdfBtn');
+    const statusBanner = document.getElementById('statusBanner');
+    const statusMessage = document.getElementById('statusMessage');
+
+    let selectedFile = null;
+
+    // File Input Handler
+    pdfFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      selectedFile = file;
+      selectPdfLabel.textContent = 'Change PDF';
+      fileMeta.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+      extractTextBtn.disabled = false;
+    });
+
+    // Extract Text Button Handler
+    extractTextBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      try {
+        extractTextBtn.disabled = true;
+        extractBtnText.textContent = 'Extracting...';
+        statusBanner.classList.remove('hidden');
+        statusMessage.textContent = 'Extracting PDF content using PyMuPDF...';
+
+        const formData = new FormData();
+        formData.append('pdf', selectedFile);
+
+        const response = await fetch('/extract-html', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(errText || 'Extraction failed.');
+        }
+
+        const htmlText = await response.text();
+
+        // Dangerously paste HTML into Quill clipboard
+        quill.clipboard.dangerouslyPasteHTML(htmlText);
+
+        statusMessage.textContent = 'Successfully extracted and loaded PDF text!';
+        setTimeout(() => {
+          statusBanner.classList.add('hidden');
+        }, 3000);
+
+      } catch (err) {
+        console.error('Extract HTML Error:', err);
+        statusMessage.textContent = `Error: ${err.message}`;
+      } finally {
+        extractTextBtn.disabled = false;
+        extractBtnText.textContent = 'Extract Text';
+      }
+    });
+
+    // Save as new PDF Button Handler (html2pdf.js)
+    savePdfBtn.addEventListener('click', () => {
+      const contentHtml = quill.root.innerHTML;
+      if (!contentHtml || contentHtml === '<p><br></p>') {
+        alert('The editor is empty. Please extract or type some text first.');
+        return;
+      }
+
+      const originalFilename = selectedFile ? selectedFile.name.replace(/\.pdf$/i, '') : 'document';
+      const outputFilename = `flow_edited_${originalFilename}.pdf`;
+
+      const opt = {
+        margin:       0.5,
+        filename:     outputFilename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(quill.root.innerHTML).save();
+    });
+  </script>
+</body>
+</html>
