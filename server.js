@@ -69,6 +69,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
+// Serve Visual PDF Editor
+app.get('/edit', (req, res) => {
+  res.sendFile(path.join(publicDir, 'editor.html'));
+});
+
 // ==========================================
 // 1. COMPRESS PDF (/compress)
 // ==========================================
