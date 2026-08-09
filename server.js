@@ -7,7 +7,7 @@ const { execSync } = require('child_process');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Set up storage directories
+// Storage directories
 const uploadDir = path.join(__dirname, 'uploads');
 const publicDir = path.join(__dirname, 'public');
 
@@ -18,7 +18,7 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
-// Multer disk storage configuration
+// Multer Disk Storage Setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -49,8 +49,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(publicDir));
 
-// Helper function to safely clean up (delete) disk files
-function cleanupFiles(filePaths) {
+// Helper for aggressive file deletion using fs.unlinkSync
+function safeUnlinkSync(filePaths) {
   if (!filePaths) return;
   const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
   paths.forEach(filePath => {
@@ -64,13 +64,13 @@ function cleanupFiles(filePaths) {
   });
 }
 
-// Serve root SPA
+// Serve SPA
 app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 // ==========================================
-// 1. EXACT SIZE COMPRESSOR (/compress)
+// 1. COMPRESS PDF (/compress)
 // ==========================================
 app.post('/compress', (req, res) => {
   upload.single('pdf')(req, res, (err) => {
@@ -78,7 +78,7 @@ app.post('/compress', (req, res) => {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
     if (!req.file) {
-      return res.status(400).json({ error: 'Please select a PDF file to upload.' });
+      return res.status(400).json({ error: 'Please select a PDF file.' });
     }
 
     const inputPath = req.file.path;
@@ -86,26 +86,18 @@ app.post('/compress', (req, res) => {
     const targetSizeBytes = targetSizeMB * 1024 * 1024;
     const tempFiles = [inputPath];
 
-    const compressionLogs = {
-      filename: req.file.originalname,
-      originalSizeMB: (req.file.size / (1024 * 1024)).toFixed(2),
-      targetSizeMB: targetSizeMB,
-      targetSizeBytes: targetSizeBytes,
-      iterations: []
-    };
-
     let minDpi = 36;
     let maxDpi = 300;
     let bestOutput = null;
     let bestDiff = Infinity;
     const maxIterations = 5;
 
-    for (let i = 0; i < maxIterations; i++) {
-      const midDpi = Math.round((minDpi + maxDpi) / 2);
-      const outputPath = path.join(uploadDir, `compress_${Date.now()}_iter${i}_${Math.random().toString(36).substring(2, 7)}.pdf`);
-      tempFiles.push(outputPath);
+    try {
+      for (let i = 0; i < maxIterations; i++) {
+        const midDpi = Math.round((minDpi + maxDpi) / 2);
+        const outputPath = path.join(uploadDir, `compress_${Date.now()}_iter${i}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+        tempFiles.push(outputPath);
 
-      try {
         const gsCmd = `gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/default -dNOPAUSE -dQUIET -dBATCH \
 -dDownsampleColorImages=true -dColorImageDownsampleType=/Bicubic -dColorImageResolution=${midDpi} \
 -dDownsampleGrayImages=true -dGrayImageDownsampleType=/Bicubic -dGrayImageResolution=${midDpi} \
@@ -116,29 +108,7 @@ app.post('/compress', (req, res) => {
 
         if (fs.existsSync(outputPath)) {
           const currentSize = fs.statSync(outputPath).size;
-          const currentSizeMB = (currentSize / (1024 * 1024)).toFixed(2);
           const diff = Math.abs(currentSize - targetSizeBytes);
-          const accuracyPct = Math.max(0, (100 - (diff / targetSizeBytes) * 100)).toFixed(1);
-
-          let note = '';
-          if (diff / targetSizeBytes <= 0.05) {
-            note = `Accuracy: ${accuracyPct}%. Match found within 5% threshold.`;
-          } else if (currentSize > targetSizeBytes) {
-            note = 'Result too large. Increasing compression ratio.';
-          } else {
-            note = 'Result too small. Relaxing compression ratio.';
-          }
-
-          compressionLogs.iterations.push({
-            iteration: i + 1,
-            dpi: midDpi,
-            sizeMB: currentSizeMB,
-            sizeBytes: currentSize,
-            diff: diff,
-            accuracyPct: accuracyPct,
-            note: note,
-            isBest: false
-          });
 
           if (diff < bestDiff || !bestOutput) {
             bestDiff = diff;
@@ -159,45 +129,28 @@ app.post('/compress', (req, res) => {
             break;
           }
         }
-      } catch (gsErr) {
-        console.error(`Ghostscript iteration ${i} failed:`, gsErr.message);
-        compressionLogs.iterations.push({
-          iteration: i + 1,
-          dpi: midDpi,
-          error: gsErr.message
-        });
       }
-    }
 
-    if (!bestOutput || !fs.existsSync(bestOutput)) {
-      cleanupFiles(tempFiles);
-      return res.status(500).json({ error: 'Failed to compress PDF using Ghostscript.' });
-    }
+      if (!bestOutput || !fs.existsSync(bestOutput)) {
+        safeUnlinkSync(tempFiles);
+        return res.status(500).json({ error: 'Failed to compress PDF using Ghostscript.' });
+      }
 
-    if (compressionLogs.iterations.length > 0) {
-      let bestIdx = 0;
-      let minLogDiff = Infinity;
-      compressionLogs.iterations.forEach((item, idx) => {
-        if (item.diff !== undefined && item.diff < minLogDiff) {
-          minLogDiff = item.diff;
-          bestIdx = idx;
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}_compressed_${targetSizeMB}MB.pdf`;
+
+      res.download(bestOutput, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving compressed file:', downloadErr.message);
         }
+        // Aggressively delete input and all intermediate/output files
+        safeUnlinkSync(tempFiles);
       });
-      compressionLogs.iterations[bestIdx].isBest = true;
+    } catch (error) {
+      console.error('Compression error:', error.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to compress PDF.' });
     }
-
-    const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
-    const downloadFilename = `${safeOriginalName}_compressed_${targetSizeMB}MB.pdf`;
-
-    res.setHeader('Access-Control-Expose-Headers', 'X-Compression-Log, Content-Disposition');
-    res.setHeader('X-Compression-Log', JSON.stringify(compressionLogs));
-
-    res.download(bestOutput, downloadFilename, (downloadErr) => {
-      if (downloadErr) {
-        console.error('Error serving compressed file:', downloadErr.message);
-      }
-      cleanupFiles(tempFiles);
-    });
   });
 });
 
@@ -210,7 +163,7 @@ app.post('/merge', (req, res) => {
       return res.status(400).json({ error: err.message || 'Files upload failed.' });
     }
     if (!req.files || req.files.length < 2) {
-      if (req.files) cleanupFiles(req.files.map(f => f.path));
+      if (req.files) safeUnlinkSync(req.files.map(f => f.path));
       return res.status(400).json({ error: 'Please upload at least 2 PDF files to merge.' });
     }
 
@@ -225,7 +178,7 @@ app.post('/merge', (req, res) => {
       execSync(gsCmd);
 
       if (!fs.existsSync(outputPath)) {
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
         return res.status(500).json({ error: 'Merged PDF file was not created.' });
       }
 
@@ -233,12 +186,12 @@ app.post('/merge', (req, res) => {
         if (downloadErr) {
           console.error('Error serving merged file:', downloadErr.message);
         }
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
       });
     } catch (gsErr) {
-      console.error('Merge Ghostscript error:', gsErr.message);
-      cleanupFiles(tempFiles);
-      res.status(500).json({ error: 'Failed to merge PDFs with Ghostscript.' });
+      console.error('Merge error:', gsErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to merge PDFs.' });
     }
   });
 });
@@ -260,8 +213,8 @@ app.post('/extract', (req, res) => {
     const endPage = parseInt(req.body.endPage, 10) || startPage;
 
     if (startPage < 1 || endPage < startPage) {
-      cleanupFiles(inputPath);
-      return res.status(400).json({ error: 'Invalid page range specified. Start page must be >= 1 and end page >= start page.' });
+      safeUnlinkSync(inputPath);
+      return res.status(400).json({ error: 'Invalid page range specified.' });
     }
 
     const outputPath = path.join(uploadDir, `extracted_${Date.now()}_p${startPage}-${endPage}.pdf`);
@@ -273,7 +226,7 @@ app.post('/extract', (req, res) => {
       execSync(gsCmd);
 
       if (!fs.existsSync(outputPath)) {
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
         return res.status(500).json({ error: 'Extracted PDF file was not created.' });
       }
 
@@ -284,12 +237,12 @@ app.post('/extract', (req, res) => {
         if (downloadErr) {
           console.error('Error serving extracted file:', downloadErr.message);
         }
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
       });
     } catch (gsErr) {
-      console.error('Extract Ghostscript error:', gsErr.message);
-      cleanupFiles(tempFiles);
-      res.status(500).json({ error: 'Failed to extract pages with Ghostscript.' });
+      console.error('Extract error:', gsErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to extract pages.' });
     }
   });
 });
@@ -316,7 +269,7 @@ app.post('/grayscale', (req, res) => {
       execSync(gsCmd);
 
       if (!fs.existsSync(outputPath)) {
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
         return res.status(500).json({ error: 'Grayscale PDF was not created.' });
       }
 
@@ -327,18 +280,18 @@ app.post('/grayscale', (req, res) => {
         if (downloadErr) {
           console.error('Error serving grayscale file:', downloadErr.message);
         }
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
       });
     } catch (gsErr) {
-      console.error('Grayscale Ghostscript error:', gsErr.message);
-      cleanupFiles(tempFiles);
+      console.error('Grayscale error:', gsErr.message);
+      safeUnlinkSync(tempFiles);
       res.status(500).json({ error: 'Failed to convert PDF to grayscale.' });
     }
   });
 });
 
 // ==========================================
-// 5. GENERATE IMAGE PREVIEW (/preview)
+// 5. GENERATE JPEG PREVIEW (/preview)
 // ==========================================
 app.post('/preview', (req, res) => {
   upload.single('pdf')(req, res, (err) => {
@@ -359,7 +312,7 @@ app.post('/preview', (req, res) => {
       execSync(gsCmd);
 
       if (!fs.existsSync(outputPath)) {
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
         return res.status(500).json({ error: 'Preview image was not generated.' });
       }
 
@@ -371,12 +324,12 @@ app.post('/preview', (req, res) => {
         if (downloadErr) {
           console.error('Error serving preview image:', downloadErr.message);
         }
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
       });
     } catch (gsErr) {
-      console.error('Preview Ghostscript error:', gsErr.message);
-      cleanupFiles(tempFiles);
-      res.status(500).json({ error: 'Failed to generate JPEG preview with Ghostscript.' });
+      console.error('Preview error:', gsErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to generate JPEG preview.' });
     }
   });
 });
@@ -403,7 +356,7 @@ app.post('/archive', (req, res) => {
       execSync(gsCmd);
 
       if (!fs.existsSync(outputPath)) {
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
         return res.status(500).json({ error: 'Archival PDF/A file was not created.' });
       }
 
@@ -414,19 +367,64 @@ app.post('/archive', (req, res) => {
         if (downloadErr) {
           console.error('Error serving PDF/A file:', downloadErr.message);
         }
-        cleanupFiles(tempFiles);
+        safeUnlinkSync(tempFiles);
       });
     } catch (gsErr) {
-      console.error('PDF/A Ghostscript error:', gsErr.message);
-      cleanupFiles(tempFiles);
+      console.error('PDF/A error:', gsErr.message);
+      safeUnlinkSync(tempFiles);
       res.status(500).json({ error: 'Failed to convert PDF to archival PDF/A.' });
+    }
+  });
+});
+
+// ==========================================
+// 7. CONVERT PDF TO WORD (/word)
+// ==========================================
+app.post('/word', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `word_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.docx`);
+    const tempFiles = [inputPath, outputPath];
+
+    try {
+      const convertScript = path.join(__dirname, 'convert.py');
+      const cmd = `python3 "${convertScript}" "${inputPath}" "${outputPath}"`;
+
+      execSync(cmd);
+
+      if (!fs.existsSync(outputPath)) {
+        safeUnlinkSync(tempFiles);
+        return res.status(500).json({ error: 'Word document (.docx) was not created.' });
+      }
+
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}.docx`;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.download(outputPath, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving Word file:', downloadErr.message);
+        }
+        safeUnlinkSync(tempFiles);
+      });
+    } catch (pythonErr) {
+      console.error('PDF to Word error:', pythonErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to convert PDF to Word document.' });
     }
   });
 });
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled app error:', err);
+  console.error('Unhandled server error:', err);
   res.status(500).json({ error: err.message || 'Internal server error.' });
 });
 

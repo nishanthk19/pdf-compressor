@@ -1,7 +1,7 @@
 {
-  "name": "pdf-target-compressor",
+  "name": "pdf-precision-suite",
   "version": "1.0.0",
-  "description": "Compress uploaded PDFs to a target file size in MB using Ghostscript binary search",
+  "description": "Multi-tool PDF platform powered by Express, Ghostscript, and Python pdf2docx",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

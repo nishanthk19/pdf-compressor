@@ -1,8 +1,6 @@
 {
   "name": "PDF Precision Platform",
-  "description": "Multi-tool PDF platform with target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, and PDF/A archival conversion powered by Ghostscript.",
-  "Overwrite": true,
-  "TargetFile": "metadata.json",
-  "toolAction": "Update metadata with multi-tool platform description",
-  "toolSummary": "Update metadata.json"
+  "description": "Multi-tool PDF suite with target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, PDF/A archival conversion, and PDF to Word (.docx) conversion.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
