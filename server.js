@@ -79,6 +79,11 @@ app.get('/flow-editor', (req, res) => {
   res.sendFile(path.join(publicDir, 'flow-editor.html'));
 });
 
+// Serve Automated Overlay PDF Editor
+app.get('/overlay-editor', (req, res) => {
+  res.sendFile(path.join(publicDir, 'overlay-editor.html'));
+});
+
 // ==========================================
 // 1. COMPRESS PDF (/compress)
 // ==========================================
@@ -511,6 +516,43 @@ app.post('/extract-html', (req, res) => {
       console.error('HTML extraction error:', cmdErr.message);
       safeUnlinkSync([inputPath, outputPath]);
       res.status(500).send('Failed to extract HTML from PDF.');
+    }
+  });
+});
+
+// ==========================================
+// 11. EXTRACT COORDS FOR OVERLAY EDITOR (/extract-coords)
+// ==========================================
+app.post('/extract-coords', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: `Upload error: ${err.message || 'File upload failed.'}` });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const inputPath = req.file.path;
+
+    try {
+      const pythonCmd = `python3 extract_coords.py "${inputPath}"`;
+      const stdout = execSync(pythonCmd, { encoding: 'utf-8' });
+
+      // Aggressively delete input PDF from server
+      safeUnlinkSync([inputPath]);
+
+      let coordsData;
+      try {
+        coordsData = JSON.parse(stdout);
+      } catch (pErr) {
+        return res.status(500).json({ error: 'Invalid JSON returned from Python extractor.' });
+      }
+
+      res.json(coordsData);
+    } catch (cmdErr) {
+      console.error('Coordinates extraction error:', cmdErr.message);
+      safeUnlinkSync([inputPath]);
+      res.status(500).json({ error: 'Failed to extract text coordinates from PDF.' });
     }
   });
 });

@@ -191,6 +191,17 @@
           </div>
         </button>
 
+        <button type="button" data-tool="overlay" class="tool-tab p-3 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">11</span>
+            <div class="w-5 h-5 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">🎯</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Overlay Editor</div>
+            <div class="text-[10px] text-slate-500 font-medium">Box Precision</div>
+          </div>
+        </button>
+
       </div>
     </section>
 
@@ -237,6 +248,25 @@
           </div>
           <a href="/flow-editor" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-teal-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg shadow-teal-600/20 hover:bg-teal-700 transition-all uppercase tracking-wider text-sm cursor-pointer">
             <span>Open Flow Editor</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Overlay Editor Action Card (Shown when Overlay Editor selected) -->
+        <div id="overlayActionCard" class="hidden flex flex-col items-center justify-center p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center gap-4">
+          <div class="w-16 h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Automated Overlay PDF Editor</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-md">Extract text bounding boxes with PyMuPDF, overlay editable inputs with solid white backgrounds over the canvas, and stamp changes with pdf-lib.</p>
+          </div>
+          <a href="/overlay-editor" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all uppercase tracking-wider text-sm cursor-pointer">
+            <span>Open Overlay Editor</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
             </svg>
@@ -549,6 +579,19 @@
         showTargetSize: false,
         showPageRange: false,
         isFlowEditor: true
+      },
+      overlay: {
+        title: 'Automated Overlay PDF Editor',
+        desc: 'Extract text bounding boxes using PyMuPDF, overlay editable inputs with solid white backgrounds over the canvas, and stamp edits with pdf-lib.',
+        endpoint: '/overlay-editor',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'OPEN OVERLAY EDITOR',
+        promptHeading: 'Click to upload PDF',
+        promptSub: 'Box precision overlay editor',
+        showTargetSize: false,
+        showPageRange: false,
+        isOverlayEditor: true
       }
     };
 
@@ -563,6 +606,7 @@
 
     const editorActionCard = document.getElementById('editorActionCard');
     const flowActionCard = document.getElementById('flowActionCard');
+    const overlayActionCard = document.getElementById('overlayActionCard');
     const dropZone = document.getElementById('dropZone');
     const uploadPrompt = document.getElementById('uploadPrompt');
     const uploadPromptHeading = document.getElementById('uploadPromptHeading');
@@ -679,6 +723,7 @@
           if (config.isEditor) {
             editorActionCard.classList.remove('hidden');
             flowActionCard.classList.add('hidden');
+            overlayActionCard.classList.add('hidden');
             dropZone.classList.add('hidden');
             submitBtn.classList.add('hidden');
             targetSizeInputGroup.classList.add('hidden');
@@ -686,6 +731,15 @@
           } else if (config.isFlowEditor) {
             editorActionCard.classList.add('hidden');
             flowActionCard.classList.remove('hidden');
+            overlayActionCard.classList.add('hidden');
+            dropZone.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            targetSizeInputGroup.classList.add('hidden');
+            pageRangeInputGroup.classList.add('hidden');
+          } else if (config.isOverlayEditor) {
+            editorActionCard.classList.add('hidden');
+            flowActionCard.classList.add('hidden');
+            overlayActionCard.classList.remove('hidden');
             dropZone.classList.add('hidden');
             submitBtn.classList.add('hidden');
             targetSizeInputGroup.classList.add('hidden');
@@ -693,6 +747,7 @@
           } else {
             editorActionCard.classList.add('hidden');
             flowActionCard.classList.add('hidden');
+            overlayActionCard.classList.add('hidden');
             dropZone.classList.remove('hidden');
             submitBtn.classList.remove('hidden');
             targetSizeInputGroup.classList.toggle('hidden', !config.showTargetSize);
