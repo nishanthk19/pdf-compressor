@@ -57,7 +57,7 @@
         <div class="w-4 h-4 md:w-5 md:h-5 border-2 border-white rounded-sm rotate-45"></div>
       </div>
       <span class="text-lg md:text-xl font-extrabold tracking-tight">PDF<span class="text-indigo-600">PRECISION</span></span>
-      <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 ml-2">7 Tools</span>
+      <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 ml-2">8 Tools</span>
     </div>
     
     <nav class="flex items-center gap-6 text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest">
@@ -79,7 +79,7 @@
         <span class="text-xs text-slate-400">Multer Storage &amp; Auto-Cleanup</span>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
         
         <button type="button" data-tool="compress" class="tool-tab active-tab p-3 rounded-2xl border text-left transition-all flex flex-col justify-between h-24 bg-indigo-50/90 border-indigo-300 text-indigo-900 shadow-sm hover:shadow">
           <div class="flex justify-between items-center">
@@ -158,13 +158,24 @@
           </div>
         </button>
 
+        <button type="button" data-tool="ocr" class="tool-tab p-3 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">08</span>
+            <div class="w-5 h-5 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">🔍</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">OCR</div>
+            <div class="text-[10px] text-slate-500 font-medium">Searchable PDF</div>
+          </div>
+        </button>
+
       </div>
     </section>
 
     <!-- Active Tool Form Container -->
     <section class="bg-white border border-slate-200 rounded-3xl p-6 md:p-10 shadow-sm relative overflow-hidden">
       
-      <form id="activeForm" method="POST" enctype="multipart/form-data" class="flex flex-col gap-6">
+      <form id="activeForm" method="POST" action="/compress" enctype="multipart/form-data" class="flex flex-col gap-6">
         
         <!-- Tool Title & Description -->
         <div>
@@ -347,7 +358,7 @@
 
   <!-- Application Footer -->
   <footer class="mt-auto border-t border-slate-200 bg-white py-4 px-6 md:px-12 flex flex-wrap items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-widest gap-4">
-    <div>7-in-1 PDF Suite</div>
+    <div>8-in-1 PDF Suite</div>
     <div class="flex items-center gap-6">
       <span>Multer Storage</span>
       <span>Disk Auto-Cleanup</span>
@@ -436,6 +447,18 @@
         field: 'pdf',
         multiple: false,
         btnText: 'CONVERT TO WORD (.DOCX)',
+        promptHeading: 'Click to upload PDF',
+        promptSub: 'Single PDF up to 200MB',
+        showTargetSize: false,
+        showPageRange: false
+      },
+      ocr: {
+        title: 'Make PDF Searchable (OCR)',
+        desc: 'Apply Optical Character Recognition (OCR) to convert scanned documents into searchable and selectable PDFs.',
+        endpoint: '/ocr',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'RUN OCR PROCESSING',
         promptHeading: 'Click to upload PDF',
         promptSub: 'Single PDF up to 200MB',
         showTargetSize: false,
@@ -553,6 +576,7 @@
           toolTitle.textContent = config.title;
           toolDesc.textContent = config.desc;
           btnText.textContent = config.btnText;
+          activeForm.action = config.endpoint;
           uploadPromptHeading.innerHTML = `<span class="text-indigo-600">${config.promptHeading}</span> or drag and drop`;
           uploadPromptSub.textContent = config.promptSub;
 
@@ -679,6 +703,7 @@
             let downloadFilename = `output_${activeToolKey}.pdf`;
             if (activeToolKey === 'preview') downloadFilename = `preview.jpg`;
             if (activeToolKey === 'word') downloadFilename = `document.docx`;
+            if (activeToolKey === 'ocr') downloadFilename = `searchable.pdf`;
 
             if (contentDisposition && contentDisposition.includes('filename=')) {
               const match = contentDisposition.match(/filename="?([^";]+)"?/);
@@ -701,6 +726,8 @@
               downloadBtnLabel.textContent = 'Download JPEG Image';
             } else if (activeToolKey === 'word') {
               downloadBtnLabel.textContent = 'Download Word (.docx)';
+            } else if (activeToolKey === 'ocr') {
+              downloadBtnLabel.textContent = 'Download Searchable PDF';
             } else {
               downloadBtnLabel.textContent = 'Download Processed File';
             }

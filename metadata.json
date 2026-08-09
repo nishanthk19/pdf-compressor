@@ -1,6 +1,6 @@
 {
   "name": "PDF Precision Platform",
-  "description": "Multi-tool PDF suite with target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, PDF/A archival conversion, and PDF to Word (.docx) conversion.",
+  "description": "Multi-tool PDF suite with target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, PDF/A archival conversion, PDF to Word (.docx) conversion, and OCR searchable PDF conversion.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

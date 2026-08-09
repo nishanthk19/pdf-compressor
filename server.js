@@ -143,7 +143,6 @@ app.post('/compress', (req, res) => {
         if (downloadErr) {
           console.error('Error serving compressed file:', downloadErr.message);
         }
-        // Aggressively delete input and all intermediate/output files
         safeUnlinkSync(tempFiles);
       });
     } catch (error) {
@@ -418,6 +417,52 @@ app.post('/word', (req, res) => {
       console.error('PDF to Word error:', pythonErr.message);
       safeUnlinkSync(tempFiles);
       res.status(500).json({ error: 'Failed to convert PDF to Word document.' });
+    }
+  });
+});
+
+// ==========================================
+// 8. MAKE PDF SEARCHABLE (OCR) (/ocr)
+// ==========================================
+app.post('/ocr', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `ocr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+
+    try {
+      const ocrCmd = `ocrmypdf --force-ocr --optimize 1 "${inputPath}" "${outputPath}"`;
+
+      execSync(ocrCmd);
+
+      if (!fs.existsSync(outputPath)) {
+        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+        return res.status(500).json({ error: 'OCR processed PDF was not created.' });
+      }
+
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}_ocr.pdf`;
+
+      res.download(outputPath, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving OCR file:', downloadErr.message);
+        }
+        // Aggressive file cleanup for both input and output files inside res.download callback
+        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+      });
+    } catch (ocrErr) {
+      console.error('OCR error:', ocrErr.message);
+      // Aggressive file cleanup for both input and output files inside catch block
+      if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+      if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+      res.status(500).json({ error: 'Failed to perform OCR on PDF document.' });
     }
   });
 });
