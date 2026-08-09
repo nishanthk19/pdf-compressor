@@ -3,101 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automated Overlay PDF Editor</title>
+    <title>Automated Overlay PDF Editor - PDF Precision</title>
+    
     <!-- Core PDF Libraries -->
     <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     
     <style>
-        body { 
-            font-family: sans-serif; 
-            background-color: #f4f4f9; 
-            padding: 20px; 
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
         }
-        .container { 
-            max-width: 900px; 
-            margin: auto; 
-            background: white; 
-            padding: 30px; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f8fafc; 
+            color: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background-color: #f1f5f9;
+            color: #475569;
+            text-decoration: none;
             border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease;
         }
-        .toolbar { 
-            margin-bottom: 20px; 
+
+        .back-link:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .main-container { 
+            max-width: 1200px; 
+            width: 100%;
+            margin: 24px auto; 
+            padding: 0 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .toolbar-card { 
+            background: #ffffff; 
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 24px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05); 
             display: flex; 
-            gap: 15px; 
+            gap: 20px; 
             align-items: center; 
-            padding-bottom: 20px;
-            border-bottom: 1px solid #ddd;
+            justify-content: space-between;
+            flex-wrap: wrap;
         }
-        button { 
-            padding: 10px 20px; 
+
+        .upload-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .custom-file-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background-color: #2563eb;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .custom-file-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .file-name-display {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            font-style: italic;
+        }
+
+        .export-btn { 
+            padding: 10px 22px; 
             cursor: pointer; 
-            background: #007bff; 
-            color: white; 
+            background: #059669; 
+            color: #ffffff; 
             border: none; 
-            border-radius: 4px; 
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 8px; 
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+            display: none;
+            align-items: center;
+            gap: 8px;
         }
-        button:hover { background: #0056b3; }
-        
+
+        .export-btn:hover { 
+            background: #047857; 
+        }
+
+        .status-banner {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stage-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+            overflow: auto;
+        }
+
+        /* Centered Editor Area with Box Shadow */
         .editor-area { 
             position: relative; 
             display: inline-block; 
-            border: 1px solid #ccc; 
-            background: #ececec; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #cbd5e1; 
+            background: #ffffff; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
         }
-        canvas { display: block; }
+
+        canvas { 
+            display: block; 
+        }
         
-        /* The Magic Overlay Inputs */
+        /* The Overlay Inputs */
         .text-overlay {
             position: absolute;
-            background-color: #FFFFFF; /* The whiteout effect to hide original text */
-            border: 1px dashed #b3d7ff; /* Subtle border to show editable areas */
-            color: #000;
-            padding: 0;
+            background-color: #FFFFFF; /* Solid white background to visually hide original text */
+            border: 1px dashed #94a3b8; /* Subtle dashed border */
+            color: #0f172a;
+            padding: 0 2px;
             margin: 0;
             box-sizing: border-box;
-            font-family: Helvetica, Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             overflow: hidden;
             white-space: nowrap;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
+
         .text-overlay:focus { 
-            border: 1px solid #007bff; 
+            border: 1px solid #2563eb; /* Solid blue on focus */
             outline: none; 
-            z-index: 10; 
-            box-shadow: 0 0 5px rgba(0,123,255,0.5);
+            z-index: 20; 
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
         }
-        
-        #loading {
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #555;
-            display: none;
+
+        .empty-placeholder {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px;
+        }
+
+        .empty-placeholder svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+        }
+
+        .empty-placeholder h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .empty-placeholder p {
+            font-size: 13px;
+            color: #94a3b8;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Automated Overlay PDF Editor</h2>
-        <p style="color: #666; margin-top: -10px; margin-bottom: 20px;">
-            Click on any highlighted text to edit it. The editor applies a solid white background to visually erase the original baked-in text.
-        </p>
 
-        <div class="toolbar">
-            <input type="file" id="pdf-upload" accept=".pdf">
-            <button id="save-btn" style="display:none;">Save & Export PDF</button>
+    <header>
+        <div class="header-content">
+            <div class="brand-section">
+                <a href="/" class="back-link">
+                    &larr; Back to Tools
+                </a>
+                <div>
+                    <h1 class="brand-title">Automated Overlay PDF Editor</h1>
+                    <p class="brand-subtitle">Precision text bounding-box editor with instant PDF stamping</p>
+                </div>
+            </div>
         </div>
-        
-        <div id="loading">Processing document... this may take a few seconds.</div>
+    </header>
 
-        <div class="editor-area" id="editor-area">
-            <canvas id="pdf-canvas"></canvas>
-            <div id="overlay-container"></div>
+    <div class="main-container">
+
+        <!-- Toolbar Card -->
+        <div class="toolbar-card">
+            <div class="upload-controls">
+                <div class="file-input-wrapper">
+                    <span class="custom-file-btn">
+                        📁 Select PDF Document
+                    </span>
+                    <input type="file" id="pdf-upload" accept=".pdf,application/pdf">
+                </div>
+                <span id="file-name-display" class="file-name-display">No PDF selected</span>
+            </div>
+
+            <button id="save-btn" class="export-btn">
+                💾 Save & Export PDF
+            </button>
         </div>
+
+        <!-- Status Banner -->
+        <div id="status-banner" class="status-banner" style="display: none;">
+            <span id="status-text">Processing document...</span>
+        </div>
+
+        <!-- Editor Area Container -->
+        <div class="stage-card">
+            <div id="empty-state" class="empty-placeholder">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3>No PDF Loaded</h3>
+                <p>Upload a PDF document to extract text bounding boxes and edit text directly over the document canvas.</p>
+            </div>
+
+            <div class="editor-area" id="editor-area" style="display: none;">
+                <canvas id="pdf-canvas"></canvas>
+                <div id="overlay-container"></div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -105,30 +325,38 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 
         const fileInput = document.getElementById('pdf-upload');
+        const fileNameDisplay = document.getElementById('file-name-display');
         const saveBtn = document.getElementById('save-btn');
         const canvas = document.getElementById('pdf-canvas');
+        const editorArea = document.getElementById('editor-area');
         const overlayContainer = document.getElementById('overlay-container');
-        const loadingMsg = document.getElementById('loading');
+        const emptyState = document.getElementById('empty-state');
+        const statusBanner = document.getElementById('status-banner');
+        const statusText = document.getElementById('status-text');
         const ctx = canvas.getContext('2d');
 
         let pageData = []; 
-        let currentScale = 1.5; // Scale up the canvas so text isn't blurry to read
+        const currentScale = 1.5; // Scale up the canvas viewport by 1.5x for clarity
 
-        // --- PHASE 1 & 2: LOAD AND RENDER OVERLAYS ---
+        // --- LOAD AND RENDER LOGIC ---
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            fileNameDisplay.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
 
             // Reset UI
             overlayContainer.innerHTML = '';
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             saveBtn.style.display = 'none';
-            loadingMsg.style.display = 'block';
-            loadingMsg.innerText = "Extracting coordinates and rendering...";
-            loadingMsg.style.color = '#555';
+            emptyState.style.display = 'none';
+            editorArea.style.display = 'none';
+            
+            statusBanner.style.display = 'flex';
+            statusText.innerText = "Extracting coordinates and rendering canvas...";
 
             try {
-                // 1. Send to your Node.js/Python backend to get coordinates
+                // 1. Fetch text coordinates from Node.js backend (/extract-coords)
                 const formData = new FormData();
                 formData.append('pdf', file);
 
@@ -137,15 +365,16 @@
                     body: formData
                 });
 
-                if (!response.ok) throw new Error("Failed to extract coordinates from server.");
-                const extractedJson = await response.json();
-                
-                // Assuming PyMuPDF returns an array of spans: { text: "...", bbox: [x0, y0, x1, y1], size: 12 }
-                pageData = extractedJson;
+                if (!response.ok) {
+                    const errRes = await response.json().catch(() => ({}));
+                    throw new Error(errRes.error || "Failed to extract coordinates from server.");
+                }
 
-                // 2. Render PDF to canvas using a cloned buffer (safe for pdf.js)
+                const extractedJson = await response.json();
+                pageData = Array.isArray(extractedJson) ? extractedJson : [];
+
+                // 2. Render Page 1 onto canvas using pdf.js with 1.5x scale
                 const fileBuffer = await file.arrayBuffer();
-                // .slice(0) clones it so pdf.js doesn't lock the original
                 const pdf = await pdfjsLib.getDocument({ data: fileBuffer.slice(0) }).promise; 
                 const page = await pdf.getPage(1);
 
@@ -155,11 +384,15 @@
 
                 await page.render({ canvasContext: ctx, viewport: viewport }).promise;
 
-                // 3. Create the HTML inputs over the canvas
+                // Display canvas container
+                editorArea.style.display = 'inline-block';
+
+                // 3. Create absolute-positioned HTML inputs over the canvas
                 pageData.forEach((item) => {
                     const [x0, y0, x1, y1] = item.bbox;
+                    const rawText = item.text || '';
                     
-                    // Scale coordinates up to match our high-res canvas
+                    // Scale coordinates by 1.5x to match high-resolution canvas
                     const scaledX = x0 * currentScale;
                     const scaledY = y0 * currentScale;
                     const scaledWidth = (x1 - x0) * currentScale;
@@ -169,46 +402,45 @@
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'text-overlay';
-                    input.value = item.text.trim();
+                    input.value = rawText;
                     
-                    // Store the raw unscaled Python coordinates for export later
+                    // CRITICAL: Store original text and unscaled python coordinates in dataset
+                    input.dataset.originalText = rawText;
                     input.dataset.originalX0 = x0;
                     input.dataset.originalY0 = y0;
                     input.dataset.originalX1 = x1;
                     input.dataset.originalY1 = y1;
                     input.dataset.originalSize = item.size;
 
-                    // Position the HTML element perfectly over the text
+                    // Position HTML element over the canvas
                     input.style.left = `${scaledX}px`;
-                    input.style.top = `${scaledY - 2}px`; // slight visual nudge upward
-                    input.style.width = `${scaledWidth + 8}px`; // padding buffer
-                    input.style.height = `${scaledHeight + 4}px`; // padding buffer
+                    input.style.top = `${scaledY - 1}px`;
+                    input.style.width = `${Math.max(scaledWidth + 6, 20)}px`;
+                    input.style.height = `${Math.max(scaledHeight + 2, 14)}px`;
                     input.style.fontSize = `${scaledFontSize}px`;
 
                     overlayContainer.appendChild(input);
                 });
 
-                loadingMsg.style.display = 'none';
-                saveBtn.style.display = 'inline-block';
+                statusText.innerText = `Extracted ${pageData.length} text fields. Click on any box to edit.`;
+                saveBtn.style.display = 'inline-flex';
 
             } catch (error) {
-                console.error(error);
-                loadingMsg.innerText = "Error loading PDF or extracting coordinates.";
-                loadingMsg.style.color = 'red';
+                console.error("Load Error:", error);
+                statusText.innerText = `Error: ${error.message}`;
             }
         });
 
-        // --- PHASE 3: APPLY EDITS AND EXPORT ---
+        // --- EXPORT LOGIC ---
         saveBtn.addEventListener('click', async () => {
             const file = fileInput.files[0];
             if (!file) return;
 
             try {
-                loadingMsg.style.display = 'block';
-                loadingMsg.innerText = 'Applying edits and saving...';
-                loadingMsg.style.color = '#555';
+                statusBanner.style.display = 'flex';
+                statusText.innerText = 'Applying edits and generating PDF...';
 
-                // *** THE FIX: Get a completely fresh memory buffer from the HTML input ***
+                // CRITICAL MEMORY FIX: Re-read the file directly from the HTML file input immediately before loading
                 const freshBuffer = await file.arrayBuffer();
                 
                 // Initialize pdf-lib
@@ -216,64 +448,72 @@
                 const pdfDoc = await PDFDocument.load(freshBuffer);
                 const pages = pdfDoc.getPages();
                 const firstPage = pages[0];
-                const { height } = firstPage.getSize(); // Needed to flip the Y-axis
+                const { height } = firstPage.getSize(); // Needed for Y-axis calculation
                 
                 const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-                // Find all our text inputs
+                // Find all text overlay inputs
                 const inputs = document.querySelectorAll('.text-overlay');
+                let modifiedCount = 0;
                 
                 inputs.forEach(input => {
-                    const newText = input.value;
-                    const x0 = parseFloat(input.dataset.originalX0);
-                    const y0 = parseFloat(input.dataset.originalY0);
-                    const x1 = parseFloat(input.dataset.originalX1);
-                    const y1 = parseFloat(input.dataset.originalY1);
-                    const fontSize = parseFloat(input.dataset.originalSize);
-                    
-                    const boxWidth = x1 - x0;
-                    const boxHeight = y1 - y0;
+                    const originalText = input.dataset.originalText || '';
+                    const currentText = input.value;
 
-                    // pdf-lib's origin (0,0) is BOTTOM-LEFT. Python's origin is TOP-LEFT.
-                    // We must flip the Y coordinate by subtracting from total page height.
-                    const pdfLibY = height - y1; 
+                    // CRITICAL MODIFICATION RULE: Compare input.value to input.dataset.originalText
+                    // ONLY modify if text was changed!
+                    if (currentText !== originalText) {
+                        modifiedCount++;
+                        const x0 = parseFloat(input.dataset.originalX0);
+                        const y0 = parseFloat(input.dataset.originalY0);
+                        const x1 = parseFloat(input.dataset.originalX1);
+                        const y1 = parseFloat(input.dataset.originalY1);
+                        const fontSize = parseFloat(input.dataset.originalSize) || 11;
+                        
+                        const boxWidth = x1 - x0;
+                        const boxHeight = y1 - y0;
 
-                    // Step 1: Draw solid white rectangle to permanently erase original text
-                    firstPage.drawRectangle({
-                        x: x0 - 2, // nudge left slightly to cover artifacts
-                        y: pdfLibY - 2, 
-                        width: boxWidth + 6, 
-                        height: boxHeight + 4, 
-                        color: rgb(1, 1, 1), // White
-                    });
+                        // Calculate pdf-lib Y-axis by subtracting y1 from page height
+                        const pdfLibY = height - y1; 
 
-                    // Step 2: Draw the new text exactly where the old text was
-                    // We add ~20% of box height to align the text baseline correctly
-                    firstPage.drawText(newText, {
-                        x: x0,
-                        y: pdfLibY + (boxHeight * 0.2), 
-                        size: fontSize,
-                        font: helveticaFont,
-                        color: rgb(0, 0, 0), // Black
-                    });
+                        // Step 1: Draw solid white rectangle to erase original text
+                        firstPage.drawRectangle({
+                            x: x0 - 1,
+                            y: pdfLibY - 1, 
+                            width: Math.max(boxWidth + 4, 10), 
+                            height: Math.max(boxHeight + 2, 10), 
+                            color: rgb(1, 1, 1) // Solid white
+                        });
+
+                        // Step 2: Draw the new text if non-empty
+                        if (currentText.trim() !== '') {
+                            firstPage.drawText(currentText, {
+                                x: x0,
+                                y: pdfLibY + (boxHeight * 0.15), 
+                                size: fontSize,
+                                font: helveticaFont,
+                                color: rgb(0, 0, 0) // Black
+                            });
+                        }
+                    }
                 });
 
-                // Generate the final PDF binary
+                // Generate the final PDF
                 const pdfBytes = await pdfDoc.save();
                 
-                // Trigger an instant browser download
+                // Trigger browser download
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `edited_${Date.now()}.pdf`;
+                const originalName = file.name.replace(/\.pdf$/i, '');
+                link.download = `edited_${originalName}_${Date.now()}.pdf`;
                 link.click();
 
-                loadingMsg.style.display = 'none';
+                statusText.innerText = `Successfully exported PDF with ${modifiedCount} text edits!`;
 
             } catch (error) {
-                console.error("Save error:", error);
-                loadingMsg.innerText = `Save Error: ${error.message}`;
-                loadingMsg.style.color = 'red';
+                console.error("Export error:", error);
+                statusText.innerText = `Save Error: ${error.message}`;
             }
         });
     </script>
