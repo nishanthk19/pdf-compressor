@@ -1,6 +1,8 @@
 {
-  "name": "PDF Target Size Compressor",
-  "description": "Compress uploaded PDFs to an exact target file size in MB using Ghostscript binary search.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "name": "PDF Precision Platform",
+  "description": "Multi-tool PDF platform with target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, and PDF/A archival conversion powered by Ghostscript.",
+  "Overwrite": true,
+  "TargetFile": "metadata.json",
+  "toolAction": "Update metadata with multi-tool platform description",
+  "toolSummary": "Update metadata.json"
 }

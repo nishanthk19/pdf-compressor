@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Precision - Target Size Compressor</title>
+  <title>PDF Precision - Multi-Tool Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -13,99 +13,197 @@
     .font-mono {
       font-family: 'JetBrains Mono', monospace;
     }
-    /* Custom scrollbar for console */
-    .console-scroll::-webkit-scrollbar {
-      width: 6px;
-    }
-    .console-scroll::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    .console-scroll::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 3px;
-    }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-fadeIn {
-      animation: fadeIn 0.25s ease-out forwards;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    /* Cool processing animations */
+    @keyframes orbit {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.12); opacity: 1; filter: drop-shadow(0 0 18px rgba(99, 102, 241, 0.5)); }
+    }
+    @keyframes floatParticle {
+      0% { transform: translateY(0px) scale(0.9); opacity: 0.3; }
+      50% { transform: translateY(-12px) scale(1.1); opacity: 0.9; }
+      100% { transform: translateY(0px) scale(0.9); opacity: 0.3; }
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .animate-orbit {
+      animation: orbit 3s linear infinite;
+    }
+    .animate-orbit-reverse {
+      animation: orbit 2.2s linear infinite reverse;
+    }
+    .animate-pulseGlow {
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+    .animate-float-1 { animation: floatParticle 2.5s ease-in-out infinite; }
+    .animate-float-2 { animation: floatParticle 3.2s ease-in-out infinite 0.5s; }
+    .animate-float-3 { animation: floatParticle 2.8s ease-in-out infinite 1s; }
+    .animate-shimmer {
+      animation: shimmer 1.8s infinite;
     }
   </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-900 flex flex-col overflow-x-hidden md:overflow-hidden">
+<body class="h-full bg-slate-50 text-slate-900 flex flex-col min-h-screen">
 
   <!-- Application Header -->
-  <header class="h-16 md:h-20 border-b border-slate-200 bg-white flex items-center justify-between px-6 md:px-10 shrink-0 z-10">
+  <header class="h-16 md:h-20 border-b border-slate-200 bg-white flex items-center justify-between px-6 md:px-12 shrink-0 z-20 shadow-sm">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 md:w-10 md:h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md shadow-indigo-600/20">
+      <div class="w-9 h-9 md:w-10 md:h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-600/20">
         <div class="w-4 h-4 md:w-5 md:h-5 border-2 border-white rounded-sm rotate-45"></div>
       </div>
-      <span class="text-lg md:text-xl font-bold tracking-tight">PDF<span class="text-indigo-600">PRECISION</span></span>
+      <span class="text-lg md:text-xl font-extrabold tracking-tight">PDF<span class="text-indigo-600">PRECISION</span></span>
+      <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 ml-2">6 Tools</span>
     </div>
-    <nav class="flex items-center gap-6 md:gap-8 text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest">
-      <span class="text-indigo-600 border-b-2 border-indigo-600 pb-1 cursor-pointer">Optimizer</span>
-      <span id="historyNavBtn" class="hover:text-slate-800 transition-colors cursor-pointer">History</span>
-      <span id="consoleNavBtn" class="hover:text-slate-800 transition-colors cursor-pointer">Console</span>
+    
+    <nav class="flex items-center gap-6 text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest">
+      <span id="toolsNavBtn" class="text-indigo-600 border-b-2 border-indigo-600 pb-1 cursor-pointer">Tools</span>
+      <span id="historyNavBtn" class="hover:text-slate-800 transition-colors cursor-pointer flex items-center gap-1.5">
+        <span>History</span>
+        <span id="historyBadge" class="hidden px-1.5 py-0.2 bg-indigo-100 text-indigo-700 text-[10px] rounded-full font-bold">0</span>
+      </span>
     </nav>
   </header>
 
-  <!-- Main Grid Content -->
-  <main class="flex-1 grid grid-cols-12 overflow-y-auto md:overflow-hidden">
+  <!-- Main Work Area -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-10 flex flex-col gap-8">
     
-    <!-- Left Section: Optimizer Controls (7 Columns) -->
-    <section class="col-span-12 lg:col-span-7 p-6 md:p-10 border-r border-slate-200 bg-white flex flex-col justify-between gap-6 overflow-y-auto">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold mb-2 text-slate-900">Target Compression</h1>
-        <p class="text-slate-500 text-sm md:text-base">Upload your PDF and define the exact target size in megabytes.</p>
+    <!-- Tool Navigation Cards -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Select Processing Tool</h2>
+        <span class="text-xs text-slate-400">Multer Storage &amp; Auto-Cleanup</span>
       </div>
 
-      <form id="compressForm" action="/compress" method="POST" enctype="multipart/form-data" class="flex flex-col gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         
-        <!-- File Dropzone -->
-        <div id="dropZone" class="border-2 border-dashed border-slate-200 hover:border-indigo-500 transition-all rounded-2xl flex flex-col items-center justify-center bg-slate-50/70 p-8 md:p-10 text-center group relative cursor-pointer min-h-[180px]">
-          <input type="file" id="pdfInput" name="pdf" accept=".pdf,application/pdf" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+        <button type="button" data-tool="compress" class="tool-tab active-tab p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between h-24 bg-indigo-50/90 border-indigo-300 text-indigo-900 shadow-sm hover:shadow">
+          <div class="flex justify-between items-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">01</span>
+            <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">%</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Compress</div>
+            <div class="text-[11px] text-slate-500 font-medium">Target Size MB</div>
+          </div>
+        </button>
+
+        <button type="button" data-tool="merge" class="tool-tab p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">02</span>
+            <div class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">+</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Merge</div>
+            <div class="text-[11px] text-slate-500 font-medium">Combine PDFs</div>
+          </div>
+        </button>
+
+        <button type="button" data-tool="extract" class="tool-tab p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">03</span>
+            <div class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">✂</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Extract</div>
+            <div class="text-[11px] text-slate-500 font-medium">Page Ranges</div>
+          </div>
+        </button>
+
+        <button type="button" data-tool="grayscale" class="tool-tab p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">04</span>
+            <div class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">◐</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Grayscale</div>
+            <div class="text-[11px] text-slate-500 font-medium">Monochrome</div>
+          </div>
+        </button>
+
+        <button type="button" data-tool="preview" class="tool-tab p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">05</span>
+            <div class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">🖼</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Preview</div>
+            <div class="text-[11px] text-slate-500 font-medium">Page 1 JPEG</div>
+          </div>
+        </button>
+
+        <button type="button" data-tool="archive" class="tool-tab p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">06</span>
+            <div class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">🏛</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Archive</div>
+            <div class="text-[11px] text-slate-500 font-medium">ISO PDF/A</div>
+          </div>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- Active Tool Form Container -->
+    <section class="bg-white border border-slate-200 rounded-3xl p-6 md:p-10 shadow-sm relative overflow-hidden">
+      
+      <form id="activeForm" method="POST" enctype="multipart/form-data" class="flex flex-col gap-6">
+        
+        <!-- Tool Title & Description -->
+        <div>
+          <h1 id="toolTitle" class="text-2xl md:text-3xl font-extrabold text-slate-900">Exact Size Compressor</h1>
+          <p id="toolDesc" class="text-slate-500 text-sm md:text-base mt-1">Compress PDF to a specific target file size in MB with precision optimization.</p>
+        </div>
+
+        <!-- File Upload Drag and Drop Area -->
+        <div id="dropZone" class="border-2 border-dashed border-slate-200 hover:border-indigo-500 transition-all rounded-2xl flex flex-col items-center justify-center bg-slate-50/70 p-8 text-center group relative cursor-pointer min-h-[180px]">
+          <input type="file" id="fileInput" name="pdf" accept=".pdf,application/pdf" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
           
           <div id="uploadPrompt" class="flex flex-col items-center space-y-3 pointer-events-none">
-            <div class="w-14 h-14 bg-white shadow-sm border border-slate-200 rounded-xl flex items-center justify-center group-hover:border-indigo-300 transition-all">
-              <svg class="w-7 h-7 text-indigo-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            <div class="w-14 h-14 bg-white shadow-sm border border-slate-200 rounded-2xl flex items-center justify-center group-hover:border-indigo-300 group-hover:scale-105 transition-all">
+              <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
               </svg>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-slate-800"><span class="text-indigo-600">Click to upload</span> or drag and drop</h3>
-              <p class="text-xs text-slate-400 mt-1">PDF documents up to 200MB</p>
+              <h3 id="uploadPromptHeading" class="text-base font-bold text-slate-800"><span class="text-indigo-600">Click to upload PDF</span> or drag and drop</h3>
+              <p id="uploadPromptSub" class="text-xs text-slate-400 mt-1">Single PDF up to 200MB</p>
             </div>
           </div>
 
           <div id="fileInfo" class="hidden flex flex-col items-center space-y-2 pointer-events-none">
-            <div class="w-14 h-14 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
             </div>
-            <h3 id="fileName" class="text-base font-bold text-slate-900 truncate max-w-xs md:max-w-md">filename.pdf</h3>
-            <p id="fileSize" class="text-sm text-slate-500 font-medium">Original: 0.00 MB</p>
-            <span class="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm mt-1 pointer-events-auto">Replace File</span>
+            <h3 id="fileName" class="text-base font-bold text-slate-900 truncate max-w-xs md:max-w-md">document.pdf</h3>
+            <p id="fileSize" class="text-xs text-slate-500 font-semibold">0.00 MB</p>
+            <span class="px-3.5 py-1 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm mt-1 pointer-events-auto">Replace File</span>
           </div>
         </div>
 
-        <!-- Real-Time Upload Progress Container -->
-        <div id="uploadProgressContainer" class="hidden p-4 bg-indigo-50/60 border border-indigo-100 rounded-xl space-y-2">
-          <div class="flex justify-between items-center text-xs font-semibold text-slate-700">
-            <span id="uploadProgressLabel">Uploading PDF...</span>
-            <span id="uploadProgressPercent" class="text-indigo-600 font-bold">0%</span>
-          </div>
-          <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
-            <div id="uploadProgressBar" class="bg-indigo-600 h-full transition-all duration-150" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <!-- Target Controls Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-          <div class="flex flex-col gap-2">
+        <!-- Dynamic Parameter Inputs -->
+        <div id="dynamicInputs" class="space-y-4">
+          <!-- Target Size Input (Compress) -->
+          <div id="targetSizeInputGroup" class="flex flex-col gap-2">
             <label for="targetSize" class="text-xs font-bold uppercase text-slate-400 tracking-wider">Target Size (MB)</label>
-            <div class="relative">
+            <div class="relative max-w-xs">
               <input 
                 type="number" 
                 id="targetSize" 
@@ -114,102 +212,138 @@
                 min="0.1" 
                 max="100" 
                 step="0.1" 
-                required 
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-2xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                 placeholder="2.0"
               />
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-sm">MB</span>
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            id="submitBtn" 
-            class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:bg-indigo-800 transition-all uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span id="btnText">START COMPRESSION</span>
-            <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </button>
+          <!-- Page Range Inputs (Extract) -->
+          <div id="pageRangeInputGroup" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
+            <div class="flex flex-col gap-2">
+              <label for="startPage" class="text-xs font-bold uppercase text-slate-400 tracking-wider">Start Page</label>
+              <input 
+                type="number" 
+                id="startPage" 
+                name="startPage" 
+                value="1" 
+                min="1" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="endPage" class="text-xs font-bold uppercase text-slate-400 tracking-wider">End Page</label>
+              <input 
+                type="number" 
+                id="endPage" 
+                name="endPage" 
+                value="1" 
+                min="1" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+            </div>
+          </div>
         </div>
 
-        <!-- Download Ready Card (Shown after compression completes without auto-download) -->
-        <div id="downloadReadySection" class="hidden p-6 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex flex-col gap-4 animate-fadeIn">
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          id="submitBtn" 
+          class="w-full bg-indigo-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:bg-indigo-800 transition-all uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span id="btnText">EXECUTE COMPRESSION</span>
+        </button>
+
+        <!-- COOL PROCESSING ANIMATION CONTAINER (Shown when processing) -->
+        <div id="processingCard" class="hidden p-8 bg-slate-900 text-white rounded-2xl flex flex-col items-center justify-center gap-6 shadow-xl relative overflow-hidden animate-fadeIn">
+          <!-- Background ambient glow grid -->
+          <div class="absolute -top-12 -left-12 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+          <!-- Central Cool Animation Stage -->
+          <div class="relative w-28 h-28 flex items-center justify-center my-2">
+            <!-- Outer Orbiting Ring -->
+            <div class="absolute inset-0 rounded-full border-2 border-dashed border-indigo-500/50 animate-orbit"></div>
+            <!-- Inner Counter Orbiting Ring -->
+            <div class="absolute inset-2 rounded-full border-2 border-indigo-400/30 border-t-indigo-400 animate-orbit-reverse"></div>
+            <!-- Glowing Pulsing Center -->
+            <div class="w-16 h-16 rounded-2xl bg-indigo-600/30 border border-indigo-400/60 flex items-center justify-center animate-pulseGlow shadow-lg">
+              <svg class="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+            </div>
+            <!-- Floating Ambient Particles -->
+            <div class="absolute -top-1 left-4 w-2 h-2 rounded-full bg-indigo-400 animate-float-1"></div>
+            <div class="absolute top-8 -right-2 w-2.5 h-2.5 rounded-full bg-purple-400 animate-float-2"></div>
+            <div class="absolute -bottom-2 right-6 w-2 h-2 rounded-full bg-emerald-400 animate-float-3"></div>
+          </div>
+
+          <!-- Status & Progress Labels -->
+          <div class="text-center space-y-1.5 z-10 max-w-md">
+            <h3 id="processingStatusTitle" class="text-lg font-bold text-white tracking-wide">Uploading PDF Document...</h3>
+            <p id="processingStatusDetail" class="text-xs text-slate-400 font-medium">Transferring file data securely to server</p>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full max-w-md space-y-2 z-10">
+            <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
+              <span id="processingStepText" class="text-indigo-400 font-bold uppercase tracking-wider">Step 1: Uploading</span>
+              <span id="processingPercentText" class="font-mono text-indigo-300 font-bold">0%</span>
+            </div>
+            <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700/80 relative">
+              <div id="processingProgressBar" class="bg-gradient-to-r from-indigo-500 via-indigo-400 to-purple-500 h-full rounded-full transition-all duration-200 relative overflow-hidden" style="width: 0%">
+                <div class="absolute inset-0 bg-white/20 animate-shimmer"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Download Ready Card (No automatic download, manual button click required) -->
+        <div id="downloadReadySection" class="hidden p-6 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex flex-col gap-5 animate-fadeIn shadow-sm">
           <div class="flex items-start gap-4">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase tracking-wider">Compression Ready</span>
-              </div>
-              <h3 id="readyFileName" class="text-base font-bold text-slate-900 truncate mt-1">document_compressed.pdf</h3>
-              <div id="readyStats" class="flex flex-wrap items-center gap-2 text-xs text-slate-600 mt-1 font-medium">
-                <!-- Size details inserted via JS -->
-              </div>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase tracking-wider">Processing Complete</span>
+              <h3 id="readyFileName" class="text-base font-bold text-slate-900 truncate mt-1">output.pdf</h3>
+              <p id="readyStats" class="text-xs text-slate-600 mt-1 font-semibold"></p>
             </div>
+          </div>
+
+          <!-- JPEG Image Preview container if tool == 'preview' -->
+          <div id="imagePreviewContainer" class="hidden border border-slate-200 rounded-2xl overflow-hidden bg-slate-900 p-3 text-center shadow-inner">
+            <img id="jpegPreviewImg" class="max-h-72 mx-auto rounded-lg shadow-lg object-contain" alt="First page preview" />
           </div>
 
           <button 
             type="button" 
             id="downloadFileBtn" 
-            class="w-full bg-emerald-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 active:bg-emerald-800 transition-all uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer"
+            class="w-full bg-emerald-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 active:bg-emerald-800 transition-all uppercase tracking-wider flex items-center justify-center space-x-2 cursor-pointer"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            <span>Download Compressed PDF</span>
+            <span id="downloadBtnLabel">Download File</span>
           </button>
         </div>
 
-        <!-- Error Message Display -->
+        <!-- Error Box -->
         <div id="errorBox" class="hidden p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium"></div>
 
       </form>
 
-      <!-- History Container -->
-      <div id="historyModal" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+      <!-- History Drawer / Section -->
+      <div id="historyModal" class="hidden mt-6 p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
         <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-400">
-          <span>Recent Compressions</span>
-          <button id="clearHistoryBtn" class="text-indigo-600 hover:underline">Clear</button>
+          <span>Recent Executions</span>
+          <button id="clearHistoryBtn" class="text-indigo-600 hover:underline">Clear History</button>
         </div>
-        <div id="historyList" class="text-xs text-slate-600 space-y-1 max-h-32 overflow-y-auto">
-          <p class="text-slate-400 italic">No recent compressions yet.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Right Section: Console / Binary Search Stream (5 Columns) -->
-    <section class="col-span-12 lg:col-span-5 bg-slate-900 flex flex-col text-slate-100 overflow-hidden min-h-[400px]">
-      
-      <!-- Console Header -->
-      <div class="h-12 border-b border-slate-800 flex items-center px-6 justify-between bg-slate-950/50 shrink-0">
-        <div class="flex gap-2">
-          <div class="w-3 h-3 rounded-full bg-red-500"></div>
-          <div class="w-3 h-3 rounded-full bg-amber-500"></div>
-          <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
-        </div>
-        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Binary Search Loop v1.0.4</span>
-      </div>
-
-      <!-- Console Log Output Container -->
-      <div id="consoleLog" class="flex-1 p-6 font-mono text-[13px] leading-relaxed overflow-y-auto console-scroll space-y-3">
-        <div class="text-emerald-400">[SYSTEM] Ghostscript pdfwrite engine ready.</div>
-        <div class="text-slate-500">[SYSTEM] Awaiting file upload and target size parameter...</div>
-      </div>
-
-      <!-- Console Footer Status -->
-      <div class="p-6 border-t border-slate-800 bg-slate-950/80 shrink-0">
-        <div class="flex justify-between items-center text-xs mb-3 font-mono">
-          <span class="text-slate-400">GHOSTSCRIPT 9.55</span>
-          <span id="statusBadge" class="text-emerald-400 font-semibold">STATUS: READY</span>
-        </div>
-        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-          <div id="progressBar" class="bg-indigo-500 h-full transition-all duration-300" style="width: 10%"></div>
+        <div id="historyList" class="text-xs text-slate-600 space-y-2 max-h-48 overflow-y-auto">
+          <p class="text-slate-400 italic">No recent executions yet.</p>
         </div>
       </div>
 
@@ -218,62 +352,164 @@
   </main>
 
   <!-- Application Footer -->
-  <footer class="h-12 border-t border-slate-200 bg-white flex items-center justify-between px-6 md:px-10 text-[11px] font-semibold text-slate-400 uppercase tracking-widest shrink-0 overflow-x-auto">
-    <div>Binary Search (max 5 iter)</div>
-    <div class="flex gap-6">
-      <span>PDFwrite Engine</span>
-      <span>Bicubic Downsampling</span>
-      <span class="text-slate-800">Port 3000 Local</span>
+  <footer class="mt-auto border-t border-slate-200 bg-white py-4 px-6 md:px-12 flex flex-wrap items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-widest gap-4">
+    <div>6-in-1 PDF Suite</div>
+    <div class="flex items-center gap-6">
+      <span>Multer Storage</span>
+      <span>Disk Auto-Cleanup</span>
+      <span class="text-slate-700 font-bold">Secure Cloud Processing</span>
     </div>
   </footer>
 
   <script>
-    const pdfInput = document.getElementById('pdfInput');
+    // Tools Configuration Mapping (No Ghostscript references)
+    const TOOLS_CONFIG = {
+      compress: {
+        title: 'Exact Size Compressor',
+        desc: 'Compress PDF to a specific target file size in MB with precision optimization.',
+        endpoint: '/compress',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'EXECUTE COMPRESSION',
+        promptHeading: 'Click to upload PDF',
+        promptSub: 'Single PDF up to 200MB',
+        showTargetSize: true,
+        showPageRange: false
+      },
+      merge: {
+        title: 'Merge PDFs',
+        desc: 'Combine multiple PDF files sequentially into a single unified PDF document.',
+        endpoint: '/merge',
+        field: 'pdfs',
+        multiple: true,
+        btnText: 'MERGE PDF FILES',
+        promptHeading: 'Click to upload multiple PDFs',
+        promptSub: 'Select 2 to 20 PDF files',
+        showTargetSize: false,
+        showPageRange: false
+      },
+      extract: {
+        title: 'Extract Pages',
+        desc: 'Extract a specific page range from your PDF document into a new PDF.',
+        endpoint: '/extract',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'EXTRACT PAGE RANGE',
+        promptHeading: 'Click to upload PDF',
+        promptSub: 'Single PDF up to 200MB',
+        showTargetSize: false,
+        showPageRange: true
+      },
+      grayscale: {
+        title: 'Convert to Grayscale',
+        desc: 'Strip all color information and convert document to black & white / monochrome.',
+        endpoint: '/grayscale',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'CONVERT TO GRAYSCALE',
+        promptHeading: 'Click to upload PDF',
+        promptSub: 'Single PDF up to 200MB',
+        showTargetSize: false,
+        showPageRange: false
+      },
+      preview: {
+        title: 'Generate Image Preview',
+        desc: 'Render and convert page 1 of the PDF into a high-resolution JPEG image.',
+        endpoint: '/preview',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'GENERATE JPEG PREVIEW',
+        promptHeading: 'Click to upload PDF',
+        promptSub: 'Single PDF up to 200MB',
+        showTargetSize: false,
+        showPageRange: false
+      },
+      archive: {
+        title: 'Convert to Archival PDF/A',
+        desc: 'Embed all fonts and convert document to ISO-compliant PDF/A for long-term archiving.',
+        endpoint: '/archive',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'CONVERT TO PDF/A',
+        promptHeading: 'Click to upload PDF',
+        promptSub: 'Single PDF up to 200MB',
+        showTargetSize: false,
+        showPageRange: false
+      }
+    };
+
+    let activeToolKey = 'compress';
+
+    // DOM References
+    const toolTabs = document.querySelectorAll('.tool-tab');
+    const toolTitle = document.getElementById('toolTitle');
+    const toolDesc = document.getElementById('toolDesc');
+    const activeForm = document.getElementById('activeForm');
+    const fileInput = document.getElementById('fileInput');
+
     const uploadPrompt = document.getElementById('uploadPrompt');
+    const uploadPromptHeading = document.getElementById('uploadPromptHeading');
+    const uploadPromptSub = document.getElementById('uploadPromptSub');
+
     const fileInfo = document.getElementById('fileInfo');
     const fileName = document.getElementById('fileName');
     const fileSize = document.getElementById('fileSize');
-    const compressForm = document.getElementById('compressForm');
+
+    const targetSizeInputGroup = document.getElementById('targetSizeInputGroup');
+    const pageRangeInputGroup = document.getElementById('pageRangeInputGroup');
+
     const submitBtn = document.getElementById('submitBtn');
     const btnText = document.getElementById('btnText');
-    const btnSpinner = document.getElementById('btnSpinner');
-    const errorBox = document.getElementById('errorBox');
 
-    const uploadProgressContainer = document.getElementById('uploadProgressContainer');
-    const uploadProgressLabel = document.getElementById('uploadProgressLabel');
-    const uploadProgressPercent = document.getElementById('uploadProgressPercent');
-    const uploadProgressBar = document.getElementById('uploadProgressBar');
+    // Cool Processing Animation DOM Elements
+    const processingCard = document.getElementById('processingCard');
+    const processingStatusTitle = document.getElementById('processingStatusTitle');
+    const processingStatusDetail = document.getElementById('processingStatusDetail');
+    const processingStepText = document.getElementById('processingStepText');
+    const processingPercentText = document.getElementById('processingPercentText');
+    const processingProgressBar = document.getElementById('processingProgressBar');
 
     const downloadReadySection = document.getElementById('downloadReadySection');
     const readyFileName = document.getElementById('readyFileName');
     const readyStats = document.getElementById('readyStats');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const jpegPreviewImg = document.getElementById('jpegPreviewImg');
     const downloadFileBtn = document.getElementById('downloadFileBtn');
+    const downloadBtnLabel = document.getElementById('downloadBtnLabel');
 
-    const consoleLog = document.getElementById('consoleLog');
-    const statusBadge = document.getElementById('statusBadge');
-    const progressBar = document.getElementById('progressBar');
+    const errorBox = document.getElementById('errorBox');
 
     const historyNavBtn = document.getElementById('historyNavBtn');
+    const historyBadge = document.getElementById('historyBadge');
     const historyModal = document.getElementById('historyModal');
     const historyList = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-    let historyData = JSON.parse(localStorage.getItem('pdf_compress_history') || '[]');
+    let historyData = JSON.parse(localStorage.getItem('pdf_precision_history') || '[]');
     let currentDownloadUrl = null;
-    let currentDownloadName = 'compressed_document.pdf';
+    let currentDownloadName = 'output.pdf';
 
     function renderHistory() {
       if (historyData.length === 0) {
-        historyList.innerHTML = '<p class="text-slate-400 italic">No recent compressions yet.</p>';
+        historyList.innerHTML = '<p class="text-slate-400 italic">No recent executions yet.</p>';
+        historyBadge.classList.add('hidden');
         return;
       }
+      historyBadge.textContent = historyData.length;
+      historyBadge.classList.remove('hidden');
+
       historyList.innerHTML = historyData.map(item => `
-        <div class="flex justify-between items-center py-1 border-b border-slate-100 last:border-0">
-          <span class="font-medium text-slate-800 truncate max-w-[180px]">${item.name}</span>
-          <span class="text-indigo-600 font-bold">${item.target}MB → ${item.finalSize || '?'}MB</span>
+        <div class="flex justify-between items-center py-2 px-3 bg-white rounded-xl border border-slate-100 shadow-2xs">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase">${item.tool}</span>
+            <span class="font-semibold text-slate-800 truncate max-w-[180px] sm:max-w-xs">${item.name}</span>
+          </div>
+          <span class="text-indigo-600 font-bold text-xs">${item.size || ''}</span>
         </div>
       `).join('');
     }
+
+    renderHistory();
 
     historyNavBtn.addEventListener('click', () => {
       historyModal.classList.toggle('hidden');
@@ -282,31 +518,87 @@
 
     clearHistoryBtn.addEventListener('click', () => {
       historyData = [];
-      localStorage.removeItem('pdf_compress_history');
+      localStorage.removeItem('pdf_precision_history');
       renderHistory();
     });
 
-    // Display selected file details
-    pdfInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        fileName.textContent = file.name;
-        const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-        fileSize.textContent = `Original: ${sizeInMB} MB`;
+    // Tool Switcher Handler
+    toolTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const key = tab.getAttribute('data-tool');
+        if (TOOLS_CONFIG[key]) {
+          activeToolKey = key;
+          
+          // Update Tab Styles
+          toolTabs.forEach(t => {
+            t.classList.remove('active-tab', 'bg-indigo-50/90', 'border-indigo-300', 'text-indigo-900', 'shadow-sm');
+            t.classList.add('bg-white', 'border-slate-200');
+            const num = t.querySelector('span:first-child');
+            if (num) num.className = 'text-[11px] font-bold uppercase tracking-wider text-slate-400';
+            const iconBox = t.querySelector('div > div');
+            if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold';
+          });
+
+          tab.classList.remove('bg-white', 'border-slate-200');
+          tab.classList.add('active-tab', 'bg-indigo-50/90', 'border-indigo-300', 'text-indigo-900', 'shadow-sm');
+          const activeNum = tab.querySelector('span:first-child');
+          if (activeNum) activeNum.className = 'text-[11px] font-bold uppercase tracking-wider text-indigo-600';
+          const activeIconBox = tab.querySelector('div > div');
+          if (activeIconBox) activeIconBox.className = 'w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold';
+
+          // Update Form UI
+          const config = TOOLS_CONFIG[key];
+          toolTitle.textContent = config.title;
+          toolDesc.textContent = config.desc;
+          btnText.textContent = config.btnText;
+          uploadPromptHeading.innerHTML = `<span class="text-indigo-600">${config.promptHeading}</span> or drag and drop`;
+          uploadPromptSub.textContent = config.promptSub;
+
+          fileInput.name = config.field;
+          if (config.multiple) {
+            fileInput.setAttribute('multiple', 'multiple');
+          } else {
+            fileInput.removeAttribute('multiple');
+          }
+
+          // Toggle inputs
+          targetSizeInputGroup.classList.toggle('hidden', !config.showTargetSize);
+          pageRangeInputGroup.classList.toggle('hidden', !config.showPageRange);
+
+          // Reset File display & cards
+          fileInput.value = '';
+          uploadPrompt.classList.remove('hidden');
+          fileInfo.classList.add('hidden');
+          downloadReadySection.classList.add('hidden');
+          processingCard.classList.add('hidden');
+          errorBox.classList.add('hidden');
+        }
+      });
+    });
+
+    // File Selection Handler
+    fileInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        if (files.length === 1) {
+          fileName.textContent = files[0].name;
+          fileSize.textContent = `${(files[0].size / (1024 * 1024)).toFixed(2)} MB`;
+        } else {
+          fileName.textContent = `${files.length} PDF files selected`;
+          let totalBytes = 0;
+          for (let f of files) totalBytes += f.size;
+          fileSize.textContent = `Total Size: ${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+        }
+
         uploadPrompt.classList.add('hidden');
         fileInfo.classList.remove('hidden');
         errorBox.classList.add('hidden');
         downloadReadySection.classList.add('hidden');
-
-        // Log to console
-        consoleLog.innerHTML += `
-          <div class="text-slate-300 mt-2">[FILE] Selected: <span class="text-indigo-400 font-semibold">${file.name}</span> (${sizeInMB} MB)</div>
-        `;
-        consoleLog.scrollTop = consoleLog.scrollHeight;
+        processingCard.classList.add('hidden');
       }
     });
 
-    // Handle Manual Download Button Click
+    // Download Button Click Handler
     downloadFileBtn.addEventListener('click', () => {
       if (currentDownloadUrl) {
         const a = document.createElement('a');
@@ -321,174 +613,116 @@
     function showError(msg) {
       errorBox.textContent = msg;
       errorBox.classList.remove('hidden');
-      statusBadge.textContent = 'STATUS: ERROR';
-      statusBadge.className = 'text-red-400 font-semibold';
-      progressBar.style.width = '0%';
+      processingCard.classList.add('hidden');
     }
 
-    // Form submit handler with XMLHttpRequest for upload progress & blob response
-    compressForm.addEventListener('submit', (e) => {
+    // Form Submit Handler
+    activeForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      if (!pdfInput.files[0]) {
-        showError('Please select a PDF file.');
+      const config = TOOLS_CONFIG[activeToolKey];
+      if (!fileInput.files || fileInput.files.length === 0) {
+        showError('Please select at least one PDF file.');
         return;
       }
 
-      const file = pdfInput.files[0];
-      const targetMB = parseFloat(document.getElementById('targetSize').value) || 2.0;
-
       errorBox.classList.add('hidden');
       downloadReadySection.classList.add('hidden');
+      imagePreviewContainer.classList.add('hidden');
+      
       submitBtn.disabled = true;
-      btnText.textContent = 'UPLOADING & COMPRESSING...';
-      btnSpinner.classList.remove('hidden');
 
-      // Show upload progress container
-      uploadProgressContainer.classList.remove('hidden');
-      uploadProgressPercent.textContent = '0%';
-      uploadProgressBar.style.width = '0%';
-      uploadProgressLabel.textContent = 'Uploading PDF...';
+      // Display Cool Processing Animation
+      processingCard.classList.remove('hidden');
+      processingStatusTitle.textContent = 'Uploading PDF Document...';
+      processingStatusDetail.textContent = 'Transferring file data securely to server...';
+      processingStepText.textContent = 'Step 1: Uploading';
+      processingPercentText.textContent = '0%';
+      processingProgressBar.style.width = '0%';
 
-      statusBadge.textContent = 'STATUS: UPLOADING (0%)';
-      statusBadge.className = 'text-indigo-400 font-semibold animate-pulse';
-      progressBar.style.width = '5%';
-
-      // Reset and initialize console output
-      consoleLog.innerHTML = `
-        <div class="text-emerald-400">[SYSTEM] Starting process...</div>
-        <div class="text-slate-400">[UPLOAD] input_file: ${file.name} (${(file.size / (1024*1024)).toFixed(2)} MB)</div>
-        <div class="text-slate-400">[PARAMS] target_size: ${targetMB} MB (${(targetMB * 1024 * 1024).toLocaleString()} bytes)</div>
-      `;
-      consoleLog.scrollTop = consoleLog.scrollHeight;
-
-      const formData = new FormData(compressForm);
+      const formData = new FormData(activeForm);
       const xhr = new XMLHttpRequest();
 
-      // Track Upload Progress
+      // Track Upload Progress with smooth step transitions
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
-          uploadProgressPercent.textContent = `${percent}%`;
-          uploadProgressBar.style.width = `${percent}%`;
-
-          const uploadedMB = (event.loaded / (1024 * 1024)).toFixed(1);
-          const totalMB = (event.total / (1024 * 1024)).toFixed(1);
-
+          
           if (percent < 100) {
-            uploadProgressLabel.textContent = `Uploading PDF (${uploadedMB} MB / ${totalMB} MB)...`;
-            statusBadge.textContent = `STATUS: UPLOADING (${percent}%)`;
-            progressBar.style.width = `${Math.round(percent * 0.4)}%`; // 0 to 40%
+            processingPercentText.textContent = `${percent}%`;
+            processingProgressBar.style.width = `${Math.round(percent * 0.5)}%`; // 0 to 50%
+            processingStatusTitle.textContent = `Uploading Document (${(event.loaded / (1024 * 1024)).toFixed(1)} MB / ${(event.total / (1024 * 1024)).toFixed(1)} MB)...`;
           } else {
-            uploadProgressLabel.textContent = 'Upload complete! Running Ghostscript binary search...';
-            statusBadge.textContent = 'STATUS: COMPRESSING';
-            statusBadge.className = 'text-amber-400 font-semibold animate-pulse';
-            progressBar.style.width = '60%';
-            
-            consoleLog.innerHTML += `
-              <div class="text-indigo-400">[GS] Upload complete. Executing Ghostscript binary search loop (36-300 DPI range)...</div>
-            `;
-            consoleLog.scrollTop = consoleLog.scrollHeight;
+            processingStepText.textContent = 'Step 2: Processing PDF';
+            processingPercentText.textContent = '50%';
+            processingProgressBar.style.width = '75%';
+            processingStatusTitle.textContent = 'Optimizing & Executing PDF Tool...';
+            processingStatusDetail.textContent = 'Running secure document transformation...';
           }
         }
       };
 
-      xhr.open('POST', '/compress', true);
+      xhr.open('POST', config.endpoint, true);
       xhr.responseType = 'blob';
 
       xhr.onload = function () {
-        uploadProgressContainer.classList.add('hidden');
-
         if (xhr.status === 200) {
-          const blob = xhr.response;
-          const finalSizeMB = (blob.size / (1024 * 1024)).toFixed(2);
-          const origSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          processingStepText.textContent = 'Step 3: Ready';
+          processingPercentText.textContent = '100%';
+          processingProgressBar.style.width = '100%';
 
-          // Parse X-Compression-Log header
-          const logsHeader = xhr.getResponseHeader('X-Compression-Log');
-          if (logsHeader) {
-            try {
-              const logs = JSON.parse(logsHeader);
-              if (logs.iterations && logs.iterations.length > 0) {
-                logs.iterations.forEach((item) => {
-                  const isBest = item.isBest;
-                  const cardBg = isBest ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-slate-800/50 border-slate-700';
-                  const textTitle = isBest ? 'text-indigo-300 font-bold' : 'text-indigo-400';
-                  const sizeText = isBest ? 'text-emerald-400 font-bold' : 'text-slate-400';
+          setTimeout(() => {
+            processingCard.classList.add('hidden');
 
-                  consoleLog.innerHTML += `
-                    <div class="mt-3 p-3 rounded border ${cardBg}">
-                      <div class="flex justify-between mb-1">
-                        <span class="${textTitle}">Iteration #${item.iteration} (${item.dpi} DPI)</span>
-                        <span class="${sizeText}">${item.sizeMB} MB</span>
-                      </div>
-                      <div class="text-xs ${isBest ? 'text-indigo-300' : 'text-slate-400'}">${item.note || ''}</div>
-                    </div>
-                  `;
-                });
-              }
-            } catch (pErr) {
-              console.error('Failed to parse compression log header', pErr);
+            const blob = xhr.response;
+            const outputSizeMB = (blob.size / (1024 * 1024)).toFixed(2);
+
+            // Extract output filename from Content-Disposition header
+            const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+            let downloadFilename = `output_${activeToolKey}.pdf`;
+            if (activeToolKey === 'preview') downloadFilename = `preview.jpg`;
+
+            if (contentDisposition && contentDisposition.includes('filename=')) {
+              const match = contentDisposition.match(/filename="?([^";]+)"?/);
+              if (match && match[1]) downloadFilename = match[1];
             }
-          }
 
-          consoleLog.innerHTML += `
-            <div class="mt-4 flex items-center gap-3 text-emerald-400">
-              <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-              <div>[SUCCESS] Compression complete! Click 'Download Compressed PDF' to save file.</div>
-            </div>
-          `;
-          consoleLog.scrollTop = consoleLog.scrollHeight;
-
-          progressBar.style.width = '100%';
-          statusBadge.textContent = 'STATUS: READY FOR DOWNLOAD';
-          statusBadge.className = 'text-emerald-400 font-semibold';
-
-          // Extract output filename from Content-Disposition header
-          const contentDisposition = xhr.getResponseHeader('Content-Disposition');
-          let downloadFilename = `${file.name.replace(/\.pdf$/i, '')}_compressed_${targetMB}MB.pdf`;
-          if (contentDisposition && contentDisposition.includes('filename=')) {
-            const match = contentDisposition.match(/filename="?([^";]+)"?/);
-            if (match && match[1]) {
-              downloadFilename = match[1];
+            if (currentDownloadUrl) {
+              window.URL.revokeObjectURL(currentDownloadUrl);
             }
-          }
 
-          // Clean up prior object URL if any
-          if (currentDownloadUrl) {
-            window.URL.revokeObjectURL(currentDownloadUrl);
-          }
+            currentDownloadUrl = window.URL.createObjectURL(blob);
+            currentDownloadName = downloadFilename;
 
-          currentDownloadUrl = window.URL.createObjectURL(blob);
-          currentDownloadName = downloadFilename;
+            readyFileName.textContent = downloadFilename;
+            readyStats.textContent = `Output Size: ${outputSizeMB} MB`;
 
-          // Populate Download Ready UI section
-          readyFileName.textContent = downloadFilename;
-          const diffBytes = file.size - blob.size;
-          const diffPct = (((diffBytes) / file.size) * 100).toFixed(1);
-          readyStats.innerHTML = `
-            <span>Original: <strong>${origSizeMB} MB</strong></span>
-            <span>→</span>
-            <span class="text-emerald-700 font-bold">Final: ${finalSizeMB} MB</span>
-            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">${diffPct >= 0 ? '-' : '+'}${Math.abs(diffPct)}%</span>
-          `;
+            if (activeToolKey === 'preview') {
+              jpegPreviewImg.src = currentDownloadUrl;
+              imagePreviewContainer.classList.remove('hidden');
+              downloadBtnLabel.textContent = 'Download JPEG Image';
+            } else {
+              downloadBtnLabel.textContent = 'Download Processed File';
+            }
 
-          downloadReadySection.classList.remove('hidden');
+            downloadReadySection.classList.remove('hidden');
 
-          // Save to local history
-          historyData.unshift({
-            name: file.name,
-            target: targetMB,
-            finalSize: finalSizeMB,
-            time: new Date().toLocaleTimeString()
-          });
-          if (historyData.length > 10) historyData.pop();
-          localStorage.setItem('pdf_compress_history', JSON.stringify(historyData));
-          renderHistory();
+            // Save to history
+            historyData.unshift({
+              tool: activeToolKey,
+              name: fileInput.files[0] ? fileInput.files[0].name : 'PDF Document',
+              size: `${outputSizeMB} MB`
+            });
+            if (historyData.length > 10) historyData.pop();
+            localStorage.setItem('pdf_precision_history', JSON.stringify(historyData));
+            renderHistory();
+
+            submitBtn.disabled = false;
+          }, 300);
 
         } else {
-          // Handle error response from server
-          let errorMsg = 'Failed to compress PDF.';
+          processingCard.classList.add('hidden');
+          let errorMsg = 'Processing failed.';
           const reader = new FileReader();
           reader.onload = function () {
             try {
@@ -498,19 +732,14 @@
             showError(errorMsg);
           };
           reader.readAsText(xhr.response);
+          submitBtn.disabled = false;
         }
-
-        submitBtn.disabled = false;
-        btnText.textContent = 'START COMPRESSION';
-        btnSpinner.classList.add('hidden');
       };
 
       xhr.onerror = function () {
-        uploadProgressContainer.classList.add('hidden');
-        showError('Network error occurred during PDF upload.');
+        processingCard.classList.add('hidden');
+        showError('Network error occurred during processing.');
         submitBtn.disabled = false;
-        btnText.textContent = 'START COMPRESSION';
-        btnSpinner.classList.add('hidden');
       };
 
       xhr.send(formData);
