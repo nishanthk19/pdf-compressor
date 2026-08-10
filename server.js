@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,9 +64,71 @@ function safeUnlinkSync(filePaths) {
   });
 }
 
-// Serve SPA
+// Serve SPA & SEO endpoints
 app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
+});
+
+app.get('/overlay-editor', (req, res) => {
+  res.sendFile(path.join(publicDir, 'overlay-editor.html'));
+});
+
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.sendFile(path.join(publicDir, 'robots.txt'));
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.sendFile(path.join(publicDir, 'sitemap.xml'));
+});
+
+// Extract text bounding boxes for Box Precision Overlay Editor
+app.post('/extract-coords', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const inputPath = req.file.path;
+
+    try {
+      const pythonProcess = spawn('python3', [path.join(__dirname, 'extract_coords.py'), inputPath]);
+      let stdoutData = '';
+      let stderrData = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        stdoutData += data.toString();
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        stderrData += data.toString();
+      });
+
+      pythonProcess.on('close', (code) => {
+        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+
+        if (code !== 0) {
+          console.error('extract_coords.py failed:', stderrData);
+          return res.status(500).json({ error: 'Failed to extract PDF bounding boxes.' });
+        }
+
+        try {
+          const spans = JSON.parse(stdoutData);
+          res.json({ spans });
+        } catch (parseErr) {
+          console.error('Failed to parse extract_coords JSON:', parseErr.message);
+          res.status(500).json({ error: 'Invalid coordinate data extracted from PDF.' });
+        }
+      });
+    } catch (procErr) {
+      if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+      res.status(500).json({ error: 'Failed to launch extraction script.' });
+    }
+  });
 });
 
 // ==========================================
