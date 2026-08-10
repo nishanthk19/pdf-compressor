@@ -529,6 +529,241 @@ app.post('/ocr', (req, res) => {
   });
 });
 
+// ==========================================
+// 9. PROTECT PDF (/protect)
+// ==========================================
+app.post('/protect', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const password = (req.body.password || '').trim();
+    if (!password) {
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: 'Password is required to protect PDF.' });
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `protected_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+    const tempFiles = [inputPath, outputPath];
+
+    try {
+      const utilScript = path.join(__dirname, 'pdf_utilities.py');
+      const cmd = `python3 "${utilScript}" protect "${inputPath}" "${outputPath}" "${password.replace(/"/g, '\\"')}"`;
+
+      execSync(cmd);
+
+      if (!fs.existsSync(outputPath)) {
+        safeUnlinkSync(tempFiles);
+        return res.status(500).json({ error: 'Protected PDF was not created.' });
+      }
+
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}_protected.pdf`;
+
+      res.download(outputPath, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving protected file:', downloadErr.message);
+        }
+        safeUnlinkSync(tempFiles);
+      });
+    } catch (procErr) {
+      console.error('Protect PDF error:', procErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to encrypt and protect PDF.' });
+    }
+  });
+});
+
+// ==========================================
+// 10. UNLOCK PDF (/unlock)
+// ==========================================
+app.post('/unlock', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const password = req.body.password || '';
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `unlocked_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+    const tempFiles = [inputPath, outputPath];
+
+    try {
+      const utilScript = path.join(__dirname, 'pdf_utilities.py');
+      const cmd = `python3 "${utilScript}" unlock "${inputPath}" "${outputPath}" "${password.replace(/"/g, '\\"')}"`;
+
+      execSync(cmd);
+
+      if (!fs.existsSync(outputPath)) {
+        safeUnlinkSync(tempFiles);
+        return res.status(500).json({ error: 'Unlocked PDF was not created.' });
+      }
+
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}_unlocked.pdf`;
+
+      res.download(outputPath, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving unlocked file:', downloadErr.message);
+        }
+        safeUnlinkSync(tempFiles);
+      });
+    } catch (procErr) {
+      console.error('Unlock PDF error:', procErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to unlock PDF. Please verify the password.' });
+    }
+  });
+});
+
+// ==========================================
+// 11. ROTATE PDF (/rotate)
+// ==========================================
+app.post('/rotate', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const angle = parseInt(req.body.angle) || 90;
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `rotated_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+    const tempFiles = [inputPath, outputPath];
+
+    try {
+      const utilScript = path.join(__dirname, 'pdf_utilities.py');
+      const cmd = `python3 "${utilScript}" rotate "${inputPath}" "${outputPath}" "${angle}"`;
+
+      execSync(cmd);
+
+      if (!fs.existsSync(outputPath)) {
+        safeUnlinkSync(tempFiles);
+        return res.status(500).json({ error: 'Rotated PDF was not created.' });
+      }
+
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}_rotated.pdf`;
+
+      res.download(outputPath, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving rotated file:', downloadErr.message);
+        }
+        safeUnlinkSync(tempFiles);
+      });
+    } catch (procErr) {
+      console.error('Rotate PDF error:', procErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to rotate PDF document.' });
+    }
+  });
+});
+
+// ==========================================
+// 12. DELETE PAGES (/delete-pages)
+// ==========================================
+app.post('/delete-pages', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const pages = (req.body.pages || '').trim();
+    if (!pages) {
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: 'Please specify page numbers to delete.' });
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `deleted_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+    const tempFiles = [inputPath, outputPath];
+
+    try {
+      const utilScript = path.join(__dirname, 'pdf_utilities.py');
+      const cmd = `python3 "${utilScript}" delete "${inputPath}" "${outputPath}" "${pages.replace(/"/g, '\\"')}"`;
+
+      execSync(cmd);
+
+      if (!fs.existsSync(outputPath)) {
+        safeUnlinkSync(tempFiles);
+        return res.status(500).json({ error: 'PDF after page deletion was not created.' });
+      }
+
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}_modified.pdf`;
+
+      res.download(outputPath, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving modified file:', downloadErr.message);
+        }
+        safeUnlinkSync(tempFiles);
+      });
+    } catch (procErr) {
+      console.error('Delete pages error:', procErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to delete specified pages from PDF.' });
+    }
+  });
+});
+
+// ==========================================
+// 13. ADD PAGE NUMBERS / PAGINATE (/paginate)
+// ==========================================
+app.post('/paginate', (req, res) => {
+  upload.single('pdf')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please select a PDF file.' });
+    }
+
+    const startPage = parseInt(req.body.startPage) || 1;
+    const inputPath = req.file.path;
+    const outputPath = path.join(uploadDir, `paginated_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+    const tempFiles = [inputPath, outputPath];
+
+    try {
+      const utilScript = path.join(__dirname, 'pdf_utilities.py');
+      const cmd = `python3 "${utilScript}" paginate "${inputPath}" "${outputPath}" "${startPage}"`;
+
+      execSync(cmd);
+
+      if (!fs.existsSync(outputPath)) {
+        safeUnlinkSync(tempFiles);
+        return res.status(500).json({ error: 'Paginated PDF was not created.' });
+      }
+
+      const safeOriginalName = (req.file.originalname || 'document.pdf').replace(/\.pdf$/i, '');
+      const downloadFilename = `${safeOriginalName}_paginated.pdf`;
+
+      res.download(outputPath, downloadFilename, (downloadErr) => {
+        if (downloadErr) {
+          console.error('Error serving paginated file:', downloadErr.message);
+        }
+        safeUnlinkSync(tempFiles);
+      });
+    } catch (procErr) {
+      console.error('Paginate PDF error:', procErr.message);
+      safeUnlinkSync(tempFiles);
+      res.status(500).json({ error: 'Failed to add page numbers to PDF.' });
+    }
+  });
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Unhandled server error:', err);
