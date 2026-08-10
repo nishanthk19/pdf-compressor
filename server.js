@@ -69,31 +69,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
-// Serve Visual PDF Editor
-app.get('/edit', (req, res) => {
-  res.sendFile(path.join(publicDir, 'editor.html'));
-});
-
-// Serve Smart Flowable Editor
-app.get('/flow-editor', (req, res) => {
-  res.sendFile(path.join(publicDir, 'flow-editor.html'));
-});
-
-// Serve Automated Overlay PDF Editor
-app.get('/overlay-editor', (req, res) => {
-  res.sendFile(path.join(publicDir, 'overlay-editor.html'));
-});
-
-// Serve Hardware Token (DSC) Desktop Signer Download
-app.get('/download-signer', (req, res) => {
-  const filePath = path.join(publicDir, 'downloads', 'DSC_Signer.zip');
-  if (fs.existsSync(filePath)) {
-    res.download(filePath, 'DSC_Signer.zip');
-  } else {
-    res.status(404).send('DSC Signer package not found.');
-  }
-});
-
 // ==========================================
 // 1. COMPRESS PDF (/compress)
 // ==========================================
@@ -490,74 +465,6 @@ app.post('/ocr', (req, res) => {
       res.status(500).json({ error: 'Failed to perform OCR on PDF document.' });
     }
   });
-});
-
-// ==========================================
-// 10. EXTRACT HTML FOR FLOW EDITOR (/extract-html)
-// ==========================================
-app.post('/extract-html', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
-    if (err) {
-      return res.status(400).send(`Upload error: ${err.message || 'File upload failed.'}`);
-    }
-    if (!req.file) {
-      return res.status(400).send('Please select a PDF file.');
-    }
-
-    const inputPath = req.file.path;
-    const outputPath = path.join(uploadDir, `extracted_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.html`);
-
-    try {
-      const pythonCmd = `python3 extract_html.py "${inputPath}" "${outputPath}"`;
-      execSync(pythonCmd);
-
-      if (!fs.existsSync(outputPath)) {
-        safeUnlinkSync([inputPath, outputPath]);
-        return res.status(500).send('HTML extraction failed.');
-      }
-
-      const htmlContent = fs.readFileSync(outputPath, 'utf-8');
-
-      // Aggressively delete both input PDF and output HTML from server
-      safeUnlinkSync([inputPath, outputPath]);
-
-      res.send(htmlContent);
-    } catch (cmdErr) {
-      console.error('HTML extraction error:', cmdErr.message);
-      safeUnlinkSync([inputPath, outputPath]);
-      res.status(500).send('Failed to extract HTML from PDF.');
-    }
-  });
-});
-
-// ==========================================
-// 11. EXTRACT COORDS FOR OVERLAY EDITOR (/extract-coords)
-// ==========================================
-app.post('/extract-coords', upload.single('pdf'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'Please select a PDF file.' });
-  }
-
-  const inputPath = req.file.path;
-
-  try {
-    const stdout = execSync(`python3 extract_coords.py "${inputPath}"`, { encoding: 'utf-8' });
-
-    if (fs.existsSync(inputPath)) {
-      fs.unlinkSync(inputPath);
-    }
-
-    res.setHeader('Content-Type', 'application/json');
-    res.send(stdout);
-  } catch (cmdErr) {
-    console.error('Coordinates extraction error:', cmdErr.message);
-
-    if (fs.existsSync(inputPath)) {
-      fs.unlinkSync(inputPath);
-    }
-
-    res.status(500).json({ error: 'Failed to extract text coordinates from PDF.' });
-  }
 });
 
 // Global Error Handler
