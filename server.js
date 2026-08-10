@@ -84,6 +84,16 @@ app.get('/overlay-editor', (req, res) => {
   res.sendFile(path.join(publicDir, 'overlay-editor.html'));
 });
 
+// Serve Hardware Token (DSC) Desktop Signer Download
+app.get('/download-signer', (req, res) => {
+  const filePath = path.join(publicDir, 'downloads', 'DSC_Signer.zip');
+  if (fs.existsSync(filePath)) {
+    res.download(filePath, 'DSC_Signer.zip');
+  } else {
+    res.status(404).send('DSC Signer package not found.');
+  }
+});
+
 // ==========================================
 // 1. COMPRESS PDF (/compress)
 // ==========================================

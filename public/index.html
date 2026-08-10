@@ -202,6 +202,17 @@
           </div>
         </button>
 
+        <button type="button" data-tool="dsc" class="tool-tab p-3 rounded-2xl border border-slate-200 hover:border-indigo-300 text-left transition-all flex flex-col justify-between h-24 bg-white hover:bg-slate-50">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">12</span>
+            <div class="w-5 h-5 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center text-[10px] font-bold">🔑</div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Hardware Token</div>
+            <div class="text-[10px] text-slate-500 font-medium">DSC Bridge</div>
+          </div>
+        </button>
+
       </div>
     </section>
 
@@ -269,6 +280,25 @@
             <span>Open Overlay Editor</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Hardware Token (DSC) Signer Action Card -->
+        <div id="dscActionCard" class="hidden flex flex-col items-center justify-center p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center gap-4">
+          <div class="w-16 h-16 rounded-2xl bg-sky-600 text-white flex items-center justify-center shadow-lg shadow-sky-600/20">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Hardware Token (DSC) Signer</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-md">USB Crypto tokens require a local connection. Download our secure desktop bridge application to batch-sign operational rosters and warehouse documents.</p>
+          </div>
+          <a href="/download-signer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-sky-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg shadow-sky-600/20 hover:bg-sky-700 transition-all uppercase tracking-wider text-sm cursor-pointer button">
+            <span>Download Desktop Signer (Windows)</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
             </svg>
           </a>
         </div>
@@ -592,6 +622,19 @@
         showTargetSize: false,
         showPageRange: false,
         isOverlayEditor: true
+      },
+      dsc: {
+        title: 'Hardware Token (DSC) Signer',
+        desc: 'USB Crypto tokens require a local connection. Download our secure desktop bridge application to batch-sign operational rosters and warehouse documents.',
+        endpoint: '/download-signer',
+        field: 'pdf',
+        multiple: false,
+        btnText: 'DOWNLOAD DESKTOP SIGNER',
+        promptHeading: 'Download DSC Bridge',
+        promptSub: 'Hardware USB Token Signing App',
+        showTargetSize: false,
+        showPageRange: false,
+        isDscSigner: true
       }
     };
 
@@ -607,6 +650,7 @@
     const editorActionCard = document.getElementById('editorActionCard');
     const flowActionCard = document.getElementById('flowActionCard');
     const overlayActionCard = document.getElementById('overlayActionCard');
+    const dscActionCard = document.getElementById('dscActionCard');
     const dropZone = document.getElementById('dropZone');
     const uploadPrompt = document.getElementById('uploadPrompt');
     const uploadPromptHeading = document.getElementById('uploadPromptHeading');
@@ -724,6 +768,7 @@
             editorActionCard.classList.remove('hidden');
             flowActionCard.classList.add('hidden');
             overlayActionCard.classList.add('hidden');
+            dscActionCard.classList.add('hidden');
             dropZone.classList.add('hidden');
             submitBtn.classList.add('hidden');
             targetSizeInputGroup.classList.add('hidden');
@@ -732,6 +777,7 @@
             editorActionCard.classList.add('hidden');
             flowActionCard.classList.remove('hidden');
             overlayActionCard.classList.add('hidden');
+            dscActionCard.classList.add('hidden');
             dropZone.classList.add('hidden');
             submitBtn.classList.add('hidden');
             targetSizeInputGroup.classList.add('hidden');
@@ -740,6 +786,16 @@
             editorActionCard.classList.add('hidden');
             flowActionCard.classList.add('hidden');
             overlayActionCard.classList.remove('hidden');
+            dscActionCard.classList.add('hidden');
+            dropZone.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            targetSizeInputGroup.classList.add('hidden');
+            pageRangeInputGroup.classList.add('hidden');
+          } else if (config.isDscSigner) {
+            editorActionCard.classList.add('hidden');
+            flowActionCard.classList.add('hidden');
+            overlayActionCard.classList.add('hidden');
+            dscActionCard.classList.remove('hidden');
             dropZone.classList.add('hidden');
             submitBtn.classList.add('hidden');
             targetSizeInputGroup.classList.add('hidden');
@@ -748,6 +804,7 @@
             editorActionCard.classList.add('hidden');
             flowActionCard.classList.add('hidden');
             overlayActionCard.classList.add('hidden');
+            dscActionCard.classList.add('hidden');
             dropZone.classList.remove('hidden');
             submitBtn.classList.remove('hidden');
             targetSizeInputGroup.classList.toggle('hidden', !config.showTargetSize);
