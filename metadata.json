@@ -1,6 +1,6 @@
 {
   "name": "PDF Precision Platform",
-  "description": "Multi-tool PDF suite featuring target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, PDF/A archival conversion, PDF to Word (.docx) conversion, OCR searchable PDF conversion, visual canvas editor, and Smart Flowable Editor.",
+  "description": "Multi-tool PDF suite featuring target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, PDF/A archival conversion, PDF to Word (.docx) conversion, OCR searchable PDF conversion, visual canvas editor, Smart Flowable Editor, and Box Precision Overlay Editor.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -11,33 +11,56 @@ def main():
 
     try:
         doc = fitz.open(input_pdf_path)
-        if len(doc) == 0:
+        total_pages = len(doc)
+        if total_pages == 0:
             doc.close()
-            print(json.dumps([]))
+            print(json.dumps({"totalPages": 0, "pages": [], "spans": []}))
             sys.exit(0)
 
-        page = doc[0]
-        page_dict = page.get_text("dict")
-        spans = []
+        pages_data = []
+        all_page1_spans = []
 
-        for block in page_dict.get("blocks", []):
-            if block.get("type") == 0:  # text block
-                for line in block.get("lines", []):
-                    for span in line.get("spans", []):
-                        text = span.get("text", "").strip()
-                        if not text:
-                            continue
-                        bbox = span.get("bbox")  # (x0, y0, x1, y1)
-                        size = span.get("size", 11)
+        for page_num in range(total_pages):
+            page = doc[page_num]
+            page_dict = page.get_text("dict")
+            spans = []
 
-                        spans.append({
-                            "text": span.get("text", ""),
-                            "bbox": [bbox[0], bbox[1], bbox[2], bbox[3]],
-                            "size": size
-                        })
+            for block in page_dict.get("blocks", []):
+                if block.get("type") == 0:  # text block
+                    for line in block.get("lines", []):
+                        for span in line.get("spans", []):
+                            text = span.get("text", "")
+                            if not text.strip():
+                                continue
+                            bbox = span.get("bbox")  # (x0, y0, x1, y1)
+                            size = span.get("size", 11)
+                            font = span.get("font", "Helvetica")
+
+                            span_obj = {
+                                "text": text,
+                                "bbox": [round(bbox[0], 2), round(bbox[1], 2), round(bbox[2], 2), round(bbox[3], 2)],
+                                "size": round(size, 2),
+                                "font": font
+                            }
+                            spans.append(span_obj)
+
+            pages_data.append({
+                "pageIndex": page_num,
+                "pageNumber": page_num + 1,
+                "width": round(page.rect.width, 2),
+                "height": round(page.rect.height, 2),
+                "spans": spans
+            })
+
+            if page_num == 0:
+                all_page1_spans = spans
 
         doc.close()
-        print(json.dumps(spans))
+        print(json.dumps({
+            "totalPages": total_pages,
+            "pages": pages_data,
+            "spans": all_page1_spans
+        }))
 
     except Exception as e:
         sys.stderr.write(f"Error extracting coordinates: {str(e)}\n")
@@ -45,3 +68,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -117,8 +117,8 @@ app.post('/extract-coords', (req, res) => {
         }
 
         try {
-          const spans = JSON.parse(stdoutData);
-          res.json({ spans });
+          const resultData = JSON.parse(stdoutData);
+          res.json(resultData);
         } catch (parseErr) {
           console.error('Failed to parse extract_coords JSON:', parseErr.message);
           res.status(500).json({ error: 'Invalid coordinate data extracted from PDF.' });
