@@ -1,6 +1,7 @@
 name: Build Desktop Signer (Windows)
 
 on:
+workflow_dispatch:
   push:
     paths:
       - 'desktop_signer.py' # Only run when you update the python file
