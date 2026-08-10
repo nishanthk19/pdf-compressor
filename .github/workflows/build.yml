@@ -1,0 +1,33 @@
+name: Build Desktop Signer (Windows)
+
+on:
+  push:
+    paths:
+      - 'desktop_signer.py' # Only run when you update the python file
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller pyhanko python-pkcs11
+
+    - name: Build EXE with PyInstaller
+      run: pyinstaller --onefile --windowed desktop_signer.py
+
+    - name: Upload EXE as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: DSC_Signer_Windows
+        path: dist/desktop_signer.exe
