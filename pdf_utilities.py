@@ -94,24 +94,40 @@ def main():
 
         elif op == "paginate":
             doc = fitz.open(input_path)
-            try:
-                start_num = int(arg)
-            except ValueError:
-                start_num = 1
+            position = arg.strip().lower() if arg else "bottom-center"
 
-            total_pages = len(doc)
-            for i, page in enumerate(doc):
-                page_num = start_num + i
-                page_str = f"Page {page_num} of {total_pages}"
-                rect = page.rect
-                textbox_rect = fitz.Rect(0, rect.height - 36, rect.width, rect.height - 10)
-                page.insert_textbox(
-                    textbox_rect,
+            for page in doc:
+                width = page.rect.width
+                height = page.rect.height
+                margin = 30
+
+                # Calculate X and Y coordinates with 30-point margin
+                pos_map = {
+                    "top-left": (margin, margin + 10),
+                    "top-center": (width / 2, margin + 10),
+                    "top-right": (width - 50, margin + 10),
+                    "middle-left": (margin, height / 2),
+                    "middle-center": (width / 2, height / 2),
+                    "middle-right": (width - 50, height / 2),
+                    "bottom-left": (margin, height - margin),
+                    "bottom-center": (width / 2, height - margin),
+                    "bottom-right": (width - 50, height - margin)
+                }
+
+                x, y = pos_map.get(position, (width / 2, height - margin))
+                page_str = str(page.number + 1)
+
+                # Visually adjust X position for center and right alignment
+                if "center" in position:
+                    x = x - (len(page_str) * 3.5)
+                elif "right" in position:
+                    x = x - (len(page_str) * 7)
+
+                page.insert_text(
+                    fitz.Point(x, y),
                     page_str,
-                    fontname="helv",
-                    fontsize=10,
-                    color=(0, 0, 0),
-                    align=fitz.TEXT_ALIGN_CENTER
+                    fontsize=12,
+                    fontname="helv"
                 )
 
             doc.save(output_path)

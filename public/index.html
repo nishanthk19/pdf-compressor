@@ -143,6 +143,27 @@
     .animate-pulseGlow { animation: pulseGlow 2s ease-in-out infinite; }
     .animate-float-1 { animation: floatParticle 2.5s ease-in-out infinite; }
     .animate-float-2 { animation: floatParticle 3.2s ease-in-out infinite 0.5s; }
+
+    /* Interactive 3x3 Grid Styles for Page Number Position */
+    .page-grid-container {
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+    .grid-cell {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .grid-cell:hover {
+      background-color: #f1f5f9;
+      border-color: #a5b4fc;
+    }
+    .grid-cell.active {
+      background-color: #e0e7ff !important;
+      border-color: #6366f1 !important;
+      color: #3730a3 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
     .animate-float-3 { animation: floatParticle 2.8s ease-in-out infinite 1s; }
     .animate-shimmer { animation: shimmer 1.8s infinite; }
 
@@ -602,16 +623,45 @@
           </div>
 
           <!-- Paginate Input (Add Page Numbers) -->
-          <div id="paginateInputGroup" class="hidden flex flex-col gap-2 max-w-md">
-            <label for="startPageNum" class="text-xs font-bold uppercase tracking-wider text-slate-500">Starting Page Number</label>
-            <input 
-              type="number" 
-              id="startPageNum" 
-              name="startPage" 
-              value="1" 
-              min="1" 
-              class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-            />
+          <div id="paginateInputGroup" class="hidden flex flex-col gap-4 max-w-md">
+            <div class="flex flex-col gap-1.5">
+              <label for="startPageNum" class="text-xs font-bold uppercase tracking-wider text-slate-500">Starting Page Number</label>
+              <input 
+                type="number" 
+                id="startPageNum" 
+                name="startPage" 
+                value="1" 
+                min="1" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                <span>Page Number Position</span>
+                <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Click cell to place</span>
+              </label>
+
+              <!-- Interactive 3x3 Mini Document Grid -->
+              <div class="page-grid-container p-3 rounded-2xl max-w-xs mx-auto w-full aspect-[3/4] flex flex-col justify-between relative">
+                <!-- Hidden Position Input -->
+                <input type="hidden" name="position" id="page-number-position" value="bottom-center" />
+                
+                <div class="grid grid-cols-3 grid-rows-3 gap-2 w-full h-full">
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="top-left">Top-Left</div>
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="top-center">Top-Center</div>
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="top-right">Top-Right</div>
+                  
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="middle-left">Mid-Left</div>
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="middle-center">Center</div>
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="middle-right">Mid-Right</div>
+                  
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="bottom-left">Btm-Left</div>
+                  <div class="grid-cell active flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="bottom-center">Btm-Center</div>
+                  <div class="grid-cell flex items-center justify-center rounded-xl border border-slate-200 bg-white cursor-pointer text-xs font-bold text-slate-400 select-none shadow-sm" data-position="bottom-right">Btm-Right</div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -1294,6 +1344,20 @@
           downloadReadySection.classList.add('hidden');
           processingCard.classList.add('hidden');
           errorBox.classList.add('hidden');
+        }
+      });
+    });
+
+    // Handle 3x3 Position Grid Cell Clicks
+    const gridCells = document.querySelectorAll('.grid-cell');
+    const posInput = document.getElementById('page-number-position');
+
+    gridCells.forEach(cell => {
+      cell.addEventListener('click', () => {
+        gridCells.forEach(c => c.classList.remove('active'));
+        cell.classList.add('active');
+        if (posInput) {
+          posInput.value = cell.getAttribute('data-position') || 'bottom-center';
         }
       });
     });

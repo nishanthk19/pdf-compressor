@@ -731,14 +731,14 @@ app.post('/paginate', (req, res) => {
       return res.status(400).json({ error: 'Please select a PDF file.' });
     }
 
-    const startPage = parseInt(req.body.startPage) || 1;
+    const position = (req.body.position || 'bottom-center').trim();
     const inputPath = req.file.path;
     const outputPath = path.join(uploadDir, `paginated_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
     const tempFiles = [inputPath, outputPath];
 
     try {
       const utilScript = path.join(__dirname, 'pdf_utilities.py');
-      const cmd = `python3 "${utilScript}" paginate "${inputPath}" "${outputPath}" "${startPage}"`;
+      const cmd = `python3 "${utilScript}" paginate "${inputPath}" "${outputPath}" "${position.replace(/"/g, '\\"')}"`;
 
       execSync(cmd);
 
