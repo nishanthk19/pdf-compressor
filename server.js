@@ -73,6 +73,10 @@ app.get('/overlay-editor', (req, res) => {
   res.sendFile(path.join(publicDir, 'overlay-editor.html'));
 });
 
+app.get('/paginate-editor', (req, res) => {
+  res.sendFile(path.join(publicDir, 'paginate-editor.html'));
+});
+
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.sendFile(path.join(publicDir, 'robots.txt'));
@@ -731,14 +735,29 @@ app.post('/paginate', (req, res) => {
       return res.status(400).json({ error: 'Please select a PDF file.' });
     }
 
-    const position = (req.body.position || 'bottom-center').trim();
+    let configJson = req.body.config;
+    if (!configJson) {
+      // Build config JSON object from flat req.body if config field is omitted
+      const configObj = {
+        position: req.body.position || 'bottom-center',
+        margin: req.body.margin || 'recommended',
+        startPage: parseInt(req.body.startPage) || 1,
+        fromPage: parseInt(req.body.fromPage) || 1,
+        toPage: parseInt(req.body.toPage) || 999999,
+        pattern: req.body.pattern || '{num}',
+        fontSize: parseInt(req.body.fontSize) || 12,
+        color: req.body.color || '#000000'
+      };
+      configJson = JSON.stringify(configObj);
+    }
+
     const inputPath = req.file.path;
     const outputPath = path.join(uploadDir, `paginated_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
     const tempFiles = [inputPath, outputPath];
 
     try {
       const utilScript = path.join(__dirname, 'pdf_utilities.py');
-      const cmd = `python3 "${utilScript}" paginate "${inputPath}" "${outputPath}" "${position.replace(/"/g, '\\"')}"`;
+      const cmd = `python3 "${utilScript}" paginate "${inputPath}" "${outputPath}" ${JSON.stringify(configJson)}`;
 
       execSync(cmd);
 

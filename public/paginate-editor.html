@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Page Numbers - Interactive PDF Workspace</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    /* Custom Scrollbar for Workspace */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* 3x3 Position Grid Styling */
+    .grid-cell-pos {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .grid-cell-pos:hover {
+      background-color: #f1f5f9;
+      border-color: #a5b4fc;
+    }
+    .grid-cell-pos.active {
+      background-color: #e0e7ff !important;
+      border-color: #6366f1 !important;
+      color: #3730a3 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    /* Red Indicator Dot Animation */
+    .indicator-dot {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .indicator-dot-pulse {
+      animation: dotPulse 2s infinite;
+    }
+    @keyframes dotPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans h-screen flex flex-col overflow-hidden antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider bg-slate-800/80 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        <span>All PDF Tools</span>
+      </a>
+      <div class="h-4 w-px bg-slate-800"></div>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-indigo-600/30">
+          🔢
+        </div>
+        <h1 class="text-sm font-bold text-white tracking-tight">Add Page Numbers Workspace</h1>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3 text-xs text-slate-400">
+      <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 font-semibold">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        Interactive PDF Studio
+      </span>
+    </div>
+  </header>
+
+  <!-- Main 2-Column Full Screen Workspace -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- LEFT COLUMN: PDF Preview Area -->
+    <main class="flex-1 bg-slate-950 p-6 overflow-y-auto relative flex flex-col items-center justify-start">
+      
+      <!-- Blank State (No PDF Selected) -->
+      <div id="blankState" class="my-auto flex flex-col items-center justify-center text-center p-8 max-w-md bg-slate-900/80 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur">
+        <div class="w-20 h-20 rounded-3xl bg-indigo-950/60 border border-indigo-800/50 text-indigo-400 flex items-center justify-center text-3xl mb-4 shadow-inner">
+          📄
+        </div>
+        <h2 class="text-lg font-bold text-white">Upload PDF to Preview Pages</h2>
+        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">Select a PDF file using the sidebar controls on the right to render real-time page thumbnails and position indicators.</p>
+        <button type="button" onclick="document.getElementById('fileInput').click()" class="mt-5 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+          Choose PDF File
+        </button>
+      </div>
+
+      <!-- PDF Loading Spinner -->
+      <div id="loadingState" class="hidden my-auto flex flex-col items-center justify-center text-center p-8">
+        <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-sm font-bold text-white">Rendering Document Pages...</p>
+        <p class="text-xs text-slate-400 mt-1">Extracting thumbnail canvases with PDF.js</p>
+      </div>
+
+      <!-- Thumbnails Grid Container -->
+      <div id="previewContainer" class="hidden w-full max-w-5xl space-y-6">
+        <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 px-5 py-3 rounded-2xl backdrop-blur">
+          <div class="flex items-center gap-2 text-xs font-semibold text-slate-300">
+            <span class="text-indigo-400 font-bold" id="docPageCount">0 Pages</span>
+            <span>•</span>
+            <span id="docFileName" class="text-slate-400 truncate max-w-xs">Document.pdf</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-800/50">
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              Red dot indicates page number location
+            </span>
+          </div>
+        </div>
+
+        <!-- Thumbnails Flex / Grid Container -->
+        <div id="thumbnailsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 pb-12">
+          <!-- Dynamically populated page thumbnail cards -->
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT COLUMN: Sidebar Controls -->
+    <aside class="w-96 bg-white border-l border-slate-200 flex flex-col h-full shrink-0 shadow-2xl z-10">
+      
+      <!-- Sidebar Header -->
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Page Number Settings</h2>
+          <p class="text-[11px] text-slate-500 font-medium mt-0.5">Configure position, style, and range</p>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+          Pro Mode
+        </span>
+      </div>
+
+      <!-- Sidebar Form Controls -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-5">
+
+        <!-- File Upload Section -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+            <span>Select PDF File</span>
+            <span id="fileSizeBadge" class="text-[10px] font-semibold text-slate-400"></span>
+          </label>
+          <div 
+            id="dropZoneSidebar"
+            onclick="document.getElementById('fileInput').click()"
+            class="border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50 hover:bg-indigo-50/30 rounded-2xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
+          >
+            <input type="file" id="fileInput" accept="application/pdf" class="hidden" />
+            <div class="w-8 h-8 rounded-xl bg-white text-indigo-600 flex items-center justify-center shadow-sm text-sm font-bold border border-slate-100">
+              📁
+            </div>
+            <p id="fileNameDisplay" class="text-xs font-bold text-slate-800 truncate max-w-[220px]">Click or Drop PDF Here</p>
+            <p class="text-[10px] text-slate-400">Supports PDF documents up to 200MB</p>
+          </div>
+        </div>
+
+        <hr class="border-slate-100" />
+
+        <!-- 3x3 Position Grid Selector -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+            <span>Position on Page</span>
+            <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">3x3 Grid</span>
+          </label>
+          
+          <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 aspect-[3/4] max-w-[200px] mx-auto flex flex-col justify-between shadow-inner">
+            <div class="grid grid-cols-3 grid-rows-3 gap-1.5 w-full h-full">
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="top-left">TL</button>
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="top-center">TC</button>
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="top-right">TR</button>
+              
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="middle-left">ML</button>
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="middle-center">MC</button>
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="middle-right">MR</button>
+              
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="bottom-left">BL</button>
+              <button type="button" class="grid-cell-pos active flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="bottom-center">BC</button>
+              <button type="button" class="grid-cell-pos flex items-center justify-center rounded-lg border border-slate-200 bg-white cursor-pointer text-[10px] font-bold text-slate-500 select-none shadow-sm" data-position="bottom-right">BR</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Margin Dropdown -->
+        <div class="space-y-1.5">
+          <label for="marginSelect" class="text-xs font-bold uppercase tracking-wider text-slate-500">Margin Distance</label>
+          <select id="marginSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer">
+            <option value="recommended" selected>Recommended (30pt / ~10mm)</option>
+            <option value="small">Small (15pt / ~5mm)</option>
+            <option value="big">Big (50pt / ~18mm)</option>
+          </select>
+        </div>
+
+        <hr class="border-slate-100" />
+
+        <!-- First Page Number & Page Range -->
+        <div class="space-y-3">
+          <div class="space-y-1.5">
+            <label for="startPageInput" class="text-xs font-bold uppercase tracking-wider text-slate-500">First Number</label>
+            <input type="number" id="startPageInput" value="1" min="1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-1.5">
+              <label for="fromPageInput" class="text-xs font-bold uppercase tracking-wider text-slate-500">From Page</label>
+              <input type="number" id="fromPageInput" value="1" min="1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+            </div>
+            <div class="space-y-1.5">
+              <label for="toPageInput" class="text-xs font-bold uppercase tracking-wider text-slate-500">To Page</label>
+              <input type="number" id="toPageInput" value="1" min="1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-100" />
+
+        <!-- Text Pattern Choice -->
+        <div class="space-y-1.5">
+          <label for="patternSelect" class="text-xs font-bold uppercase tracking-wider text-slate-500">Text Pattern</label>
+          <select id="patternSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer">
+            <option value="{num}" selected>Number only (1, 2, 3)</option>
+            <option value="Page {num}">Page {num} (Page 1, Page 2)</option>
+            <option value="Page {num} of {total}">Page {num} of {total} (Page 1 of 12)</option>
+          </select>
+        </div>
+
+        <!-- Typography & Color Formatting -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="space-y-1.5">
+            <label for="fontSizeInput" class="text-xs font-bold uppercase tracking-wider text-slate-500">Font Size (pt)</label>
+            <input type="number" id="fontSizeInput" value="12" min="6" max="72" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="colorPickerInput" class="text-xs font-bold uppercase tracking-wider text-slate-500">Text Color</label>
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+              <input type="color" id="colorPickerInput" value="#000000" class="w-7 h-7 rounded border-0 cursor-pointer bg-transparent" />
+              <span id="colorHexText" class="text-[11px] font-mono font-bold text-slate-700">#000000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Message Banner -->
+        <div id="statusBanner" class="hidden p-3.5 rounded-xl text-xs font-semibold"></div>
+
+      </div>
+
+      <!-- Sidebar Action Footer -->
+      <div class="p-5 border-t border-slate-200 bg-slate-50/80">
+        <button 
+          type="button" 
+          id="submitBtn"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span id="submitBtnText">ADD PAGE NUMBERS</span>
+          <svg id="submitSpinner" class="hidden w-4 h-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </button>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- Client JavaScript -->
+  <script>
+    // Set PDF.js worker source
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    // State Variables
+    let selectedFile = null;
+    let loadedPdfDoc = null;
+    let selectedPosition = 'bottom-center';
+
+    // DOM Elements
+    const fileInput = document.getElementById('fileInput');
+    const dropZoneSidebar = document.getElementById('dropZoneSidebar');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const fileSizeBadge = document.getElementById('fileSizeBadge');
+    
+    const blankState = document.getElementById('blankState');
+    const loadingState = document.getElementById('loadingState');
+    const previewContainer = document.getElementById('previewContainer');
+    const thumbnailsGrid = document.getElementById('thumbnailsGrid');
+    const docPageCount = document.getElementById('docPageCount');
+    const docFileName = document.getElementById('docFileName');
+
+    const marginSelect = document.getElementById('marginSelect');
+    const startPageInput = document.getElementById('startPageInput');
+    const fromPageInput = document.getElementById('fromPageInput');
+    const toPageInput = document.getElementById('toPageInput');
+    const patternSelect = document.getElementById('patternSelect');
+    const fontSizeInput = document.getElementById('fontSizeInput');
+    const colorPickerInput = document.getElementById('colorPickerInput');
+    const colorHexText = document.getElementById('colorHexText');
+
+    const statusBanner = document.getElementById('statusBanner');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitBtnText = document.getElementById('submitBtnText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    const gridCellBtns = document.querySelectorAll('.grid-cell-pos');
+
+    // 1. Grid Cell Click Listener
+    gridCellBtns.forEach(cell => {
+      cell.addEventListener('click', () => {
+        gridCellBtns.forEach(c => c.classList.remove('active'));
+        cell.classList.add('active');
+        selectedPosition = cell.getAttribute('data-position') || 'bottom-center';
+        updateIndicatorDots();
+      });
+    });
+
+    // Color Picker Sync
+    colorPickerInput.addEventListener('input', (e) => {
+      colorHexText.textContent = e.target.value.toUpperCase();
+      updateIndicatorDots();
+    });
+
+    // Live update indicators on option changes
+    [marginSelect, patternSelect, fontSizeInput, startPageInput, fromPageInput, toPageInput].forEach(elem => {
+      elem.addEventListener('change', updateIndicatorDots);
+      elem.addEventListener('input', updateIndicatorDots);
+    });
+
+    // 2. File Selection Handler
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFileLoad(e.target.files[0]);
+      }
+    });
+
+    // Drag & Drop
+    dropZoneSidebar.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZoneSidebar.classList.add('border-indigo-500', 'bg-indigo-50');
+    });
+    dropZoneSidebar.addEventListener('dragleave', () => {
+      dropZoneSidebar.classList.remove('border-indigo-500', 'bg-indigo-50');
+    });
+    dropZoneSidebar.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZoneSidebar.classList.remove('border-indigo-500', 'bg-indigo-50');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileLoad(e.dataTransfer.files[0]);
+      }
+    });
+
+    // Parse and load PDF
+    async function handleFileLoad(file) {
+      if (!file || !file.name.toLowerCase().endsWith('.pdf')) {
+        showStatus('Please select a valid PDF file.', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      fileNameDisplay.textContent = file.name;
+      docFileName.textContent = file.name;
+      fileSizeBadge.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+      blankState.classList.add('hidden');
+      previewContainer.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      hideStatus();
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        loadedPdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        
+        const pageCount = loadedPdfDoc.numPages;
+        docPageCount.textContent = `${pageCount} Page${pageCount > 1 ? 's' : ''}`;
+        
+        // Update Range Defaults
+        fromPageInput.value = 1;
+        toPageInput.value = pageCount;
+        toPageInput.max = pageCount;
+
+        await renderThumbnails(loadedPdfDoc);
+
+        loadingState.classList.add('hidden');
+        previewContainer.classList.remove('hidden');
+      } catch (err) {
+        console.error('PDF Render Error:', err);
+        loadingState.classList.add('hidden');
+        blankState.classList.remove('hidden');
+        showStatus('Failed to load PDF preview. ' + err.message, 'error');
+      }
+    }
+
+    // 3. Render Page Thumbnails
+    async function renderThumbnails(pdfDoc) {
+      thumbnailsGrid.innerHTML = '';
+      const maxPagesToRender = Math.min(pdfDoc.numPages, 12); // Render up to first 12 pages
+
+      for (let i = 1; i <= maxPagesToRender; i++) {
+        const page = await pdfDoc.getPage(i);
+        const viewport = page.getViewport({ scale: 0.45 });
+
+        // Outer Card Wrapper
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-xl flex flex-col items-center gap-2.5 relative group hover:border-slate-700 transition-all';
+
+        // Inner Canvas Wrapper (Relative container for red dot positioning)
+        const canvasWrapper = document.createElement('div');
+        canvasWrapper.className = 'relative rounded-lg overflow-hidden border border-slate-700/80 bg-white shadow-md thumbnail-canvas-wrapper';
+        canvasWrapper.style.width = `${viewport.width}px`;
+        canvasWrapper.style.height = `${viewport.height}px`;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+
+        canvasWrapper.appendChild(canvas);
+
+        // Indicator Dot Element
+        const dot = document.createElement('div');
+        dot.className = 'indicator-dot absolute z-20 flex items-center justify-center pointer-events-none';
+        dot.innerHTML = `
+          <div class="relative flex items-center justify-center">
+            <span class="w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-[8px] font-black text-white indicator-dot-pulse"></span>
+            <span class="absolute -top-7 px-2 py-0.5 rounded-full bg-slate-900/90 text-white text-[9px] font-bold border border-slate-700 shadow whitespace-nowrap sample-badge">1</span>
+          </div>
+        `;
+        canvasWrapper.appendChild(dot);
+
+        // Footer Page Label
+        const pageLabel = document.createElement('div');
+        pageLabel.className = 'text-[11px] font-bold text-slate-400 flex items-center justify-between w-full px-1';
+        pageLabel.innerHTML = `<span>Page ${i}</span> <span class="text-[10px] text-slate-500">${viewport.width.toFixed(0)}x${viewport.height.toFixed(0)}pt</span>`;
+
+        card.appendChild(canvasWrapper);
+        card.appendChild(pageLabel);
+        thumbnailsGrid.appendChild(card);
+
+        // Render PDF page to canvas
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      }
+
+      updateIndicatorDots();
+    }
+
+    // 4. Update Indicator Dots Position
+    function updateIndicatorDots() {
+      const marginVal = marginSelect.value || 'recommended';
+      const pattern = patternSelect.value || '{num}';
+      const startNum = parseInt(startPageInput.value) || 1;
+      const fromP = parseInt(fromPageInput.value) || 1;
+      const toP = parseInt(toPageInput.value) || (loadedPdfDoc ? loadedPdfDoc.numPages : 999);
+      const color = colorPickerInput.value || '#000000';
+
+      // Offset percentage according to margin option
+      let offsetPct = '8%';
+      if (marginVal === 'small') offsetPct = '4%';
+      if (marginVal === 'big') offsetPct = '14%';
+
+      const cards = thumbnailsGrid.querySelectorAll('.thumbnail-canvas-wrapper');
+      cards.forEach((wrapper, idx) => {
+        const pageNum = idx + 1;
+        const dot = wrapper.querySelector('.indicator-dot');
+        const badge = wrapper.querySelector('.sample-badge');
+
+        if (!dot) return;
+
+        // Reset Styles
+        dot.style.top = '';
+        dot.style.bottom = '';
+        dot.style.left = '';
+        dot.style.right = '';
+        dot.style.transform = '';
+
+        // Calculate Position
+        switch (selectedPosition) {
+          case 'top-left':
+            dot.style.top = offsetPct;
+            dot.style.left = offsetPct;
+            break;
+          case 'top-center':
+            dot.style.top = offsetPct;
+            dot.style.left = '50%';
+            dot.style.transform = 'translateX(-50%)';
+            break;
+          case 'top-right':
+            dot.style.top = offsetPct;
+            dot.style.right = offsetPct;
+            break;
+
+          case 'middle-left':
+            dot.style.top = '50%';
+            dot.style.left = offsetPct;
+            dot.style.transform = 'translateY(-50%)';
+            break;
+          case 'middle-center':
+            dot.style.top = '50%';
+            dot.style.left = '50%';
+            dot.style.transform = 'translate(-50%, -50%)';
+            break;
+          case 'middle-right':
+            dot.style.top = '50%';
+            dot.style.right = offsetPct;
+            dot.style.transform = 'translateY(-50%)';
+            break;
+
+          case 'bottom-left':
+            dot.style.bottom = offsetPct;
+            dot.style.left = offsetPct;
+            break;
+          case 'bottom-center':
+            dot.style.bottom = offsetPct;
+            dot.style.left = '50%';
+            dot.style.transform = 'translateX(-50%)';
+            break;
+          case 'bottom-right':
+            dot.style.bottom = offsetPct;
+            dot.style.right = offsetPct;
+            break;
+        }
+
+        // Check if page in range
+        if (pageNum >= fromP && pageNum <= toP) {
+          dot.style.display = 'flex';
+          const totalP = loadedPdfDoc ? loadedPdfDoc.numPages : 1;
+          const displayNum = startNum + (pageNum - fromP);
+          let sampleStr = pattern.replace('{num}', displayNum).replace('{total}', totalP);
+          if (badge) {
+            badge.textContent = sampleStr;
+            badge.style.color = color;
+          }
+        } else {
+          dot.style.display = 'none';
+        }
+      });
+    }
+
+    // 5. Submit Form Request
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedFile) {
+        showStatus('Please select a PDF file first.', 'error');
+        return;
+      }
+
+      const config = {
+        position: selectedPosition,
+        margin: marginSelect.value || 'recommended',
+        startPage: parseInt(startPageInput.value) || 1,
+        fromPage: parseInt(fromPageInput.value) || 1,
+        toPage: parseInt(toPageInput.value) || (loadedPdfDoc ? loadedPdfDoc.numPages : 999),
+        pattern: patternSelect.value || '{num}',
+        fontSize: parseInt(fontSizeInput.value) || 12,
+        color: colorPickerInput.value || '#000000'
+      };
+
+      const formData = new FormData();
+      formData.append('pdf', selectedFile);
+      formData.append('config', JSON.stringify(config));
+
+      // UI Loading State
+      submitBtn.disabled = true;
+      submitBtnText.textContent = 'STAMPING PAGE NUMBERS...';
+      submitSpinner.classList.remove('hidden');
+      showStatus('Processing PDF document and stamping page numbers...', 'info');
+
+      try {
+        const response = await fetch('/paginate', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          let errText = 'Failed to add page numbers.';
+          try {
+            const errJson = await response.json();
+            if (errJson.error) errText = errJson.error;
+          } catch (_) {}
+          throw new Error(errText);
+        }
+
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `${selectedFile.name.replace(/\.pdf$/i, '')}_paginated.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+
+        showStatus('Success! Paginated PDF downloaded automatically.', 'success');
+      } catch (err) {
+        console.error('Paginate submit error:', err);
+        showStatus(err.message || 'An error occurred during pagination.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtnText.textContent = 'ADD PAGE NUMBERS';
+        submitSpinner.classList.add('hidden');
+      }
+    });
+
+    // Helper: Show Status Banner
+    function showStatus(msg, type) {
+      statusBanner.classList.remove('hidden', 'bg-red-50', 'text-red-700', 'border-red-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200', 'bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
+      statusBanner.classList.add('border');
+      
+      if (type === 'error') {
+        statusBanner.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
+      } else if (type === 'success') {
+        statusBanner.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+      } else {
+        statusBanner.classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
+      }
+      statusBanner.textContent = msg;
+    }
+
+    function hideStatus() {
+      statusBanner.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

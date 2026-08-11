@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compress PDF - PDF Tools Studio</title>
+  <!-- Workspace Stylesheet -->
+  <link rel="stylesheet" href="/css/workspace.css" />
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    /* Radio Option Cards for Compression Levels */
+    .compression-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .compression-option:hover {
+      background-color: #ffffff;
+      border-color: #cbd5e1;
+    }
+
+    .compression-option input[type="radio"] {
+      margin-top: 3px;
+      accent-color: var(--primary-color);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .compression-option.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 1px var(--primary-color);
+    }
+
+    .option-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+      display: block;
+    }
+
+    .option-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: block;
+      line-height: 1.4;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.2s ease;
+    }
+
+    .back-link:hover {
+      color: var(--primary-color);
+    }
+
+    .btn-change-file {
+      background: #f1f5f9;
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-change-file:hover {
+      background: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="workspace-container">
+
+    <!-- LEFT SIDEBAR: Settings & Controls -->
+    <aside class="sidebar">
+      
+      <div class="sidebar-header">
+        <a href="/" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          All Tools
+        </a>
+        <h2>Compress PDF</h2>
+        <p>Get your PDF document compressed while maintaining optimal quality.</p>
+      </div>
+
+      <form id="compressForm" action="/compress" method="POST" enctype="multipart/form-data" class="sidebar-body">
+        
+        <!-- File Input (Hidden, synchronized via JS) -->
+        <input type="file" id="fileInput" name="pdf" accept="application/pdf" style="display: none;" />
+
+        <div class="form-group">
+          <label class="form-label">Compression Level</label>
+          
+          <div class="compression-option selected" id="opt-recommended">
+            <input type="radio" name="level" value="/ebook" id="level-recommended" checked />
+            <label for="level-recommended" style="cursor: pointer; width: 100%;">
+              <span class="option-title">Recommended Compression</span>
+              <span class="option-desc">Good quality, good compression. Ideal for most documents.</span>
+            </label>
+          </div>
+
+          <div class="compression-option" id="opt-extreme">
+            <input type="radio" name="level" value="/screen" id="level-extreme" />
+            <label for="level-extreme" style="cursor: pointer; width: 100%;">
+              <span class="option-title">Extreme Compression</span>
+              <span class="option-desc">Less quality, high compression. Smaller file size.</span>
+            </label>
+          </div>
+
+          <div class="compression-option" id="opt-less">
+            <input type="radio" name="level" value="/printer" id="level-less" />
+            <label for="level-less" style="cursor: pointer; width: 100%;">
+              <span class="option-title">Less Compression</span>
+              <span class="option-desc">High quality, less compression. Best visual fidelity.</span>
+            </label>
+          </div>
+        </div>
+
+      </form>
+
+      <div class="sidebar-footer">
+        <button type="submit" form="compressForm" id="submitBtn" class="btn-primary-action" disabled>
+          Compress PDF
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT WORKSPACE: Dropzone & Canvas Thumbnails -->
+    <main class="main-workspace">
+      
+      <!-- Dropzone State (Initial) -->
+      <div id="dropzone" class="dropzone-state">
+        <div class="dropzone-icon">🗜️</div>
+        <h3 class="dropzone-title">Compress PDF File</h3>
+        <p class="dropzone-desc">Reduce file size while optimizing for maximal PDF quality. Drag and drop your PDF here or select from your computer.</p>
+        <button type="button" class="btn-select-file">Select PDF file</button>
+      </div>
+
+      <!-- Preview State (Active after upload) -->
+      <div id="preview-area" class="preview-state">
+        <div class="preview-bar">
+          <div class="file-info">
+            <span>📄</span>
+            <span class="file-name">Document.pdf</span>
+            <span style="color: #cbd5e1;">|</span>
+            <span class="page-count" style="color: var(--text-muted);">0 Pages</span>
+          </div>
+          <button type="button" class="btn-change-file" id="changeFileBtn">Change File</button>
+        </div>
+
+        <div class="preview-grid">
+          <!-- Thumbnail cards rendered via PDFWorkspaceManager -->
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Shared Workspace Script -->
+  <script src="/js/workspace.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const submitBtn = document.getElementById('submitBtn');
+      const compressForm = document.getElementById('compressForm');
+      const fileInput = document.getElementById('fileInput');
+      const changeFileBtn = document.getElementById('changeFileBtn');
+
+      // Instantiate PDFWorkspaceManager from /js/workspace.js
+      const workspace = new PDFWorkspaceManager({
+        dropzoneSelector: '#dropzone',
+        previewStateSelector: '#preview-area',
+        previewGridSelector: '.preview-grid',
+        fileInputSelector: '#fileInput',
+        fileSelectBtnSelector: '.btn-select-file',
+        fileNameDisplaySelector: '.file-name',
+        pageCountDisplaySelector: '.page-count',
+        onFileLoaded: (file, pdfDoc) => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+          }
+        }
+      });
+
+      if (changeFileBtn && fileInput) {
+        changeFileBtn.addEventListener('click', () => fileInput.click());
+      }
+
+      // Handle Compression Option Selection Styles
+      const radioOptions = document.querySelectorAll('.compression-option');
+      radioOptions.forEach(card => {
+        card.addEventListener('click', () => {
+          const radio = card.querySelector('input[type="radio"]');
+          if (radio) {
+            radio.checked = true;
+            radioOptions.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+          }
+        });
+      });
+
+      // Form validation & submission check
+      compressForm.addEventListener('submit', (e) => {
+        const selectedFile = workspace.getSelectedFile();
+        if (!selectedFile) {
+          e.preventDefault();
+          alert('Please select a PDF file first.');
+          return false;
+        }
+
+        // Sync selected file into hidden fileInput if needed
+        if (fileInput && (!fileInput.files || fileInput.files.length === 0)) {
+          const dt = new DataTransfer();
+          dt.items.add(selectedFile);
+          fileInput.files = dt.files;
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

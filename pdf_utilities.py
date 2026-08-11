@@ -94,40 +94,101 @@ def main():
 
         elif op == "paginate":
             doc = fitz.open(input_path)
-            position = arg.strip().lower() if arg else "bottom-center"
+            
+            # Parse argument (JSON string or plain position string)
+            config = {}
+            if arg:
+                try:
+                    config = json.loads(arg)
+                except Exception:
+                    # Fallback for simple positional string argument
+                    config = {"position": arg.strip().lower()}
 
-            for page in doc:
+            position = str(config.get("position", "bottom-center")).strip().lower()
+            margin_raw = config.get("margin", "recommended")
+            if margin_raw == "small":
+                margin = 15
+            elif margin_raw == "big":
+                margin = 50
+            elif margin_raw == "recommended":
+                margin = 30
+            else:
+                try:
+                    margin = float(margin_raw)
+                except ValueError:
+                    margin = 30
+
+            try:
+                start_num = int(config.get("startPage", 1))
+            except (ValueError, TypeError):
+                start_num = 1
+
+            total_pages = len(doc)
+            try:
+                from_page = int(config.get("fromPage", 1))
+            except (ValueError, TypeError):
+                from_page = 1
+
+            try:
+                to_page = int(config.get("toPage", total_pages))
+            except (ValueError, TypeError):
+                to_page = total_pages
+
+            pattern = str(config.get("pattern", "{num}"))
+            try:
+                font_size = float(config.get("fontSize", 12))
+            except (ValueError, TypeError):
+                font_size = 12.0
+
+            color_hex = str(config.get("color", "#000000")).lstrip('#')
+            if len(color_hex) == 6:
+                try:
+                    rgb_color = (
+                        int(color_hex[0:2], 16) / 255.0,
+                        int(color_hex[2:4], 16) / 255.0,
+                        int(color_hex[4:6], 16) / 255.0
+                    )
+                except ValueError:
+                    rgb_color = (0.0, 0.0, 0.0)
+            else:
+                rgb_color = (0.0, 0.0, 0.0)
+
+            for idx, page in enumerate(doc):
+                page_1based = idx + 1
+                if page_1based < from_page or page_1based > to_page:
+                    continue
+
+                curr_number = start_num + (page_1based - from_page)
+                text_str = pattern.replace("{num}", str(curr_number)).replace("{total}", str(total_pages))
+
                 width = page.rect.width
                 height = page.rect.height
-                margin = 30
 
-                # Calculate X and Y coordinates with 30-point margin
                 pos_map = {
-                    "top-left": (margin, margin + 10),
-                    "top-center": (width / 2, margin + 10),
-                    "top-right": (width - 50, margin + 10),
+                    "top-left": (margin, margin + font_size),
+                    "top-center": (width / 2, margin + font_size),
+                    "top-right": (width - margin, margin + font_size),
                     "middle-left": (margin, height / 2),
                     "middle-center": (width / 2, height / 2),
-                    "middle-right": (width - 50, height / 2),
+                    "middle-right": (width - margin, height / 2),
                     "bottom-left": (margin, height - margin),
                     "bottom-center": (width / 2, height - margin),
-                    "bottom-right": (width - 50, height - margin)
+                    "bottom-right": (width - margin, height - margin)
                 }
 
                 x, y = pos_map.get(position, (width / 2, height - margin))
-                page_str = str(page.number + 1)
 
-                # Visually adjust X position for center and right alignment
                 if "center" in position:
-                    x = x - (len(page_str) * 3.5)
+                    x = x - (len(text_str) * font_size * 0.28)
                 elif "right" in position:
-                    x = x - (len(page_str) * 7)
+                    x = x - (len(text_str) * font_size * 0.55)
 
                 page.insert_text(
                     fitz.Point(x, y),
-                    page_str,
-                    fontsize=12,
-                    fontname="helv"
+                    text_str,
+                    fontsize=font_size,
+                    fontname="helv",
+                    color=rgb_color
                 )
 
             doc.save(output_path)
