@@ -3,60 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compress PDF - PDF Tools Studio</title>
-  <!-- Workspace Stylesheet -->
+  <title>Compress PDF - Target File Size Architecture - PDF Precision</title>
+  <!-- Workspace Stylesheet (Seashell Garnet Palette) -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <!-- PDF.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
-    /* Radio Option Cards for Compression Levels */
-    .compression-option {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px 16px;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      background-color: #f8fafc;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .compression-option:hover {
-      background-color: #ffffff;
-      border-color: #cbd5e1;
-    }
-
-    .compression-option input[type="radio"] {
-      margin-top: 3px;
-      accent-color: var(--primary-color);
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-    }
-
-    .compression-option.selected {
-      background-color: #eff6ff;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 1px var(--primary-color);
-    }
-
-    .option-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-dark);
-      display: block;
-    }
-
-    .option-desc {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-      display: block;
-      line-height: 1.4;
-    }
-
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -70,23 +22,96 @@
     }
 
     .back-link:hover {
-      color: var(--primary-color);
+      color: var(--accent-teal);
     }
 
     .btn-change-file {
-      background: #f1f5f9;
+      background: #ffffff;
       border: 1px solid var(--border-color);
       color: var(--text-dark);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 6px 14px;
       border-radius: var(--radius-md);
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: all 0.2s ease;
     }
 
     .btn-change-file:hover {
-      background: #e2e8f0;
+      background: #f0fdfd;
+      border-color: var(--color-teal);
+      color: var(--color-teal);
+    }
+
+    /* Target Size Preset Chips */
+    .target-presets {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .preset-btn {
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--color-teal);
+      background-color: #f0fdfd;
+    }
+
+    .preset-btn.active {
+      background-color: #f0fdfd;
+      border-color: var(--color-teal);
+      color: var(--color-teal);
+      box-shadow: 0 0 0 2px rgba(9, 161, 161, 0.2);
+    }
+
+    /* Stats Display Box */
+    .stats-card {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-val {
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .reduction-badge {
+      background-color: #f0fdfd;
+      color: var(--color-teal);
+      border: 1px solid var(--color-teal);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
     }
   </style>
 </head>
@@ -94,7 +119,7 @@
 
   <div class="workspace-container">
 
-    <!-- LEFT SIDEBAR: Settings & Controls -->
+    <!-- LEFT SIDEBAR: Compression Settings & Target Size -->
     <aside class="sidebar">
       
       <div class="sidebar-header">
@@ -106,7 +131,7 @@
           All Tools
         </a>
         <h2>Compress PDF</h2>
-        <p>Get your PDF document compressed while maintaining optimal quality.</p>
+        <p>Specify your exact target file size (MB) for smart Ghostscript compression.</p>
       </div>
 
       <form id="compressForm" action="/compress" method="POST" enctype="multipart/form-data" class="sidebar-body">
@@ -114,31 +139,60 @@
         <!-- File Input (Hidden, synchronized via JS) -->
         <input type="file" id="fileInput" name="pdf" accept="application/pdf" style="display: none;" />
 
+        <!-- Original File Stats Card -->
+        <div class="stats-card">
+          <div class="stat-row">
+            <span class="stat-label">Original File Size:</span>
+            <span class="stat-val" id="origSizeDisplay">-- MB</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Target Size:</span>
+            <span class="stat-val" id="targetSizeDisplay" style="color: var(--color-teal);">2.0 MB</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Estimated Reduction:</span>
+            <span class="reduction-badge" id="reductionBadge">-- %</span>
+          </div>
+        </div>
+
+        <!-- Target Size Input Control -->
         <div class="form-group">
-          <label class="form-label">Compression Level</label>
+          <label for="targetSizeInput" class="form-label">Target File Size (MB)</label>
+          <div style="display: flex; items-center; gap: 8px;">
+            <input 
+              type="number" 
+              id="targetSizeInput" 
+              name="targetSize" 
+              value="2.0" 
+              step="0.1" 
+              min="0.1" 
+              max="50.0" 
+              class="form-control" 
+              required
+            />
+            <span style="font-size: 13px; font-weight: 700; color: var(--text-dark); align-self: center;">MB</span>
+          </div>
           
-          <div class="compression-option selected" id="opt-recommended">
-            <input type="radio" name="level" value="/ebook" id="level-recommended" checked />
-            <label for="level-recommended" style="cursor: pointer; width: 100%;">
-              <span class="option-title">Recommended Compression</span>
-              <span class="option-desc">Good quality, good compression. Ideal for most documents.</span>
-            </label>
-          </div>
+          <!-- Range Slider -->
+          <input 
+            type="range" 
+            id="targetSizeSlider" 
+            min="0.2" 
+            max="10.0" 
+            step="0.1" 
+            value="2.0" 
+            style="width: 100%; margin-top: 10px; accent-color: var(--color-teal);"
+          />
 
-          <div class="compression-option" id="opt-extreme">
-            <input type="radio" name="level" value="/screen" id="level-extreme" />
-            <label for="level-extreme" style="cursor: pointer; width: 100%;">
-              <span class="option-title">Extreme Compression</span>
-              <span class="option-desc">Less quality, high compression. Smaller file size.</span>
-            </label>
-          </div>
-
-          <div class="compression-option" id="opt-less">
-            <input type="radio" name="level" value="/printer" id="level-less" />
-            <label for="level-less" style="cursor: pointer; width: 100%;">
-              <span class="option-title">Less Compression</span>
-              <span class="option-desc">High quality, less compression. Best visual fidelity.</span>
-            </label>
+          <!-- Quick Presets -->
+          <div class="form-label" style="margin-top: 14px;">Quick Target Presets</div>
+          <div class="target-presets">
+            <button type="button" class="preset-btn" data-preset="0.5">0.5 MB</button>
+            <button type="button" class="preset-btn" data-preset="1.0">1.0 MB</button>
+            <button type="button" class="preset-btn active" data-preset="2.0">2.0 MB</button>
+            <button type="button" class="preset-btn" data-preset="5.0">5.0 MB</button>
+            <button type="button" class="preset-btn" data-preset="50%">50% Target</button>
+            <button type="button" class="preset-btn" data-preset="25%">25% Target</button>
           </div>
         </div>
 
@@ -146,7 +200,7 @@
 
       <div class="sidebar-footer">
         <button type="submit" form="compressForm" id="submitBtn" class="btn-primary-action" disabled>
-          Compress PDF
+          Compress PDF to Target Size
         </button>
       </div>
 
@@ -159,8 +213,8 @@
       <div id="dropzone" class="dropzone-state">
         <div class="dropzone-icon">🗜️</div>
         <h3 class="dropzone-title">Compress PDF File</h3>
-        <p class="dropzone-desc">Reduce file size while optimizing for maximal PDF quality. Drag and drop your PDF here or select from your computer.</p>
-        <button type="button" class="btn-select-file">Select PDF file</button>
+        <p class="dropzone-desc">Reduce file size to your exact target MB limit. Drag and drop your PDF here or click to choose a file.</p>
+        <button type="button" class="btn-select-file">Select PDF File</button>
       </div>
 
       <!-- Preview State (Active after upload) -->
@@ -169,7 +223,7 @@
           <div class="file-info">
             <span>📄</span>
             <span class="file-name">Document.pdf</span>
-            <span style="color: #cbd5e1;">|</span>
+            <span style="color: var(--color-iceblue);">|</span>
             <span class="page-count" style="color: var(--text-muted);">0 Pages</span>
           </div>
           <button type="button" class="btn-change-file" id="changeFileBtn">Change File</button>
@@ -192,6 +246,37 @@
       const compressForm = document.getElementById('compressForm');
       const fileInput = document.getElementById('fileInput');
       const changeFileBtn = document.getElementById('changeFileBtn');
+      const targetSizeInput = document.getElementById('targetSizeInput');
+      const targetSizeSlider = document.getElementById('targetSizeSlider');
+      const origSizeDisplay = document.getElementById('origSizeDisplay');
+      const targetSizeDisplay = document.getElementById('targetSizeDisplay');
+      const reductionBadge = document.getElementById('reductionBadge');
+      const presetBtns = document.querySelectorAll('.preset-btn');
+
+      let currentFileMB = null;
+
+      function updateCalculations() {
+        const targetVal = parseFloat(targetSizeInput.value) || 2.0;
+        targetSizeDisplay.textContent = `${targetVal.toFixed(1)} MB`;
+        targetSizeSlider.value = targetVal;
+
+        if (currentFileMB && currentFileMB > 0) {
+          const reduction = ((currentFileMB - targetVal) / currentFileMB) * 100;
+          if (reduction > 0) {
+            reductionBadge.textContent = `-${Math.round(reduction)}% Reduction`;
+            reductionBadge.style.backgroundColor = '#f0fdfd';
+            reductionBadge.style.color = 'var(--color-teal)';
+            reductionBadge.style.borderColor = 'var(--color-teal)';
+          } else {
+            reductionBadge.textContent = `+${Math.abs(Math.round(reduction))}% (Larger)`;
+            reductionBadge.style.backgroundColor = '#fff1f2';
+            reductionBadge.style.color = '#e11d48';
+            reductionBadge.style.borderColor = '#fda4af';
+          }
+        } else {
+          reductionBadge.textContent = '-- %';
+        }
+      }
 
       // Instantiate PDFWorkspaceManager from /js/workspace.js
       const workspace = new PDFWorkspaceManager({
@@ -203,6 +288,18 @@
         fileNameDisplaySelector: '.file-name',
         pageCountDisplaySelector: '.page-count',
         onFileLoaded: (file, pdfDoc) => {
+          if (file) {
+            currentFileMB = file.size / (1024 * 1024);
+            origSizeDisplay.textContent = `${currentFileMB.toFixed(2)} MB`;
+            
+            // Set default target size as ~50% of original file or 2.0 MB if small
+            const defaultTarget = Math.max(0.5, Math.min(2.0, (currentFileMB * 0.5))).toFixed(1);
+            targetSizeInput.value = defaultTarget;
+            targetSizeSlider.max = Math.max(10.0, Math.ceil(currentFileMB * 1.2));
+            
+            updateCalculations();
+          }
+
           if (submitBtn) {
             submitBtn.disabled = false;
           }
@@ -213,20 +310,33 @@
         changeFileBtn.addEventListener('click', () => fileInput.click());
       }
 
-      // Handle Compression Option Selection Styles
-      const radioOptions = document.querySelectorAll('.compression-option');
-      radioOptions.forEach(card => {
-        card.addEventListener('click', () => {
-          const radio = card.querySelector('input[type="radio"]');
-          if (radio) {
-            radio.checked = true;
-            radioOptions.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
+      // Sync slider & number input
+      targetSizeInput.addEventListener('input', updateCalculations);
+      targetSizeSlider.addEventListener('input', () => {
+        targetSizeInput.value = parseFloat(targetSizeSlider.value).toFixed(1);
+        updateCalculations();
+      });
+
+      // Handle preset button clicks
+      presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          presetBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const preset = btn.getAttribute('data-preset');
+          if (preset.endsWith('%')) {
+            const pct = parseFloat(preset) / 100;
+            if (currentFileMB) {
+              targetSizeInput.value = Math.max(0.1, (currentFileMB * pct)).toFixed(1);
+            }
+          } else {
+            targetSizeInput.value = parseFloat(preset).toFixed(1);
           }
+          updateCalculations();
         });
       });
 
-      // Form validation & submission check
+      // Form submission validation
       compressForm.addEventListener('submit', (e) => {
         const selectedFile = workspace.getSelectedFile();
         if (!selectedFile) {

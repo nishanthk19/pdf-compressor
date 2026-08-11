@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merge PDFs - PDF Precision Workspace</title>
+  <link rel="stylesheet" href="/css/workspace.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.2s ease;
+    }
+    .back-link:hover { color: var(--color-teal); }
+    .btn-change-file {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+    }
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .file-item {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="workspace-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          All Tools
+        </a>
+        <h2>Merge PDFs</h2>
+        <p>Combine 2 or more PDF documents into a single document.</p>
+      </div>
+
+      <form id="mergeForm" action="/merge" method="POST" enctype="multipart/form-data" class="sidebar-body">
+        <input type="file" id="fileInput" name="pdfs" accept="application/pdf" multiple style="display: none;" />
+        
+        <div class="form-group">
+          <label class="form-label">Selected Files to Combine</label>
+          <div id="fileListContainer" class="file-list">
+            <div style="font-size: 12px; color: var(--text-muted); font-style: italic;">No files selected yet.</div>
+          </div>
+        </div>
+      </form>
+
+      <div class="sidebar-footer">
+        <button type="submit" form="mergeForm" id="submitBtn" class="btn-primary-action" disabled>
+          Merge PDFs Now
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-workspace">
+      <div id="dropzone" class="dropzone-state">
+        <div class="dropzone-icon">🧩</div>
+        <h3 class="dropzone-title">Merge PDF Documents</h3>
+        <p class="dropzone-desc">Drag & drop two or more PDF files to combine them in sequence.</p>
+        <button type="button" class="btn-select-file">Select PDF Files</button>
+      </div>
+
+      <div id="preview-area" class="preview-state">
+        <div class="preview-bar">
+          <div class="file-info">
+            <span>📄</span>
+            <span class="file-name">Multiple Files Selected</span>
+          </div>
+          <button type="button" class="btn-change-file" id="changeFileBtn">Add / Change Files</button>
+        </div>
+        <div class="preview-grid"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/workspace.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const submitBtn = document.getElementById('submitBtn');
+      const fileInput = document.getElementById('fileInput');
+      const changeFileBtn = document.getElementById('changeFileBtn');
+      const fileListContainer = document.getElementById('fileListContainer');
+
+      const workspace = new PDFWorkspaceManager({
+        dropzoneSelector: '#dropzone',
+        previewStateSelector: '#preview-area',
+        previewGridSelector: '.preview-grid',
+        fileInputSelector: '#fileInput',
+        fileSelectBtnSelector: '.btn-select-file',
+        fileNameDisplaySelector: '.file-name',
+        pageCountDisplaySelector: '.page-count',
+        onFileLoaded: (file, pdfDoc) => {
+          if (fileInput.files && fileInput.files.length >= 2) {
+            submitBtn.disabled = false;
+            fileListContainer.innerHTML = '';
+            Array.from(fileInput.files).forEach((f, idx) => {
+              const div = document.createElement('div');
+              div.className = 'file-item';
+              div.innerHTML = `<span>${idx + 1}. ${f.name}</span> <span style="color: var(--color-teal);">${(f.size/(1024*1024)).toFixed(2)} MB</span>`;
+              fileListContainer.appendChild(div);
+            });
+          } else if (fileInput.files && fileInput.files.length === 1) {
+            fileListContainer.innerHTML = `<div class="file-item"><span>1. ${fileInput.files[0].name}</span></div><div style="font-size: 11px; color: var(--accent-rose); margin-top: 4px;">Select at least 1 more file to merge.</div>`;
+            submitBtn.disabled = true;
+          }
+        }
+      });
+
+      if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
+    });
+  </script>
+</body>
+</html>

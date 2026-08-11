@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protect PDF - Password Encryption - PDF Precision</title>
+  <link rel="stylesheet" href="/css/workspace.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.2s ease;
+    }
+    .back-link:hover { color: var(--color-teal); }
+    .btn-change-file {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="workspace-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          All Tools
+        </a>
+        <h2>Protect PDF</h2>
+        <p>Encrypt your PDF document with a password.</p>
+      </div>
+
+      <form id="protectForm" action="/protect" method="POST" enctype="multipart/form-data" class="sidebar-body">
+        <input type="file" id="fileInput" name="pdf" accept="application/pdf" style="display: none;" />
+
+        <div class="form-group">
+          <label for="password" class="form-label">Set PDF Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter secure password" class="form-control" required />
+        </div>
+      </form>
+
+      <div class="sidebar-footer">
+        <button type="submit" form="protectForm" id="submitBtn" class="btn-primary-action" disabled>
+          Protect PDF File
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-workspace">
+      <div id="dropzone" class="dropzone-state">
+        <div class="dropzone-icon">🔒</div>
+        <h3 class="dropzone-title">Protect PDF Document</h3>
+        <p class="dropzone-desc">Drag & drop your PDF file to apply password encryption.</p>
+        <button type="button" class="btn-select-file">Select PDF File</button>
+      </div>
+
+      <div id="preview-area" class="preview-state">
+        <div class="preview-bar">
+          <div class="file-info">
+            <span>📄</span>
+            <span class="file-name">Document.pdf</span>
+            <span class="page-count" style="color: var(--text-muted);">0 Pages</span>
+          </div>
+          <button type="button" class="btn-change-file" id="changeFileBtn">Change File</button>
+        </div>
+        <div class="preview-grid"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/workspace.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const submitBtn = document.getElementById('submitBtn');
+      const fileInput = document.getElementById('fileInput');
+      const changeFileBtn = document.getElementById('changeFileBtn');
+
+      new PDFWorkspaceManager({
+        dropzoneSelector: '#dropzone',
+        previewStateSelector: '#preview-area',
+        previewGridSelector: '.preview-grid',
+        fileInputSelector: '#fileInput',
+        fileSelectBtnSelector: '.btn-select-file',
+        fileNameDisplaySelector: '.file-name',
+        pageCountDisplaySelector: '.page-count',
+        onFileLoaded: () => { submitBtn.disabled = false; }
+      });
+
+      if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
+    });
+  </script>
+</body>
+</html>

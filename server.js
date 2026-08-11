@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { execSync, spawn } = require('child_process');
+const pdfHelpers = require('./pdf-helpers');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -89,7 +90,7 @@ app.get('/sitemap.xml', (req, res) => {
 
 // Extract text bounding boxes for Box Precision Overlay Editor
 app.post('/extract-coords', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -100,37 +101,13 @@ app.post('/extract-coords', (req, res) => {
     const inputPath = req.file.path;
 
     try {
-      const pythonProcess = spawn('python3', [path.join(__dirname, 'extract_coords.py'), inputPath]);
-      let stdoutData = '';
-      let stderrData = '';
-
-      pythonProcess.stdout.on('data', (data) => {
-        stdoutData += data.toString();
-      });
-
-      pythonProcess.stderr.on('data', (data) => {
-        stderrData += data.toString();
-      });
-
-      pythonProcess.on('close', (code) => {
-        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-
-        if (code !== 0) {
-          console.error('extract_coords.py failed:', stderrData);
-          return res.status(500).json({ error: 'Failed to extract PDF bounding boxes.' });
-        }
-
-        try {
-          const resultData = JSON.parse(stdoutData);
-          res.json(resultData);
-        } catch (parseErr) {
-          console.error('Failed to parse extract_coords JSON:', parseErr.message);
-          res.status(500).json({ error: 'Invalid coordinate data extracted from PDF.' });
-        }
-      });
-    } catch (procErr) {
-      if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-      res.status(500).json({ error: 'Failed to launch extraction script.' });
+      const resultData = await pdfHelpers.extractPdfCoords(inputPath);
+      safeUnlinkSync(inputPath);
+      res.json(resultData);
+    } catch (extractErr) {
+      safeUnlinkSync(inputPath);
+      console.error('Extract coords error:', extractErr.message);
+      res.status(500).json({ error: 'Failed to extract PDF bounding boxes.' });
     }
   });
 });
@@ -446,7 +423,7 @@ app.post('/archive', (req, res) => {
 // 7. CONVERT PDF TO WORD (/word)
 // ==========================================
 app.post('/word', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -459,10 +436,7 @@ app.post('/word', (req, res) => {
     const tempFiles = [inputPath, outputPath];
 
     try {
-      const convertScript = path.join(__dirname, 'convert.py');
-      const cmd = `python3 "${convertScript}" "${inputPath}" "${outputPath}"`;
-
-      execSync(cmd);
+      await pdfHelpers.convertPdfToWord(inputPath, outputPath);
 
       if (!fs.existsSync(outputPath)) {
         safeUnlinkSync(tempFiles);
@@ -491,7 +465,7 @@ app.post('/word', (req, res) => {
 // 8. MAKE PDF SEARCHABLE (OCR) (/ocr)
 // ==========================================
 app.post('/ocr', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -501,14 +475,13 @@ app.post('/ocr', (req, res) => {
 
     const inputPath = req.file.path;
     const outputPath = path.join(uploadDir, `ocr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`);
+    const tempFiles = [inputPath, outputPath];
 
     try {
-      const ocrCmd = `ocrmypdf --force-ocr --optimize 1 "${inputPath}" "${outputPath}"`;
-
-      execSync(ocrCmd);
+      await pdfHelpers.makePdfSearchable(inputPath, outputPath);
 
       if (!fs.existsSync(outputPath)) {
-        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+        safeUnlinkSync(tempFiles);
         return res.status(500).json({ error: 'OCR processed PDF was not created.' });
       }
 
@@ -519,15 +492,11 @@ app.post('/ocr', (req, res) => {
         if (downloadErr) {
           console.error('Error serving OCR file:', downloadErr.message);
         }
-        // Aggressive file cleanup for both input and output files inside res.download callback
-        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+        safeUnlinkSync(tempFiles);
       });
     } catch (ocrErr) {
       console.error('OCR error:', ocrErr.message);
-      // Aggressive file cleanup for both input and output files inside catch block
-      if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-      if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+      safeUnlinkSync(tempFiles);
       res.status(500).json({ error: 'Failed to perform OCR on PDF document.' });
     }
   });
@@ -537,7 +506,7 @@ app.post('/ocr', (req, res) => {
 // 9. PROTECT PDF (/protect)
 // ==========================================
 app.post('/protect', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -556,10 +525,7 @@ app.post('/protect', (req, res) => {
     const tempFiles = [inputPath, outputPath];
 
     try {
-      const utilScript = path.join(__dirname, 'pdf_utilities.py');
-      const cmd = `python3 "${utilScript}" protect "${inputPath}" "${outputPath}" "${password.replace(/"/g, '\\"')}"`;
-
-      execSync(cmd);
+      await pdfHelpers.protectPdf(inputPath, outputPath, password);
 
       if (!fs.existsSync(outputPath)) {
         safeUnlinkSync(tempFiles);
@@ -587,7 +553,7 @@ app.post('/protect', (req, res) => {
 // 10. UNLOCK PDF (/unlock)
 // ==========================================
 app.post('/unlock', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -601,10 +567,7 @@ app.post('/unlock', (req, res) => {
     const tempFiles = [inputPath, outputPath];
 
     try {
-      const utilScript = path.join(__dirname, 'pdf_utilities.py');
-      const cmd = `python3 "${utilScript}" unlock "${inputPath}" "${outputPath}" "${password.replace(/"/g, '\\"')}"`;
-
-      execSync(cmd);
+      await pdfHelpers.unlockPdf(inputPath, outputPath, password);
 
       if (!fs.existsSync(outputPath)) {
         safeUnlinkSync(tempFiles);
@@ -632,7 +595,7 @@ app.post('/unlock', (req, res) => {
 // 11. ROTATE PDF (/rotate)
 // ==========================================
 app.post('/rotate', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -646,10 +609,7 @@ app.post('/rotate', (req, res) => {
     const tempFiles = [inputPath, outputPath];
 
     try {
-      const utilScript = path.join(__dirname, 'pdf_utilities.py');
-      const cmd = `python3 "${utilScript}" rotate "${inputPath}" "${outputPath}" "${angle}"`;
-
-      execSync(cmd);
+      await pdfHelpers.rotatePdf(inputPath, outputPath, angle);
 
       if (!fs.existsSync(outputPath)) {
         safeUnlinkSync(tempFiles);
@@ -677,7 +637,7 @@ app.post('/rotate', (req, res) => {
 // 12. DELETE PAGES (/delete-pages)
 // ==========================================
 app.post('/delete-pages', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -696,10 +656,7 @@ app.post('/delete-pages', (req, res) => {
     const tempFiles = [inputPath, outputPath];
 
     try {
-      const utilScript = path.join(__dirname, 'pdf_utilities.py');
-      const cmd = `python3 "${utilScript}" delete "${inputPath}" "${outputPath}" "${pages.replace(/"/g, '\\"')}"`;
-
-      execSync(cmd);
+      await pdfHelpers.deletePdfPages(inputPath, outputPath, pages);
 
       if (!fs.existsSync(outputPath)) {
         safeUnlinkSync(tempFiles);
@@ -727,7 +684,7 @@ app.post('/delete-pages', (req, res) => {
 // 13. ADD PAGE NUMBERS / PAGINATE (/paginate)
 // ==========================================
 app.post('/paginate', (req, res) => {
-  upload.single('pdf')(req, res, (err) => {
+  upload.single('pdf')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || 'File upload failed.' });
     }
@@ -737,7 +694,6 @@ app.post('/paginate', (req, res) => {
 
     let configJson = req.body.config;
     if (!configJson) {
-      // Build config JSON object from flat req.body if config field is omitted
       const configObj = {
         position: req.body.position || 'bottom-center',
         margin: req.body.margin || 'recommended',
@@ -756,10 +712,7 @@ app.post('/paginate', (req, res) => {
     const tempFiles = [inputPath, outputPath];
 
     try {
-      const utilScript = path.join(__dirname, 'pdf_utilities.py');
-      const cmd = `python3 "${utilScript}" paginate "${inputPath}" "${outputPath}" ${JSON.stringify(configJson)}`;
-
-      execSync(cmd);
+      await pdfHelpers.paginatePdf(inputPath, outputPath, configJson);
 
       if (!fs.existsSync(outputPath)) {
         safeUnlinkSync(tempFiles);

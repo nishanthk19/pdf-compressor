@@ -12,7 +12,7 @@
   <meta name="author" content="PDF Precision">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical" href="https://pdfprecision.com/">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#30525C">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
@@ -37,13 +37,19 @@
       theme: {
         extend: {
           colors: {
+            seashell: '#F6C992',
+            garnet: '#30525C',
+            iceblue: '#ACC0D3',
+            rose: '#D396A6',
+            tealaccent: '#09A1A1',
+            steel: '#5484A4',
             brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              900: '#312e81',
+              50: '#f0fdfd',
+              100: '#acc0d3',
+              500: '#09a1a1',
+              600: '#30525c',
+              700: '#223c44',
+              900: '#15252b',
             }
           }
         }
@@ -94,7 +100,7 @@
         "name": "How do I compress a PDF online?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Navigate to the Compress PDF tool from our directory, choose your preferred compression level (Recommended, Extreme, or Less), upload your PDF, and download your optimized document instantly."
+          "text": "Navigate to the Compress PDF tool from our directory, choose your preferred target file size in MB, upload your PDF, and download your optimized document instantly."
         }
       },
       {
@@ -125,36 +131,36 @@
   }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white flex flex-col min-h-screen">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-tealaccent selection:text-white flex flex-col min-h-screen">
 
   <!-- Header & Navigation -->
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-iceblue/60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
       <!-- Brand Logo -->
       <a href="/" class="flex items-center gap-2.5 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+        <div class="w-10 h-10 rounded-xl bg-garnet flex items-center justify-center text-seashell shadow-md shadow-garnet/20 group-hover:scale-105 transition-transform">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
         </div>
         <div>
-          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">PDF PRECISION</span>
-          <span class="block text-[10px] font-semibold tracking-wider text-indigo-600 uppercase -mt-1">Workspace Studio</span>
+          <span class="font-extrabold text-lg tracking-tight text-garnet">PDF PRECISION</span>
+          <span class="block text-[10px] font-semibold tracking-wider text-tealaccent uppercase -mt-1">Workspace Studio</span>
         </div>
       </a>
 
       <!-- Desktop Navigation Links -->
-      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-        <a href="#tools-section" class="hover:text-indigo-600 transition-colors">Tools Directory</a>
-        <a href="#features-section" class="hover:text-indigo-600 transition-colors">Features</a>
-        <a href="#how-it-works" class="hover:text-indigo-600 transition-colors">How It Works</a>
-        <a href="#faq-section" class="hover:text-indigo-600 transition-colors">FAQ</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-steel">
+        <a href="#tools-section" class="hover:text-tealaccent transition-colors">Tools Directory</a>
+        <a href="#features-section" class="hover:text-tealaccent transition-colors">Features</a>
+        <a href="#how-it-works" class="hover:text-tealaccent transition-colors">How It Works</a>
+        <a href="#faq-section" class="hover:text-tealaccent transition-colors">FAQ</a>
       </nav>
 
       <!-- Action Button -->
       <div class="flex items-center gap-3">
-        <a href="#tools-section" class="inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all hover:shadow-indigo-200">
+        <a href="#tools-section" class="inline-flex items-center justify-center px-4 py-2 text-xs font-extrabold text-white bg-tealaccent hover:bg-tealaccent/90 rounded-xl shadow-sm transition-all hover:shadow-tealaccent/20">
           Explore All Tools
         </a>
       </div>
@@ -165,38 +171,38 @@
   <main class="flex-grow">
 
     <!-- Hero Header -->
-    <section class="relative bg-gradient-to-b from-indigo-50/60 via-slate-50 to-slate-50 pt-16 pb-12 overflow-hidden border-b border-slate-200/60">
+    <section class="relative bg-gradient-to-b from-brand-50/80 via-slate-50 to-slate-50 pt-16 pb-12 overflow-hidden border-b border-iceblue/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         
         <!-- Badge -->
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-100/80 border border-indigo-200 text-indigo-800 text-xs font-bold mb-6 shadow-sm">
-          <span class="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-seashell/40 border border-seashell text-garnet text-xs font-extrabold mb-6 shadow-sm">
+          <span class="flex h-2 w-2 rounded-full bg-tealaccent animate-pulse"></span>
           100% Free & Private Online PDF Toolkit
         </div>
 
         <!-- Headline -->
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.15]">
-          Every PDF Tool You Need in <span class="bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 bg-clip-text text-transparent">One Workspace</span>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-garnet tracking-tight max-w-4xl mx-auto leading-[1.15]">
+          Every PDF Tool You Need in <span class="text-tealaccent">One Workspace</span>
         </h1>
 
         <!-- Subheading -->
-        <p class="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        <p class="mt-4 text-base sm:text-lg text-steel max-w-2xl mx-auto leading-relaxed font-medium">
           Fast, effortless PDF processing right in your browser. Select any tool below to launch its dedicated interactive workspace studio.
         </p>
 
         <!-- Trust Badges -->
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-bold text-steel uppercase tracking-wider">
           <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            <svg class="w-4 h-4 text-tealaccent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
             Zero File Retention
           </div>
           <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            <svg class="w-4 h-4 text-tealaccent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
             No Registration Required
           </div>
           <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-            No File Limits
+            <svg class="w-4 h-4 text-tealaccent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            Target Size Compression
           </div>
         </div>
 
@@ -207,183 +213,183 @@
     <section id="tools-section" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
       <div class="text-center max-w-2xl mx-auto mb-12">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">PDF Tools Directory</h2>
-        <p class="text-sm text-slate-600 mt-2">Choose a utility to open its dedicated 2-column workspace studio.</p>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">PDF Tools Directory</h2>
+        <p class="text-sm text-steel mt-2">Choose a utility to open its dedicated 2-column workspace studio.</p>
       </div>
 
       <!-- Tools Directory Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
         <!-- 1. Compress PDF -->
-        <a href="/tools/compress.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/compress.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-brand-50 text-tealaccent flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-tealaccent group-hover:text-white transition-all">
               🗜️
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">Compress PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Reduce file size while optimizing for maximal quality with recommended, extreme, or custom levels.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Compress PDF</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Reduce file size to your exact target MB limit with real-time compression stats.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 2. Merge PDFs -->
-        <a href="/tools/merge.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/merge.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-garnet group-hover:text-seashell transition-all">
               🧩
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors">Merge PDFs</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Combine multiple PDF files into one seamless document with custom page ordering.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Merge PDFs</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Combine multiple PDF files into one seamless document with custom page ordering.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 3. Extract Pages -->
-        <a href="/tools/extract.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/extract.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-seashell/40 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-seashell group-hover:text-garnet transition-all">
               ✂️
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">Extract Pages</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Separate a page range or single pages into a brand new standalone PDF file.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Extract Pages</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Separate a page range or single pages into a brand new standalone PDF file.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-amber-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 4. OCR PDF -->
-        <a href="/tools/ocr.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/ocr.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
               🔍
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-purple-600 transition-colors">OCR PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Convert scanned non-searchable PDF documents into fully searchable & selectable text.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">OCR PDF</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Convert scanned non-searchable PDF documents into fully searchable & selectable text.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 5. Box Precision Overlay Editor -->
-        <a href="/overlay-editor" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/overlay-editor" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-brand-50 text-tealaccent flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-tealaccent group-hover:text-white transition-all">
               📐
             </div>
             <div class="flex items-center gap-2">
-              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">Box Overlay Studio</h3>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">PRO</span>
+              <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Box Overlay Studio</h3>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-seashell text-garnet uppercase">PRO</span>
             </div>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Interactive box overlay studio for precise header, footer, watermarks, and margin masking.</p>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Interactive box overlay studio for precise header, footer, watermarks, and margin masking.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Launch Interactive Studio &rarr;
           </div>
         </a>
 
         <!-- 6. Page Numbers Studio -->
-        <a href="/paginate-editor" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/paginate-editor" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-pink-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
               🔢
             </div>
             <div class="flex items-center gap-2">
-              <h3 class="text-base font-extrabold text-slate-900 group-hover:text-pink-600 transition-colors">Page Numbers Studio</h3>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-pink-100 text-pink-800 uppercase">Interactive</span>
+              <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Page Numbers Studio</h3>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose/20 text-garnet uppercase">Interactive</span>
             </div>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Full 2-column workspace with live PDF thumbnail position dots for perfect pagination placement.</p>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Full 2-column workspace with live PDF thumbnail position dots for perfect pagination placement.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-pink-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Launch Interactive Studio &rarr;
           </div>
         </a>
 
         <!-- 7. Convert PDF to Word -->
-        <a href="/tools/word.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/word.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-sky-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-garnet group-hover:text-seashell transition-all">
               📝
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-sky-600 transition-colors">PDF to Word</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Convert your PDF files into editable Microsoft Word (.docx) documents effortlessly.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">PDF to Word</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Convert your PDF files into editable Microsoft Word (.docx) documents effortlessly.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-sky-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 8. Protect PDF -->
-        <a href="/tools/protect.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/protect.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
               🔒
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-rose-600 transition-colors">Protect PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Encrypt your PDF document with a password to prevent unauthorized viewing and editing.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Protect PDF</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Encrypt your PDF document with a password to prevent unauthorized viewing and editing.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-rose-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 9. Unlock PDF -->
-        <a href="/tools/unlock.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/unlock.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-teal-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-brand-50 text-tealaccent flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-tealaccent group-hover:text-white transition-all">
               🔓
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-teal-600 transition-colors">Unlock PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Remove security passwords and restrictions from your protected PDF files.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Unlock PDF</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Remove security passwords and restrictions from your protected PDF files.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-teal-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 10. Rotate PDF -->
-        <a href="/tools/rotate.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/rotate.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-seashell/40 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-seashell group-hover:text-garnet transition-all">
               🔄
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-orange-600 transition-colors">Rotate PDF</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Rotate your PDF pages by 90, 180, or 270 degrees to correct document orientation.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Rotate PDF</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Rotate your PDF pages by 90, 180, or 270 degrees to correct document orientation.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 11. Delete Pages -->
-        <a href="/tools/delete.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/delete.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-red-600 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
               🗑️
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-red-600 transition-colors">Delete Pages</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Remove unwanted pages from your PDF file and save a clean streamlined output.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Delete Pages</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Remove unwanted pages from your PDF file and save a clean streamlined output.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-red-600 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
 
         <!-- 12. Archival PDF/A -->
-        <a href="/tools/archive.html" class="group bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between">
+        <a href="/tools/archive.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-slate-800 group-hover:text-white transition-all">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-garnet group-hover:text-seashell transition-all">
               🏛️
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 group-hover:text-slate-700 transition-colors">Archival PDF/A</h3>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Convert standard PDFs to ISO-compliant PDF/A format for long-term document archiving.</p>
+            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Archival PDF/A</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Convert standard PDFs to ISO-compliant PDF/A format for long-term document archiving.</p>
           </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-slate-700 group-hover:translate-x-1 transition-transform">
+          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
             Open Workspace &rarr;
           </div>
         </a>
@@ -392,38 +398,38 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features-section" class="py-16 bg-white border-y border-slate-200/80">
+    <section id="features-section" class="py-16 bg-white border-y border-iceblue/60">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Why Choose PDF Precision</h2>
-          <p class="text-sm text-slate-600 mt-2">Enterprise-grade document utilities optimized for performance and privacy.</p>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">Why Choose PDF Precision</h2>
+          <p class="text-sm text-steel mt-2">Enterprise-grade document utilities optimized for performance and privacy.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           
-          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg mb-4">
+          <div class="p-6 rounded-2xl bg-slate-50 border border-iceblue/60">
+            <div class="w-10 h-10 rounded-xl bg-garnet text-seashell flex items-center justify-center font-bold text-lg mb-4">
               🛡️
             </div>
-            <h3 class="text-base font-bold text-slate-900">Immediate Auto-Cleanup</h3>
-            <p class="text-xs text-slate-600 mt-2 leading-relaxed">All uploaded files are automatically deleted from server disk space as soon as your task completes. Zero tracking or permanent storage.</p>
+            <h3 class="text-base font-bold text-garnet">Immediate Auto-Cleanup</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">All uploaded files are automatically deleted from server disk space as soon as your task completes. Zero tracking or permanent storage.</p>
           </div>
 
-          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg mb-4">
+          <div class="p-6 rounded-2xl bg-slate-50 border border-iceblue/60">
+            <div class="w-10 h-10 rounded-xl bg-tealaccent text-white flex items-center justify-center font-bold text-lg mb-4">
               ⚡
             </div>
-            <h3 class="text-base font-bold text-slate-900">2-Column Workspace UI</h3>
-            <p class="text-xs text-slate-600 mt-2 leading-relaxed">Dedicated split-screen layout with settings on the left sidebar and instant document canvas thumbnail grid on the right area.</p>
+            <h3 class="text-base font-bold text-garnet">Target Size Architecture</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Compress PDFs to exact target MB file sizes with real-time reduction estimates and Ghostscript binary search optimization.</p>
           </div>
 
-          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg mb-4">
+          <div class="p-6 rounded-2xl bg-slate-50 border border-iceblue/60">
+            <div class="w-10 h-10 rounded-xl bg-garnet text-seashell flex items-center justify-center font-bold text-lg mb-4">
               ✨
             </div>
-            <h3 class="text-base font-bold text-slate-900">No Hidden Limits</h3>
-            <p class="text-xs text-slate-600 mt-2 leading-relaxed">Completely free to use with no account registration, no watermarks added to documents, and high processing file limits.</p>
+            <h3 class="text-base font-bold text-garnet">No Hidden Limits</h3>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Completely free to use with no account registration, no watermarks added to documents, and high processing file limits.</p>
           </div>
 
         </div>
@@ -434,86 +440,86 @@
     <!-- How It Works Section -->
     <section id="how-it-works" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-2xl mx-auto mb-16">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">How It Works</h2>
-        <p class="text-sm text-slate-600 mt-2">3 simple steps to transform and optimize your PDF files.</p>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">How It Works</h2>
+        <p class="text-sm text-steel mt-2">3 simple steps to transform and optimize your PDF files.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
         
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-center">
-          <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 font-extrabold text-lg flex items-center justify-center mx-auto mb-4">
+        <div class="bg-white p-6 rounded-2xl border border-iceblue/60 shadow-sm text-center">
+          <div class="w-12 h-12 rounded-full bg-seashell/40 text-garnet font-extrabold text-lg flex items-center justify-center mx-auto mb-4 border border-seashell">
             1
           </div>
-          <h3 class="text-base font-bold text-slate-900">Select Tool & File</h3>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed">Choose a utility from our directory and drop your PDF into the interactive workspace area.</p>
+          <h3 class="text-base font-bold text-garnet">Select Tool & File</h3>
+          <p class="text-xs text-steel mt-2 leading-relaxed">Choose a utility from our directory and drop your PDF into the interactive workspace area.</p>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-center">
-          <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 font-extrabold text-lg flex items-center justify-center mx-auto mb-4">
+        <div class="bg-white p-6 rounded-2xl border border-iceblue/60 shadow-sm text-center">
+          <div class="w-12 h-12 rounded-full bg-brand-50 text-tealaccent font-extrabold text-lg flex items-center justify-center mx-auto mb-4 border border-tealaccent/30">
             2
           </div>
-          <h3 class="text-base font-bold text-slate-900">Customize Settings</h3>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed">Configure parameters, page numbers, or positions in the left sidebar while reviewing live thumbnails.</p>
+          <h3 class="text-base font-bold text-garnet">Customize Settings</h3>
+          <p class="text-xs text-steel mt-2 leading-relaxed">Configure target size, page numbers, or positions in the left sidebar while reviewing live thumbnails.</p>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-center">
-          <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 font-extrabold text-lg flex items-center justify-center mx-auto mb-4">
+        <div class="bg-white p-6 rounded-2xl border border-iceblue/60 shadow-sm text-center">
+          <div class="w-12 h-12 rounded-full bg-rose/20 text-garnet font-extrabold text-lg flex items-center justify-center mx-auto mb-4 border border-rose/30">
             3
           </div>
-          <h3 class="text-base font-bold text-slate-900">Execute & Download</h3>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed">Click the primary action button to process your file and save the output instantly to your computer.</p>
+          <h3 class="text-base font-bold text-garnet">Execute & Download</h3>
+          <p class="text-xs text-steel mt-2 leading-relaxed">Click the primary action button to process your file and save the output instantly to your computer.</p>
         </div>
 
       </div>
     </section>
 
     <!-- FAQ Accordion Section -->
-    <section id="faq-section" class="py-16 bg-slate-100/70 border-t border-slate-200/80">
+    <section id="faq-section" class="py-16 bg-slate-100/70 border-t border-iceblue/60">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center mb-12">
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Frequently Asked Questions</h2>
-          <p class="text-sm text-slate-600 mt-2">Everything you need to know about PDF Precision.</p>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">Frequently Asked Questions</h2>
+          <p class="text-sm text-steel mt-2">Everything you need to know about PDF Precision.</p>
         </div>
 
         <div class="space-y-4" id="faq-accordion">
           
-          <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-slate-900 hover:bg-slate-50 transition-colors">
-              <span>How do I compress a PDF online?</span>
-              <svg class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
+            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
+              <span>How do I compress a PDF to a specific target file size?</span>
+              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-              Navigate to the Compress PDF tool from our directory, choose your preferred compression level (Recommended, Extreme, or Less), upload your PDF, and download your optimized document instantly.
+            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
+              Navigate to the Compress PDF tool from our directory, enter your desired target file size in MB (e.g., 2.0 MB), upload your PDF, and download your optimized document instantly.
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-slate-900 hover:bg-slate-50 transition-colors">
+          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
+            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
               <span>Are my uploaded PDF documents secure and private?</span>
-              <svg class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
               Yes, absolutely. PDF Precision processes files on secure servers with immediate disk auto-cleanup as soon as processing completes. Your files are never stored permanently or shared.
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-slate-900 hover:bg-slate-50 transition-colors">
+          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
+            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
               <span>How do I convert a scanned PDF into searchable text?</span>
-              <svg class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
               Click on the OCR PDF tool, upload your scanned PDF document, and click Run OCR. Our engine performs text recognition and adds an invisible, selectable text layer over your document.
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-slate-900 hover:bg-slate-50 transition-colors">
+          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
+            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
               <span>Is PDF Precision completely free to use?</span>
-              <svg class="faq-icon w-5 h-5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
               Yes! All tools on PDF Precision are 100% free with no hidden fees, no registration required, and zero watermarks.
             </div>
           </div>
@@ -526,27 +532,27 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-slate-900 text-slate-400 text-xs py-12 border-t border-slate-800">
+  <footer class="bg-garnet text-iceblue text-xs py-12 border-t border-brand-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
       
       <!-- Column 1: Brand -->
       <div class="md:col-span-2">
         <div class="flex items-center gap-2 mb-3">
-          <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+          <div class="w-7 h-7 rounded-lg bg-tealaccent text-white flex items-center justify-center font-bold text-sm">
             PDF
           </div>
-          <span class="font-bold text-white text-base">PDF PRECISION</span>
+          <span class="font-bold text-seashell text-base">PDF PRECISION</span>
         </div>
-        <p class="text-slate-400 leading-relaxed max-w-sm">
+        <p class="text-iceblue/80 leading-relaxed max-w-sm">
           High-performance online document workspace studio. Fast, private, and secure browser-based tools with zero file retention.
         </p>
       </div>
 
       <!-- Column 2: Popular Tools -->
       <div>
-        <h4 class="font-bold text-white uppercase tracking-wider text-[11px] mb-3">Popular Utilities</h4>
+        <h4 class="font-bold text-seashell uppercase tracking-wider text-[11px] mb-3">Popular Utilities</h4>
         <ul class="space-y-2">
-          <li><a href="/tools/compress.html" class="hover:text-white transition-colors">Compress PDF</a></li>
+          <li><a href="/tools/compress.html" class="hover:text-white transition-colors">Compress PDF (Target Size)</a></li>
           <li><a href="/tools/merge.html" class="hover:text-white transition-colors">Merge PDFs</a></li>
           <li><a href="/tools/extract.html" class="hover:text-white transition-colors">Extract Pages</a></li>
           <li><a href="/tools/ocr.html" class="hover:text-white transition-colors">OCR Searchable PDF</a></li>
@@ -556,7 +562,7 @@
 
       <!-- Column 3: Sitemap & Indexing -->
       <div>
-        <h4 class="font-bold text-white uppercase tracking-wider text-[11px] mb-3">Index & Legal</h4>
+        <h4 class="font-bold text-seashell uppercase tracking-wider text-[11px] mb-3">Index & Legal</h4>
         <ul class="space-y-2">
           <li><a href="/sitemap.xml" class="hover:text-white transition-colors">Sitemap XML</a></li>
           <li><a href="/robots.txt" class="hover:text-white transition-colors">Robots.txt</a></li>
@@ -566,9 +572,9 @@
 
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-brand-700 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
       <p>&copy; 2026 PDF Precision. All rights reserved.</p>
-      <p class="text-slate-500">100% Free Online PDF Workspace Studio</p>
+      <p class="text-iceblue/60">100% Free Online PDF Workspace Studio</p>
     </div>
   </footer>
 
