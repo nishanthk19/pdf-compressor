@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script src="/js/iframe-polyfill.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Text over PDF - Draggable Text Studio - PDF Precision</title>
+  
+  <!-- Workspace Stylesheet & Tailwind CSS -->
+  <link rel="stylesheet" href="/css/workspace.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  
+  <!-- pdf-lib CDN -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    /* Interactive Draggable Overlay Styles */
+    .draggable-text-box {
+      position: absolute;
+      min-width: 120px;
+      min-height: 40px;
+      border: 2px dashed #09A1A1;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(48, 82, 92, 0.15);
+      cursor: move;
+      user-select: none;
+      z-index: 10;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      touch-action: none;
+    }
+
+    .draggable-text-box.active {
+      border: 2px solid #09A1A1;
+      box-shadow: 0 0 0 3px rgba(9, 161, 161, 0.25), 0 8px 20px rgba(0,0,0,0.18);
+      z-index: 20;
+    }
+
+    .drag-handle-bar {
+      height: 22px;
+      background: #30525C;
+      color: #ffffff;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: move;
+    }
+
+    .text-box-textarea {
+      width: 100%;
+      height: calc(100% - 22px);
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: both;
+      padding: 6px 8px;
+      font-family: inherit;
+      line-height: 1.3;
+      color: #1e293b;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .text-box-textarea:focus {
+      outline: none;
+    }
+
+    .box-action-btn {
+      color: #acc0d3;
+      transition: color 0.15s ease;
+      cursor: pointer;
+      padding: 0 2px;
+    }
+    .box-action-btn:hover {
+      color: #f6c992;
+    }
+
+    /* Thumbnail strip styling */
+    .thumb-card {
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .thumb-card.active {
+      border-color: #09A1A1;
+      background-color: #f0fdfd;
+      box-shadow: 0 0 0 2px rgba(9, 161, 161, 0.2);
+    }
+
+    /* Color Swatch Button */
+    .swatch-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .swatch-btn:hover {
+      transform: scale(1.15);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
+
+  <!-- 2-Column Workspace Layout -->
+  <div class="workspace-container">
+
+    <!-- LEFT SIDEBAR: CONTROLS & FORMATTING -->
+    <aside class="sidebar flex flex-col h-full bg-white border-r border-slate-200 w-[360px] min-w-[360px] shadow-lg z-20">
+      
+      <!-- Header -->
+      <div class="sidebar-header p-4 border-b border-slate-200 bg-slate-50">
+        <a href="/" class="back-link inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-teal-600 mb-2 transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span>PDF Precision Directory</span>
+        </a>
+        
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-teal-600/20">
+            ✍️
+          </div>
+          <div>
+            <h2 class="text-base font-extrabold text-slate-800 leading-tight">Add Text over PDF</h2>
+            <p class="text-[11px] font-semibold text-slate-500">Draggable Text &amp; Stamp Studio</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable Sidebar Body -->
+      <div class="sidebar-body flex-1 overflow-y-auto p-4 space-y-5">
+
+        <!-- 1. PDF File Upload & File Meta -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">PDF Document</span>
+            <span id="fileBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600">No File</span>
+          </div>
+          
+          <label class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold rounded-lg shadow cursor-pointer transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span id="uploadBtnText">Choose PDF File</span>
+            <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" class="hidden" />
+          </label>
+
+          <div id="fileInfoBox" class="mt-2.5 hidden text-[11px] font-medium text-slate-600 bg-white p-2 rounded border border-slate-200">
+            <div id="fileNameText" class="font-bold text-slate-800 truncate">document.pdf</div>
+            <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1">
+              <span id="fileSizeText">0.0 MB</span>
+              <span id="filePagesText">0 Pages</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Primary Action: Add Text Button -->
+        <div class="space-y-2">
+          <button type="button" id="addTextBtn" disabled class="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs rounded-xl shadow-md shadow-teal-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Add Draggable Text Box</span>
+          </button>
+        </div>
+
+        <!-- 3. Quick Preset Stamps -->
+        <div id="stampSection" class="space-y-2 opacity-50 pointer-events-none transition-opacity">
+          <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 block">Quick Preset Stamps</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" data-stamp="APPROVED" class="stamp-btn px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-extrabold text-[11px] rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <span>🟢</span> APPROVED
+            </button>
+            <button type="button" data-stamp="CONFIDENTIAL" class="stamp-btn px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-extrabold text-[11px] rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <span>🔒</span> CONFIDENTIAL
+            </button>
+            <button type="button" data-stamp="DRAFT" class="stamp-btn px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 font-extrabold text-[11px] rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <span>📝</span> DRAFT
+            </button>
+            <button type="button" data-stamp="PLEASE SIGN" class="stamp-btn px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 font-extrabold text-[11px] rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <span>✍️</span> PLEASE SIGN
+            </button>
+            <button type="button" data-stamp="DATE: ________" class="stamp-btn px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 font-extrabold text-[11px] rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer col-span-2">
+              <span>📅</span> DATE: ________________
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Text Formatting Properties Panel -->
+        <div id="formattingPanel" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3 opacity-50 pointer-events-none transition-opacity">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Text Properties</span>
+            <span id="activeSelectionLabel" class="text-[10px] font-semibold text-slate-400">None selected</span>
+          </div>
+
+          <!-- Font Family & Size -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Font Family</label>
+              <select id="fontFamilySelect" class="w-full bg-white text-slate-800 text-xs font-semibold rounded-lg px-2 py-1.5 border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500">
+                <option value="Helvetica">Helvetica (Sans)</option>
+                <option value="TimesRoman">Times (Serif)</option>
+                <option value="Courier">Courier (Mono)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Font Size</label>
+              <select id="fontSizeSelect" class="w-full bg-white text-slate-800 text-xs font-semibold rounded-lg px-2 py-1.5 border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500">
+                <option value="12">12 px</option>
+                <option value="14">14 px</option>
+                <option value="16" selected>16 px</option>
+                <option value="18">18 px</option>
+                <option value="20">20 px</option>
+                <option value="24">24 px</option>
+                <option value="28">28 px</option>
+                <option value="32">32 px</option>
+                <option value="36">36 px</option>
+                <option value="48">48 px</option>
+                <option value="64">64 px</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Styling & Alignment Row -->
+          <div class="flex items-center justify-between gap-2">
+            <!-- Bold & Italic Buttons -->
+            <div class="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-300">
+              <button type="button" id="boldToggleBtn" class="w-7 h-7 font-black text-xs rounded hover:bg-slate-100 transition-colors flex items-center justify-center">B</button>
+              <button type="button" id="italicToggleBtn" class="w-7 h-7 font-semibold italic text-xs rounded hover:bg-slate-100 transition-colors flex items-center justify-center">I</button>
+            </div>
+
+            <!-- Alignment Buttons -->
+            <div class="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-300">
+              <button type="button" data-align="left" class="align-btn w-7 h-7 text-xs rounded hover:bg-slate-100 bg-slate-200 font-bold transition-colors flex items-center justify-center">⎸≡</button>
+              <button type="button" data-align="center" class="align-btn w-7 h-7 text-xs rounded hover:bg-slate-100 font-bold transition-colors flex items-center justify-center">≡</button>
+              <button type="button" data-align="right" class="align-btn w-7 h-7 text-xs rounded hover:bg-slate-100 font-bold transition-colors flex items-center justify-center">≡⎸</button>
+            </div>
+          </div>
+
+          <!-- Color Swatches & Picker -->
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Text Color</label>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button type="button" class="swatch-btn bg-black" data-color="#000000"></button>
+              <button type="button" class="swatch-btn bg-slate-800" data-color="#1e293b"></button>
+              <button type="button" class="swatch-btn bg-red-600" data-color="#dc2626"></button>
+              <button type="button" class="swatch-btn bg-blue-600" data-color="#2563eb"></button>
+              <button type="button" class="swatch-btn bg-emerald-600" data-color="#16a34a"></button>
+              <button type="button" class="swatch-btn bg-amber-500" data-color="#d97706"></button>
+              <button type="button" class="swatch-btn bg-purple-600" data-color="#7c3aed"></button>
+              <button type="button" class="swatch-btn bg-white" data-color="#ffffff"></button>
+              
+              <input type="color" id="customTextColor" value="#000000" class="w-6 h-6 rounded border border-slate-300 bg-transparent cursor-pointer p-0 ml-auto" title="Custom color" />
+            </div>
+          </div>
+
+          <!-- Background Fill / Whiteout -->
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Box Fill / Whiteout</label>
+            <select id="bgFillSelect" class="w-full bg-white text-slate-800 text-xs font-semibold rounded-lg px-2 py-1.5 border border-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500">
+              <option value="rgba(255, 255, 255, 0.95)" selected>Solid White (Whiteout)</option>
+              <option value="transparent">Transparent (Text Only)</option>
+              <option value="#fef08a">Yellow Highlight</option>
+              <option value="#e0f2fe">Light Blue Fill</option>
+              <option value="#f1f5f9">Light Gray Fill</option>
+            </select>
+          </div>
+
+          <!-- Selected Text Controls -->
+          <div class="pt-2 border-t border-slate-200 flex items-center justify-between gap-2">
+            <button type="button" id="duplicateBoxBtn" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
+              📋 Duplicate
+            </button>
+            <button type="button" id="deleteBoxBtn" class="px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
+              🗑️ Delete
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 5. Page Selector & Thumbnails Strip -->
+        <div id="pageNavSection" class="space-y-2 opacity-50 pointer-events-none transition-opacity">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Page Navigator</span>
+            <span id="pageCounterText" class="text-xs font-bold text-teal-700">Page 1 of 1</span>
+          </div>
+
+          <div class="flex items-center justify-between gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+            <button type="button" id="prevPageBtn" disabled class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 disabled:opacity-40 text-xs font-bold text-slate-700 rounded-lg transition-all cursor-pointer">
+              ‹ Prev
+            </button>
+            <span id="currentPageLabel" class="text-xs font-extrabold text-slate-800">1 / 1</span>
+            <button type="button" id="nextPageBtn" disabled class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 disabled:opacity-40 text-xs font-bold text-slate-700 rounded-lg transition-all cursor-pointer">
+              Next ›
+            </button>
+          </div>
+
+          <!-- Page Thumbnails Strip Container -->
+          <div id="thumbnailStrip" class="flex gap-2 overflow-x-auto pb-2 pt-1 max-h-[120px] scrollbar-thin"></div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar Footer: Export Button -->
+      <div class="sidebar-footer p-4 border-t border-slate-200 bg-white">
+        <button type="button" id="exportPdfBtn" disabled class="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span id="exportBtnLabel">Download PDF with Text</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT MAIN WORKSPACE: CANVAS & OVERLAY STAGE -->
+    <main class="flex-1 bg-slate-900 overflow-auto p-6 flex flex-col items-center justify-start relative">
+      
+      <!-- Top Sub-Bar Controls -->
+      <div class="w-full max-w-5xl mb-4 flex items-center justify-between gap-4 bg-slate-800/80 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-700/80 text-xs text-slate-300 shadow-md">
+        
+        <!-- Zoom Controls -->
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-slate-400">Zoom:</span>
+          <button type="button" id="zoomOutBtn" disabled class="px-2 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 rounded font-bold text-white transition-colors cursor-pointer">-</button>
+          <span id="zoomValText" class="font-mono font-bold text-teal-400 w-12 text-center">100%</span>
+          <button type="button" id="zoomInBtn" disabled class="px-2 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 rounded font-bold text-white transition-colors cursor-pointer">+</button>
+        </div>
+
+        <!-- Instruction Tip -->
+        <div class="hidden md:flex items-center gap-2 text-slate-400 text-[11px] font-medium">
+          <span>💡 Click anywhere on page to place a text box. Drag text boxes freely.</span>
+        </div>
+
+        <!-- Text Box Counter Badge -->
+        <div class="flex items-center gap-2">
+          <span id="statusOverlayBadge" class="px-2.5 py-1 bg-teal-500/20 text-teal-300 font-bold text-[11px] rounded-lg border border-teal-500/30">
+            0 Text Boxes
+          </span>
+        </div>
+      </div>
+
+      <!-- Stage Container (Center Stage) -->
+      <div class="flex-1 w-full flex items-center justify-center my-auto min-h-[500px]">
+        
+        <!-- Empty State Dropzone -->
+        <div id="emptyState" class="flex flex-col items-center justify-center text-center max-w-md p-10 bg-slate-800/60 border-2 border-dashed border-slate-700 rounded-3xl shadow-2xl relative cursor-pointer group hover:border-teal-500 transition-all">
+          <input type="file" id="dropzoneFileInput" accept="application/pdf,.pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+          <div class="w-16 h-16 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-inner">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-slate-100">Load PDF to Add Draggable Text</h2>
+          <p class="text-xs text-slate-400 mt-1 max-w-xs">Select or drag &amp; drop a PDF document to place custom editable text overlays and stamps.</p>
+          <span class="mt-5 px-4 py-2 bg-teal-600 text-white font-extrabold text-xs rounded-xl shadow-md shadow-teal-600/30 group-hover:bg-teal-500 transition-all pointer-events-none">
+            Choose PDF File
+          </span>
+        </div>
+
+        <!-- Canvas Stage Wrapper (Shown when PDF is loaded) -->
+        <div id="canvasStage" class="hidden relative shadow-2xl rounded-lg border border-slate-700 bg-white">
+          <!-- Rendered PDF Page Canvas -->
+          <canvas id="pdfPageCanvas" class="block rounded-lg cursor-crosshair"></canvas>
+
+          <!-- Interactive Text Overlays Layer -->
+          <div id="textOverlayLayer" class="absolute inset-0 overflow-hidden rounded-lg pointer-events-auto"></div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // Configure PDF.js Worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // DOM Elements
+    const pdfFileInput = document.getElementById('pdfFileInput');
+    const dropzoneFileInput = document.getElementById('dropzoneFileInput');
+    const emptyState = document.getElementById('emptyState');
+    const canvasStage = document.getElementById('canvasStage');
+    const pdfPageCanvas = document.getElementById('pdfPageCanvas');
+    const textOverlayLayer = document.getElementById('textOverlayLayer');
+
+    const addTextBtn = document.getElementById('addTextBtn');
+    const stampSection = document.getElementById('stampSection');
+    const formattingPanel = document.getElementById('formattingPanel');
+    const pageNavSection = document.getElementById('pageNavSection');
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+
+    const fontFamilySelect = document.getElementById('fontFamilySelect');
+    const fontSizeSelect = document.getElementById('fontSizeSelect');
+    const boldToggleBtn = document.getElementById('boldToggleBtn');
+    const italicToggleBtn = document.getElementById('italicToggleBtn');
+    const customTextColor = document.getElementById('customTextColor');
+    const bgFillSelect = document.getElementById('bgFillSelect');
+
+    const duplicateBoxBtn = document.getElementById('duplicateBoxBtn');
+    const deleteBoxBtn = document.getElementById('deleteBoxBtn');
+
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const currentPageLabel = document.getElementById('currentPageLabel');
+    const pageCounterText = document.getElementById('pageCounterText');
+    const thumbnailStrip = document.getElementById('thumbnailStrip');
+
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const zoomValText = document.getElementById('zoomValText');
+    const statusOverlayBadge = document.getElementById('statusOverlayBadge');
+
+    const fileInfoBox = document.getElementById('fileInfoBox');
+    const fileNameText = document.getElementById('fileNameText');
+    const fileSizeText = document.getElementById('fileSizeText');
+    const filePagesText = document.getElementById('filePagesText');
+    const fileBadge = document.getElementById('fileBadge');
+    const uploadBtnText = document.getElementById('uploadBtnText');
+
+    // Application State
+    let rawPdfArrayBuffer = null;
+    let pdfFileName = 'document.pdf';
+    let pdfDocObject = null;
+    let totalPages = 0;
+    let currentPageNum = 1;
+    let zoomScale = 1.25;
+
+    // Map storing text overlays for each page index: { 1: [overlay1, overlay2], 2: [...] }
+    let pageOverlaysMap = {};
+    let selectedBoxId = null;
+    let isBoldActive = false;
+    let isItalicActive = false;
+    let currentTextAlign = 'left';
+
+    // File Input Handlers
+    pdfFileInput.addEventListener('change', handleFileSelected);
+    dropzoneFileInput.addEventListener('change', handleFileSelected);
+
+    async function handleFileSelected(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      try {
+        pdfFileName = file.name;
+        fileNameText.textContent = file.name;
+        fileSizeText.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+        fileBadge.textContent = 'Loaded';
+        fileBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700';
+        uploadBtnText.textContent = 'Change PDF File';
+        fileInfoBox.classList.remove('hidden');
+
+        rawPdfArrayBuffer = await file.arrayBuffer();
+
+        // Load document with PDF.js
+        const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(rawPdfArrayBuffer.slice(0)) });
+        pdfDocObject = await loadingTask.promise;
+        totalPages = pdfDocObject.numPages;
+
+        filePagesText.textContent = `${totalPages} Page${totalPages > 1 ? 's' : ''}`;
+        pageCounterText.textContent = `Page 1 of ${totalPages}`;
+        currentPageLabel.textContent = `1 / ${totalPages}`;
+
+        // Reset state
+        pageOverlaysMap = {};
+        for (let i = 1; i <= totalPages; i++) {
+          pageOverlaysMap[i] = [];
+        }
+
+        currentPageNum = 1;
+        
+        // Enable UI Panels
+        emptyState.classList.add('hidden');
+        canvasStage.classList.remove('hidden');
+        addTextBtn.disabled = false;
+        exportPdfBtn.disabled = false;
+        zoomInBtn.disabled = false;
+        zoomOutBtn.disabled = false;
+
+        stampSection.classList.remove('opacity-50', 'pointer-events-none');
+        formattingPanel.classList.remove('opacity-50', 'pointer-events-none');
+        pageNavSection.classList.remove('opacity-50', 'pointer-events-none');
+
+        // Build thumbnail sidebar
+        renderThumbnailStrip();
+
+        // Render Page 1
+        await renderPdfPage(currentPageNum);
+
+      } catch (err) {
+        console.error('Error loading PDF:', err);
+        alert('Could not render PDF. Please select a valid PDF document.');
+      }
+    }
+
+    // Render PDF Page onto canvas
+    async function renderPdfPage(pageNum) {
+      if (!pdfDocObject) return;
+
+      const page = await pdfDocObject.getPage(pageNum);
+      const viewport = page.getViewport({ scale: zoomScale });
+
+      pdfPageCanvas.width = viewport.width;
+      pdfPageCanvas.height = viewport.height;
+
+      const renderContext = {
+        canvasContext: pdfPageCanvas.getContext('2d'),
+        viewport: viewport
+      };
+
+      await page.render(renderContext).promise;
+
+      // Match Overlay Layer dimensions
+      textOverlayLayer.style.width = `${viewport.width}px`;
+      textOverlayLayer.style.height = `${viewport.height}px`;
+
+      // Update Page Navigation Buttons
+      prevPageBtn.disabled = (pageNum <= 1);
+      nextPageBtn.disabled = (pageNum >= totalPages);
+      currentPageLabel.textContent = `${pageNum} / ${totalPages}`;
+      pageCounterText.textContent = `Page ${pageNum} of ${totalPages}`;
+
+      // Re-render text boxes for this page
+      renderOverlayBoxesForPage(pageNum);
+
+      // Highlight active thumbnail
+      document.querySelectorAll('.thumb-card').forEach((tc, idx) => {
+        if (idx + 1 === pageNum) {
+          tc.classList.add('active');
+        } else {
+          tc.classList.remove('active');
+        }
+      });
+
+      updateStatusBadge();
+    }
+
+    // Render Page Thumbnails in sidebar
+    async function renderThumbnailStrip() {
+      thumbnailStrip.innerHTML = '';
+      for (let i = 1; i <= totalPages; i++) {
+        const thumbCard = document.createElement('div');
+        thumbCard.className = `thumb-card shrink-0 p-1 bg-white rounded-lg border border-slate-200 text-center text-[10px] font-extrabold ${i === currentPageNum ? 'active' : ''}`;
+        thumbCard.innerHTML = `
+          <div class="w-12 h-16 bg-slate-100 flex items-center justify-center font-bold text-slate-400 rounded overflow-hidden">
+            P${i}
+          </div>
+          <span class="mt-0.5 block text-slate-600">Page ${i}</span>
+        `;
+        thumbCard.addEventListener('click', async () => {
+          saveCurrentPageOverlaysFromDOM();
+          currentPageNum = i;
+          await renderPdfPage(currentPageNum);
+        });
+        thumbnailStrip.appendChild(thumbCard);
+      }
+    }
+
+    // Navigation Button Events
+    prevPageBtn.addEventListener('click', async () => {
+      if (currentPageNum > 1) {
+        saveCurrentPageOverlaysFromDOM();
+        currentPageNum--;
+        await renderPdfPage(currentPageNum);
+      }
+    });
+
+    nextPageBtn.addEventListener('click', async () => {
+      if (currentPageNum < totalPages) {
+        saveCurrentPageOverlaysFromDOM();
+        currentPageNum++;
+        await renderPdfPage(currentPageNum);
+      }
+    });
+
+    // Zoom Controls
+    zoomInBtn.addEventListener('click', async () => {
+      if (zoomScale < 2.5) {
+        saveCurrentPageOverlaysFromDOM();
+        zoomScale += 0.25;
+        zoomValText.textContent = `${Math.round(zoomScale * 100)}%`;
+        await renderPdfPage(currentPageNum);
+      }
+    });
+
+    zoomOutBtn.addEventListener('click', async () => {
+      if (zoomScale > 0.5) {
+        saveCurrentPageOverlaysFromDOM();
+        zoomScale -= 0.25;
+        zoomValText.textContent = `${Math.round(zoomScale * 100)}%`;
+        await renderPdfPage(currentPageNum);
+      }
+    });
+
+    // Add Text Box Handler
+    addTextBtn.addEventListener('click', () => {
+      createDraggableTextBox('Type your text here...', 80, 80);
+    });
+
+    // Click on Canvas stage to place text box
+    pdfPageCanvas.addEventListener('click', (e) => {
+      if (e.target !== pdfPageCanvas) return;
+      const rect = pdfPageCanvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left - 50;
+      const clickY = e.clientY - rect.top - 20;
+      createDraggableTextBox('Type text...', Math.max(10, clickX), Math.max(10, clickY));
+    });
+
+    // Preset Stamp Buttons
+    document.querySelectorAll('.stamp-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const stampText = btn.getAttribute('data-stamp');
+        let textColor = '#16a34a';
+        let bgColor = '#ecfdf5';
+
+        if (stampText === 'CONFIDENTIAL') { textColor = '#dc2626'; bgColor = '#fef2f2'; }
+        if (stampText === 'DRAFT') { textColor = '#d97706'; bgColor = '#fffbeb'; }
+        if (stampText === 'PLEASE SIGN') { textColor = '#0284c7'; bgColor = '#f0f9ff'; }
+        if (stampText === 'DATE: ________') { textColor = '#7c3aed'; bgColor = '#faf5ff'; }
+
+        createDraggableTextBox(stampText, 100, 100, {
+          fontSize: 20,
+          isBold: true,
+          color: textColor,
+          bgColor: bgColor
+        });
+      });
+    });
+
+    // Create a new Draggable Text Box
+    function createDraggableTextBox(defaultText, posX = 50, posY = 50, options = {}) {
+      const boxId = 'box_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+      const overlayObj = {
+        id: boxId,
+        text: defaultText,
+        relX: posX / pdfPageCanvas.width,
+        relY: posY / pdfPageCanvas.height,
+        relWidth: 180 / pdfPageCanvas.width,
+        relHeight: 60 / pdfPageCanvas.height,
+        fontSize: options.fontSize || parseInt(fontSizeSelect.value) || 16,
+        fontFamily: options.fontFamily || fontFamilySelect.value || 'Helvetica',
+        isBold: options.isBold !== undefined ? options.isBold : isBoldActive,
+        isItalic: options.isItalic !== undefined ? options.isItalic : isItalicActive,
+        textAlign: currentTextAlign,
+        color: options.color || customTextColor.value || '#000000',
+        bgColor: options.bgColor || bgFillSelect.value || 'rgba(255, 255, 255, 0.95)'
+      };
+
+      if (!pageOverlaysMap[currentPageNum]) {
+        pageOverlaysMap[currentPageNum] = [];
+      }
+      pageOverlaysMap[currentPageNum].push(overlayObj);
+
+      renderSingleOverlayDOM(overlayObj);
+      selectTextBox(boxId);
+      updateStatusBadge();
+    }
+
+    // Render single Overlay DOM element
+    function renderSingleOverlayDOM(boxObj) {
+      const posX = boxObj.relX * pdfPageCanvas.width;
+      const posY = boxObj.relY * pdfPageCanvas.height;
+      const width = boxObj.relWidth * pdfPageCanvas.width;
+      const height = boxObj.relHeight * pdfPageCanvas.height;
+
+      const boxElem = document.createElement('div');
+      boxElem.id = boxObj.id;
+      boxElem.className = 'draggable-text-box';
+      boxElem.style.left = `${posX}px`;
+      boxElem.style.top = `${posY}px`;
+      boxElem.style.width = `${Math.max(120, width)}px`;
+      boxElem.style.height = `${Math.max(45, height)}px`;
+      boxElem.style.backgroundColor = boxObj.bgColor;
+
+      boxElem.innerHTML = `
+        <div class="drag-handle-bar">
+          <span class="truncate pr-1">⋮⋮ Text Box</span>
+          <div class="flex items-center gap-1">
+            <span class="box-action-btn dup-btn" title="Duplicate">📋</span>
+            <span class="box-action-btn del-btn" title="Delete">✕</span>
+          </div>
+        </div>
+        <textarea class="text-box-textarea">${boxObj.text}</textarea>
+      `;
+
+      const textarea = boxElem.querySelector('.text-box-textarea');
+      applyStylesToTextarea(textarea, boxObj);
+
+      // Event: Select on Click
+      boxElem.addEventListener('mousedown', (e) => {
+        if (!e.target.classList.contains('del-btn') && !e.target.classList.contains('dup-btn')) {
+          selectTextBox(boxObj.id);
+        }
+      });
+
+      // Event: Delete Button inside Handle
+      boxElem.querySelector('.del-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteTextBox(boxObj.id);
+      });
+
+      // Event: Duplicate Button inside Handle
+      boxElem.querySelector('.dup-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        duplicateTextBox(boxObj.id);
+      });
+
+      // Event: Textarea Content Update
+      textarea.addEventListener('input', () => {
+        boxObj.text = textarea.value;
+      });
+
+      // Make Draggable using Pointer Events
+      makeElementDraggable(boxElem, boxObj);
+
+      textOverlayLayer.appendChild(boxElem);
+    }
+
+    // Apply formatting styles to textarea element
+    function applyStylesToTextarea(textarea, boxObj) {
+      textarea.style.fontSize = `${boxObj.fontSize}px`;
+      textarea.style.color = boxObj.color;
+      textarea.style.fontWeight = boxObj.isBold ? 'bold' : 'normal';
+      textarea.style.fontStyle = boxObj.isItalic ? 'italic' : 'normal';
+      textarea.style.textAlign = boxObj.textAlign || 'left';
+
+      if (boxObj.fontFamily === 'TimesRoman') {
+        textarea.style.fontFamily = "'Times New Roman', Times, serif";
+      } else if (boxObj.fontFamily === 'Courier') {
+        textarea.style.fontFamily = "'Courier New', Courier, monospace";
+      } else {
+        textarea.style.fontFamily = "'Helvetica', 'Arial', sans-serif";
+      }
+    }
+
+    // Draggable Logic using Pointer Events
+    function makeElementDraggable(elem, boxObj) {
+      const handle = elem.querySelector('.drag-handle-bar');
+      let isDragging = false;
+      let startX, startY, startLeft, startTop;
+
+      handle.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        elem.setPointerCapture(e.pointerId);
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseFloat(elem.style.left) || 0;
+        startTop = parseFloat(elem.style.top) || 0;
+        selectTextBox(boxObj.id);
+      });
+
+      handle.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+
+        // Bound inside canvas
+        const maxLeft = pdfPageCanvas.width - elem.offsetWidth;
+        const maxTop = pdfPageCanvas.height - elem.offsetHeight;
+
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+
+        elem.style.left = `${newLeft}px`;
+        elem.style.top = `${newTop}px`;
+
+        // Update relative state
+        boxObj.relX = newLeft / pdfPageCanvas.width;
+        boxObj.relY = newTop / pdfPageCanvas.height;
+      });
+
+      handle.addEventListener('pointerup', (e) => {
+        if (isDragging) {
+          isDragging = false;
+          try { elem.releasePointerCapture(e.pointerId); } catch (_) {}
+        }
+      });
+    }
+
+    // Select active text box
+    function selectTextBox(boxId) {
+      selectedBoxId = boxId;
+      document.querySelectorAll('.draggable-text-box').forEach(b => {
+        if (b.id === boxId) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+
+      const boxObj = findBoxById(boxId);
+      if (boxObj) {
+        fontFamilySelect.value = boxObj.fontFamily;
+        fontSizeSelect.value = boxObj.fontSize;
+        customTextColor.value = boxObj.color;
+        bgFillSelect.value = boxObj.bgColor;
+        
+        isBoldActive = boxObj.isBold;
+        isItalicActive = boxObj.isItalic;
+        currentTextAlign = boxObj.textAlign || 'left';
+
+        boldToggleBtn.className = `w-7 h-7 font-black text-xs rounded transition-colors flex items-center justify-center ${isBoldActive ? 'bg-teal-600 text-white' : 'hover:bg-slate-100'}`;
+        italicToggleBtn.className = `w-7 h-7 font-semibold italic text-xs rounded transition-colors flex items-center justify-center ${isItalicActive ? 'bg-teal-600 text-white' : 'hover:bg-slate-100'}`;
+
+        document.querySelectorAll('.align-btn').forEach(ab => {
+          if (ab.getAttribute('data-align') === currentTextAlign) {
+            ab.classList.add('bg-slate-200');
+          } else {
+            ab.classList.remove('bg-slate-200');
+          }
+        });
+      }
+    }
+
+    // Save overlays from current DOM into pageOverlaysMap
+    function saveCurrentPageOverlaysFromDOM() {
+      if (!pageOverlaysMap[currentPageNum]) return;
+
+      const overlays = pageOverlaysMap[currentPageNum];
+      overlays.forEach(boxObj => {
+        const elem = document.getElementById(boxObj.id);
+        if (elem) {
+          boxObj.relX = parseFloat(elem.style.left) / pdfPageCanvas.width;
+          boxObj.relY = parseFloat(elem.style.top) / pdfPageCanvas.height;
+          boxObj.relWidth = elem.offsetWidth / pdfPageCanvas.width;
+          boxObj.relHeight = elem.offsetHeight / pdfPageCanvas.height;
+
+          const textarea = elem.querySelector('.text-box-textarea');
+          if (textarea) {
+            boxObj.text = textarea.value;
+          }
+        }
+      });
+    }
+
+    // Render all overlay boxes for a specific page
+    function renderOverlayBoxesForPage(pageNum) {
+      textOverlayLayer.innerHTML = '';
+      const overlays = pageOverlaysMap[pageNum] || [];
+      overlays.forEach(boxObj => {
+        renderSingleOverlayDOM(boxObj);
+      });
+    }
+
+    // Find box object by ID
+    function findBoxById(boxId) {
+      const overlays = pageOverlaysMap[currentPageNum] || [];
+      return overlays.find(b => b.id === boxId);
+    }
+
+    // Delete active box
+    function deleteTextBox(boxId) {
+      const overlays = pageOverlaysMap[currentPageNum] || [];
+      const idx = overlays.findIndex(b => b.id === boxId);
+      if (idx !== -1) {
+        overlays.splice(idx, 1);
+        const elem = document.getElementById(boxId);
+        if (elem) elem.remove();
+        if (selectedBoxId === boxId) selectedBoxId = null;
+        updateStatusBadge();
+      }
+    }
+
+    deleteBoxBtn.addEventListener('click', () => {
+      if (selectedBoxId) deleteTextBox(selectedBoxId);
+    });
+
+    // Duplicate active box
+    function duplicateTextBox(boxId) {
+      const boxObj = findBoxById(boxId);
+      if (boxObj) {
+        createDraggableTextBox(boxObj.text, (boxObj.relX * pdfPageCanvas.width) + 20, (boxObj.relY * pdfPageCanvas.height) + 20, {
+          fontSize: boxObj.fontSize,
+          fontFamily: boxObj.fontFamily,
+          isBold: boxObj.isBold,
+          isItalic: boxObj.isItalic,
+          color: boxObj.color,
+          bgColor: boxObj.bgColor
+        });
+      }
+    }
+
+    duplicateBoxBtn.addEventListener('click', () => {
+      if (selectedBoxId) duplicateTextBox(selectedBoxId);
+    });
+
+    // Formatting Panel Event Listeners
+    fontFamilySelect.addEventListener('change', updateActiveBoxFormatting);
+    fontSizeSelect.addEventListener('change', updateActiveBoxFormatting);
+    customTextColor.addEventListener('input', updateActiveBoxFormatting);
+    bgFillSelect.addEventListener('change', updateActiveBoxFormatting);
+
+    boldToggleBtn.addEventListener('click', () => {
+      isBoldActive = !isBoldActive;
+      boldToggleBtn.className = `w-7 h-7 font-black text-xs rounded transition-colors flex items-center justify-center ${isBoldActive ? 'bg-teal-600 text-white' : 'hover:bg-slate-100'}`;
+      updateActiveBoxFormatting();
+    });
+
+    italicToggleBtn.addEventListener('click', () => {
+      isItalicActive = !isItalicActive;
+      italicToggleBtn.className = `w-7 h-7 font-semibold italic text-xs rounded transition-colors flex items-center justify-center ${isItalicActive ? 'bg-teal-600 text-white' : 'hover:bg-slate-100'}`;
+      updateActiveBoxFormatting();
+    });
+
+    document.querySelectorAll('.swatch-btn').forEach(sb => {
+      sb.addEventListener('click', () => {
+        customTextColor.value = sb.getAttribute('data-color');
+        updateActiveBoxFormatting();
+      });
+    });
+
+    document.querySelectorAll('.align-btn').forEach(ab => {
+      ab.addEventListener('click', () => {
+        currentTextAlign = ab.getAttribute('data-align');
+        document.querySelectorAll('.align-btn').forEach(b => b.classList.remove('bg-slate-200'));
+        ab.classList.add('bg-slate-200');
+        updateActiveBoxFormatting();
+      });
+    });
+
+    function updateActiveBoxFormatting() {
+      if (!selectedBoxId) return;
+      const boxObj = findBoxById(selectedBoxId);
+      if (!boxObj) return;
+
+      boxObj.fontFamily = fontFamilySelect.value;
+      boxObj.fontSize = parseInt(fontSizeSelect.value) || 16;
+      boxObj.color = customTextColor.value;
+      boxObj.bgColor = bgFillSelect.value;
+      boxObj.isBold = isBoldActive;
+      boxObj.isItalic = isItalicActive;
+      boxObj.textAlign = currentTextAlign;
+
+      const elem = document.getElementById(selectedBoxId);
+      if (elem) {
+        elem.style.backgroundColor = boxObj.bgColor;
+        const textarea = elem.querySelector('.text-box-textarea');
+        if (textarea) {
+          applyStylesToTextarea(textarea, boxObj);
+        }
+      }
+    }
+
+    // Update status badge displaying box counts
+    function updateStatusBadge() {
+      let currentPageBoxes = (pageOverlaysMap[currentPageNum] || []).length;
+      let totalBoxes = 0;
+      Object.keys(pageOverlaysMap).forEach(k => {
+        totalBoxes += pageOverlaysMap[k].length;
+      });
+
+      statusOverlayBadge.textContent = `${currentPageBoxes} Box${currentPageBoxes !== 1 ? 'es' : ''} on Page ${currentPageNum} (${totalBoxes} Total)`;
+    }
+
+    // Helper: Hex Color to pdf-lib rgb()
+    function hexToRgb(hex) {
+      if (!hex || hex === 'transparent') return null;
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      if (isNaN(num)) return PDFLib.rgb(0, 0, 0);
+      return PDFLib.rgb(((num >> 16) & 255) / 255, ((num >> 8) & 255) / 255, (num & 255) / 255);
+    }
+
+    // EXPORT PDF WITH TEXT OVERLAYS
+    exportPdfBtn.addEventListener('click', async () => {
+      if (!rawPdfArrayBuffer) return;
+
+      try {
+        saveCurrentPageOverlaysFromDOM();
+
+        exportPdfBtn.disabled = true;
+        document.getElementById('exportBtnLabel').textContent = 'Generating PDF...';
+
+        // Load document into pdf-lib
+        const pdfDoc = await PDFLib.PDFDocument.load(rawPdfArrayBuffer);
+
+        // Embed Standard Fonts
+        const fontsMap = {
+          Helvetica: {
+            normal: await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica),
+            bold: await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold),
+            italic: await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaOblique),
+            boldItalic: await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBoldOblique)
+          },
+          TimesRoman: {
+            normal: await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRoman),
+            bold: await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanBold),
+            italic: await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic),
+            boldItalic: await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanBoldItalic)
+          },
+          Courier: {
+            normal: await pdfDoc.embedFont(PDFLib.StandardFonts.Courier),
+            bold: await pdfDoc.embedFont(PDFLib.StandardFonts.CourierBold),
+            italic: await pdfDoc.embedFont(PDFLib.StandardFonts.CourierOblique),
+            boldItalic: await pdfDoc.embedFont(PDFLib.StandardFonts.CourierBoldOblique)
+          }
+        };
+
+        const pages = pdfDoc.getPages();
+
+        for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
+          const pageNum = pageIdx + 1;
+          const overlays = pageOverlaysMap[pageNum] || [];
+          if (overlays.length === 0) continue;
+
+          const pdfPage = pages[pageIdx];
+          const { width: pWidth, height: pHeight } = pdfPage.getSize();
+
+          for (const boxObj of overlays) {
+            if (!boxObj.text || boxObj.text.trim() === '') continue;
+
+            // Compute PDF Coordinates
+            const pdfX = boxObj.relX * pWidth;
+            const pdfW = boxObj.relWidth * pWidth;
+            const pdfH = boxObj.relHeight * pHeight;
+            const pdfTopY = pHeight - (boxObj.relY * pHeight);
+
+            // Draw Background Fill if specified
+            if (boxObj.bgColor && boxObj.bgColor !== 'transparent') {
+              let fillRgb = PDFLib.rgb(1, 1, 1);
+              if (boxObj.bgColor.includes('#fef08a')) fillRgb = PDFLib.rgb(0.99, 0.94, 0.54);
+              if (boxObj.bgColor.includes('#e0f2fe')) fillRgb = PDFLib.rgb(0.87, 0.95, 0.99);
+              if (boxObj.bgColor.includes('#f1f5f9')) fillRgb = PDFLib.rgb(0.94, 0.96, 0.98);
+
+              pdfPage.drawRectangle({
+                x: pdfX,
+                y: pdfTopY - pdfH,
+                width: pdfW,
+                height: pdfH,
+                color: fillRgb
+              });
+            }
+
+            // Select Font
+            const fontSet = fontsMap[boxObj.fontFamily] || fontsMap['Helvetica'];
+            let font = fontSet.normal;
+            if (boxObj.isBold && boxObj.isItalic) font = fontSet.boldItalic;
+            else if (boxObj.isBold) font = fontSet.bold;
+            else if (boxObj.isItalic) font = fontSet.italic;
+
+            const fontColor = hexToRgb(boxObj.color) || PDFLib.rgb(0, 0, 0);
+            const fontSize = boxObj.fontSize * (pHeight / (pdfPageCanvas.height / zoomScale));
+
+            // Split into lines
+            const lines = boxObj.text.split('\n');
+            const lineHeight = fontSize * 1.2;
+
+            lines.forEach((line, lIdx) => {
+              if (!line.trim()) return;
+
+              let lineX = pdfX + 6;
+              const textWidth = font.widthOfTextAtSize(line, fontSize);
+
+              if (boxObj.textAlign === 'center') {
+                lineX = pdfX + (pdfW - textWidth) / 2;
+              } else if (boxObj.textAlign === 'right') {
+                lineX = pdfX + pdfW - textWidth - 6;
+              }
+
+              const lineY = pdfTopY - 22 - (lIdx * lineHeight);
+
+              if (lineY > 0 && lineY < pHeight) {
+                pdfPage.drawText(line, {
+                  x: lineX,
+                  y: lineY,
+                  size: fontSize,
+                  font: font,
+                  color: fontColor
+                });
+              }
+            });
+
+          }
+        }
+
+        // Save PDF ArrayBuffer
+        const pdfBytes = await pdfDoc.save();
+
+        // Trigger browser download
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        const outName = pdfFileName.replace(/\.pdf$/i, '') + '_with_text.pdf';
+        link.href = URL.createObjectURL(blob);
+        link.download = outName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+      } catch (exportErr) {
+        console.error('Export PDF error:', exportErr);
+        alert('Failed to generate PDF. ' + exportErr.message);
+      } finally {
+        exportPdfBtn.disabled = false;
+        document.getElementById('exportBtnLabel').textContent = 'Download PDF with Text';
+      }
+    });
+
+  </script>
+</body>
+</html>

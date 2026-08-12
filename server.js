@@ -78,6 +78,10 @@ app.get('/paginate-editor', (req, res) => {
   res.sendFile(path.join(publicDir, 'paginate-editor.html'));
 });
 
+app.get('/add-text', (req, res) => {
+  res.sendFile(path.join(publicDir, 'tools', 'add-text.html'));
+});
+
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.sendFile(path.join(publicDir, 'robots.txt'));
