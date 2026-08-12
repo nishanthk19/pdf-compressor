@@ -46,6 +46,18 @@
       z-index: 20;
     }
 
+    /* Fixed / Locked State */
+    .draggable-text-box.is-locked {
+      border: 2px solid #10b981 !important;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+      cursor: default !important;
+    }
+
+    .draggable-text-box.is-locked .drag-handle-bar {
+      background: #065f46 !important;
+      cursor: pointer !important;
+    }
+
     .drag-handle-bar {
       height: 22px;
       background: #30525C;
@@ -286,6 +298,30 @@
             </select>
           </div>
 
+          <!-- Position Lock & Precision Placement -->
+          <div class="pt-2 border-t border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-slate-500 uppercase">Position Lock &amp; Nudge</span>
+              <span id="lockStatusBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-slate-200 text-slate-600">Unlocked</span>
+            </div>
+
+            <button type="button" id="lockPositionToggleBtn" class="w-full py-2 px-3 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
+              <span id="lockToggleIcon">🔒</span>
+              <span id="lockToggleText">Fix / Lock Position in Place</span>
+            </button>
+
+            <!-- Precision Nudge Buttons -->
+            <div class="bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1">
+                <button type="button" data-nudge="left" class="nudge-btn w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded transition-colors flex items-center justify-center" title="Nudge Left">←</button>
+                <button type="button" data-nudge="up" class="nudge-btn w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded transition-colors flex items-center justify-center" title="Nudge Up">↑</button>
+                <button type="button" data-nudge="down" class="nudge-btn w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded transition-colors flex items-center justify-center" title="Nudge Down">↓</button>
+                <button type="button" data-nudge="right" class="nudge-btn w-7 h-7 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded transition-colors flex items-center justify-center" title="Nudge Right">→</button>
+              </div>
+              <span class="text-[10px] text-slate-400 font-semibold">1px fine-tune</span>
+            </div>
+          </div>
+
           <!-- Selected Text Controls -->
           <div class="pt-2 border-t border-slate-200 flex items-center justify-between gap-2">
             <button type="button" id="duplicateBoxBtn" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
@@ -349,7 +385,7 @@
 
         <!-- Instruction Tip -->
         <div class="hidden md:flex items-center gap-2 text-slate-400 text-[11px] font-medium">
-          <span>💡 Click anywhere on page to place a text box. Drag text boxes freely.</span>
+          <span>💡 Click to place text. Drag to position, then click 🔒 Lock to fix it in place!</span>
         </div>
 
         <!-- Text Box Counter Badge -->
@@ -421,6 +457,11 @@
 
     const duplicateBoxBtn = document.getElementById('duplicateBoxBtn');
     const deleteBoxBtn = document.getElementById('deleteBoxBtn');
+
+    const lockPositionToggleBtn = document.getElementById('lockPositionToggleBtn');
+    const lockStatusBadge = document.getElementById('lockStatusBadge');
+    const lockToggleIcon = document.getElementById('lockToggleIcon');
+    const lockToggleText = document.getElementById('lockToggleText');
 
     const prevPageBtn = document.getElementById('prevPageBtn');
     const nextPageBtn = document.getElementById('nextPageBtn');
@@ -666,7 +707,8 @@
         isItalic: options.isItalic !== undefined ? options.isItalic : isItalicActive,
         textAlign: currentTextAlign,
         color: options.color || customTextColor.value || '#000000',
-        bgColor: options.bgColor || bgFillSelect.value || 'rgba(255, 255, 255, 0.95)'
+        bgColor: options.bgColor || bgFillSelect.value || 'rgba(255, 255, 255, 0.95)',
+        isLocked: options.isLocked || false
       };
 
       if (!pageOverlaysMap[currentPageNum]) {
@@ -688,17 +730,22 @@
 
       const boxElem = document.createElement('div');
       boxElem.id = boxObj.id;
-      boxElem.className = 'draggable-text-box';
+      boxElem.className = `draggable-text-box ${boxObj.isLocked ? 'is-locked' : ''}`;
       boxElem.style.left = `${posX}px`;
       boxElem.style.top = `${posY}px`;
       boxElem.style.width = `${Math.max(120, width)}px`;
       boxElem.style.height = `${Math.max(45, height)}px`;
       boxElem.style.backgroundColor = boxObj.bgColor;
 
+      const handleText = boxObj.isLocked ? '🔒 Fixed in Place' : '⋮⋮ Drag Text';
+      const lockIcon = boxObj.isLocked ? '🔓' : '🔒';
+      const lockTitle = boxObj.isLocked ? 'Unlock Position' : 'Fix Position in Place';
+
       boxElem.innerHTML = `
         <div class="drag-handle-bar">
-          <span class="truncate pr-1">⋮⋮ Text Box</span>
+          <span class="handle-title-text truncate pr-1">${handleText}</span>
           <div class="flex items-center gap-1">
+            <span class="box-action-btn lock-btn" title="${lockTitle}">${lockIcon}</span>
             <span class="box-action-btn dup-btn" title="Duplicate">📋</span>
             <span class="box-action-btn del-btn" title="Delete">✕</span>
           </div>
@@ -711,9 +758,15 @@
 
       // Event: Select on Click
       boxElem.addEventListener('mousedown', (e) => {
-        if (!e.target.classList.contains('del-btn') && !e.target.classList.contains('dup-btn')) {
+        if (!e.target.classList.contains('del-btn') && !e.target.classList.contains('dup-btn') && !e.target.classList.contains('lock-btn')) {
           selectTextBox(boxObj.id);
         }
+      });
+
+      // Event: Toggle Lock Button inside Handle
+      boxElem.querySelector('.lock-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleBoxLock(boxObj.id);
       });
 
       // Event: Delete Button inside Handle
@@ -763,6 +816,16 @@
       let startX, startY, startLeft, startTop;
 
       handle.addEventListener('pointerdown', (e) => {
+        // Do not drag if locked or clicking handle action buttons!
+        if (boxObj.isLocked) {
+          selectTextBox(boxObj.id);
+          return;
+        }
+
+        if (e.target.classList.contains('del-btn') || e.target.classList.contains('dup-btn') || e.target.classList.contains('lock-btn')) {
+          return;
+        }
+
         isDragging = true;
         elem.setPointerCapture(e.pointerId);
         startX = e.clientX;
@@ -773,7 +836,7 @@
       });
 
       handle.addEventListener('pointermove', (e) => {
-        if (!isDragging) return;
+        if (!isDragging || boxObj.isLocked) return;
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
 
@@ -835,7 +898,97 @@
             ab.classList.remove('bg-slate-200');
           }
         });
+
+        updateLockControlsUI(boxObj);
       }
+    }
+
+    // Toggle Lock / Unlocked state of a text box
+    function toggleBoxLock(boxId) {
+      const boxObj = findBoxById(boxId);
+      if (!boxObj) return;
+
+      boxObj.isLocked = !boxObj.isLocked;
+
+      const elem = document.getElementById(boxId);
+      if (elem) {
+        if (boxObj.isLocked) {
+          elem.classList.add('is-locked');
+        } else {
+          elem.classList.remove('is-locked');
+        }
+
+        const titleElem = elem.querySelector('.handle-title-text');
+        if (titleElem) {
+          titleElem.textContent = boxObj.isLocked ? '🔒 Fixed in Place' : '⋮⋮ Drag Text';
+        }
+
+        const lockBtn = elem.querySelector('.lock-btn');
+        if (lockBtn) {
+          lockBtn.textContent = boxObj.isLocked ? '🔓' : '🔒';
+          lockBtn.title = boxObj.isLocked ? 'Unlock Position' : 'Fix Position in Place';
+        }
+      }
+
+      updateLockControlsUI(boxObj);
+    }
+
+    // Update Lock Controls UI in left sidebar
+    function updateLockControlsUI(boxObj) {
+      if (!lockStatusBadge || !lockPositionToggleBtn) return;
+
+      if (!boxObj) {
+        lockStatusBadge.textContent = 'Unlocked';
+        lockStatusBadge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded bg-slate-200 text-slate-600';
+        lockToggleIcon.textContent = '🔒';
+        lockToggleText.textContent = 'Fix / Lock Position in Place';
+        lockPositionToggleBtn.className = 'w-full py-2 px-3 bg-slate-200 text-slate-800 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer';
+        return;
+      }
+
+      if (boxObj.isLocked) {
+        lockStatusBadge.textContent = '🔒 Fixed';
+        lockStatusBadge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300';
+        lockToggleIcon.textContent = '🔓';
+        lockToggleText.textContent = 'Unlock Position (Allow Dragging)';
+        lockPositionToggleBtn.className = 'w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-lg shadow transition-colors flex items-center justify-center gap-2 cursor-pointer';
+      } else {
+        lockStatusBadge.textContent = '🔓 Unlocked';
+        lockStatusBadge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300';
+        lockToggleIcon.textContent = '🔒';
+        lockToggleText.textContent = 'Fix / Lock Position in Place';
+        lockPositionToggleBtn.className = 'w-full py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer';
+      }
+    }
+
+    // Nudge active text box position by pixels
+    function nudgeActiveBox(direction, amount = 1) {
+      if (!selectedBoxId) return;
+      const boxObj = findBoxById(selectedBoxId);
+      if (!boxObj) return;
+
+      const elem = document.getElementById(selectedBoxId);
+      if (!elem) return;
+
+      let currentLeft = parseFloat(elem.style.left) || 0;
+      let currentTop = parseFloat(elem.style.top) || 0;
+
+      if (direction === 'left') currentLeft -= amount;
+      if (direction === 'right') currentLeft += amount;
+      if (direction === 'up') currentTop -= amount;
+      if (direction === 'down') currentTop += amount;
+
+      const maxLeft = pdfPageCanvas.width - elem.offsetWidth;
+      const maxTop = pdfPageCanvas.height - elem.offsetHeight;
+
+      currentLeft = Math.max(0, Math.min(currentLeft, maxLeft));
+      currentTop = Math.max(0, Math.min(currentTop, maxTop));
+
+      elem.style.left = `${currentLeft}px`;
+      elem.style.top = `${currentTop}px`;
+
+      boxObj.relX = currentLeft / pdfPageCanvas.width;
+      boxObj.relY = currentTop / pdfPageCanvas.height;
     }
 
     // Save overlays from current DOM into pageOverlaysMap
@@ -908,6 +1061,39 @@
 
     duplicateBoxBtn.addEventListener('click', () => {
       if (selectedBoxId) duplicateTextBox(selectedBoxId);
+    });
+
+    // Position Lock Toggle Button Listener
+    lockPositionToggleBtn.addEventListener('click', () => {
+      if (selectedBoxId) {
+        toggleBoxLock(selectedBoxId);
+      }
+    });
+
+    // Precision Nudge Button Listeners
+    document.querySelectorAll('.nudge-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dir = btn.getAttribute('data-nudge');
+        nudgeActiveBox(dir, 2);
+      });
+    });
+
+    // Keyboard Arrow Keys Nudge Support
+    document.addEventListener('keydown', (e) => {
+      if (!selectedBoxId) return;
+      const isEditingText = e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT');
+
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        if (isEditingText && !e.altKey && !e.ctrlKey) {
+          return;
+        }
+        e.preventDefault();
+        const amount = e.shiftKey ? 5 : 1;
+        if (e.key === 'ArrowLeft') nudgeActiveBox('left', amount);
+        if (e.key === 'ArrowRight') nudgeActiveBox('right', amount);
+        if (e.key === 'ArrowUp') nudgeActiveBox('up', amount);
+        if (e.key === 'ArrowDown') nudgeActiveBox('down', amount);
+      }
     });
 
     // Formatting Panel Event Listeners
