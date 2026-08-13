@@ -1,0 +1,28 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 140" width="100%" height="100%">
+  <defs>
+    <linearGradient id="vGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="40%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Stylized V Mark -->
+  <g transform="translate(15, 10)">
+    <path d="M 25 25 L 62 102 C 65 108, 73 108, 76 102 L 122 25" 
+          fill="none" 
+          stroke="url(#vGradDark)" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark 'vibify' in White -->
+  <text x="165" y="92" 
+        font-family="'Plus Jakarta Sans', 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, sans-serif" 
+        font-weight="700" 
+        font-size="82" 
+        letter-spacing="-2.5" 
+        fill="#ffffff">vibify</text>
+</svg>

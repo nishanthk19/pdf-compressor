@@ -1,0 +1,73 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="ogBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="vOgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#ogBg)"/>
+
+  <!-- Soft Ambient Glow -->
+  <circle cx="250" cy="200" r="280" fill="#7c3aed" opacity="0.18" filter="blur(70px)"/>
+  <circle cx="950" cy="450" r="300" fill="#2563eb" opacity="0.18" filter="blur(70px)"/>
+
+  <!-- Outer Frame -->
+  <rect x="40" y="40" width="1120" height="550" rx="32" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+
+  <!-- Vibify Full White Logo -->
+  <g transform="translate(100, 120) scale(1.5)">
+    
+
+  <defs>
+    <linearGradient id="vGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="40%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Stylized V Mark -->
+  <g transform="translate(15, 10)">
+    <path d="M 25 25 L 62 102 C 65 108, 73 108, 76 102 L 122 25" 
+          fill="none" 
+          stroke="url(#vGradDark)" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark 'vibify' in White -->
+  <text x="165" y="92" 
+        font-family="'Plus Jakarta Sans', 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, sans-serif" 
+        font-weight="700" 
+        font-size="82" 
+        letter-spacing="-2.5" 
+        fill="#ffffff">vibify</text>
+
+
+  </g>
+
+  <!-- Headline & Subtitle -->
+  <text x="100" y="380" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="44" fill="#ffffff">
+    Free Online PDF Tools &amp; Smart Workspace
+  </text>
+  <text x="100" y="435" font-family="'Plus Jakarta Sans', sans-serif" font-weight="500" font-size="24" fill="#94a3b8">
+    Compress, Merge, OCR, Convert to Word, Protect, Unlock &amp; Edit PDFs instantly.
+  </text>
+
+  <!-- Pill Badge -->
+  <g transform="translate(100, 485)">
+    <rect x="0" y="0" width="220" height="52" rx="26" fill="url(#vOgGrad)"/>
+    <text x="110" y="33" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="20" fill="#ffffff" text-anchor="middle">
+      vibify.tech
+    </text>
+  </g>
+</svg>

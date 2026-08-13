@@ -1,6 +1,6 @@
 {
-  "name": "PDF Precision Platform",
-  "description": "Multi-tool PDF suite featuring target-size compression, PDF merging, page extraction, grayscale conversion, JPEG preview, PDF/A archival conversion, PDF to Word (.docx) conversion, OCR searchable PDF conversion, visual canvas editor, Smart Flowable Editor, and Box Precision Overlay Editor.",
+  "name": "Vibify",
+  "description": "vibify.tech - All-in-one free online PDF suite featuring target-size compression, PDF merging, page extraction, OCR text recognition, PDF to Word (.docx) conversion, PDF/A archival conversion, password encryption, unlock, rotation, and interactive PDF editing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
