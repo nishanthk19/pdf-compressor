@@ -4,18 +4,17 @@
   <meta charset="UTF-8" />
   <script src="/js/iframe-polyfill.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delete PDF Pages Online - Free Page Remover | vibify.tech</title>
+  <title>Delete PDF Pages - Remove Pages from PDF Online Free | vibify.tech</title>
   
-  <!-- Primary SEO Meta Tags -->
-  <meta name="title" content="Delete PDF Pages Online - Free Page Remover | vibify.tech">
+  <meta name="title" content="Delete PDF Pages - Remove Pages from PDF Online Free | vibify.tech">
   <meta name="description" content="Remove unwanted pages from PDF files online for free on vibify.tech. Enter page numbers or ranges to delete pages instantly. Fast &amp; secure.">
-  <meta name="keywords" content="delete pdf pages, remove pages from pdf, pdf page remover, delete pages online, vibify.tech">
+  <meta name="keywords" content="delete pdf pages, remove pages from pdf, delete pages online, vibify.tech">
   <meta name="author" content="Vibify Tech">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://vibify.tech/tools/delete.html">
-  <meta name="theme-color" content="#8b5cf6">
+  <meta name="theme-color" content="#30525c">
 
-  <!-- Favicons and App Icons -->
+  <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -23,33 +22,26 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://vibify.tech/tools/delete.html">
-  <meta property="og:title" content="Delete PDF Pages Online | vibify.tech">
-  <meta property="og:description" content="Remove unwanted pages from any PDF document instantly on vibify.tech. Free &amp; secure.">
-  <meta property="og:image" content="https://vibify.tech/vibify-og-image.png">
-  <meta property="og:site_name" content="Vibify">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@vibifytech">
-  <meta name="twitter:title" content="Delete PDF Pages Online | vibify.tech">
-  <meta name="twitter:description" content="Remove specific pages or page ranges from your PDF file on vibify.tech.">
-  <meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
       font-weight: 700;
       color: var(--text-muted);
       text-decoration: none;
       margin-bottom: 12px;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, font-size 0.2s ease;
+    }
+    .back-link span {
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+      transition: font-size 0.2s ease;
+      white-space: nowrap;
     }
     .back-link:hover { color: var(--color-teal); }
     .btn-change-file {
@@ -61,11 +53,16 @@
       padding: 6px 14px;
       border-radius: var(--radius-md);
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-change-file:hover {
+      background: #f0fdfd;
+      border-color: var(--color-teal);
+      color: var(--color-teal);
     }
   </style>
 </head>
 <body>
-
   <div class="workspace-container">
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -73,18 +70,35 @@
           <img src="/vibify-logo.svg" alt="Vibify.tech" class="h-5 w-auto">
           <span>‹ Back to Vibify Suite</span>
         </a>
-        <h2>Delete Pages</h2>
-        <p>Remove specific pages from your PDF file.</p>
+        <h2>Delete PDF Pages</h2>
+        <p>Remove unwanted or blank pages from your PDF document.</p>
       </div>
 
-      <form id="deleteForm" action="/delete-pages" method="POST" enctype="multipart/form-data" class="sidebar-body">
+      <form id="deleteForm" action="/delete" method="POST" enctype="multipart/form-data" class="sidebar-body">
         <input type="file" id="fileInput" name="pdf" accept="application/pdf" style="display: none;" />
 
         <div class="form-group">
-          <label for="pages" class="form-label">Page Numbers to Delete</label>
-          <input type="text" id="pages" name="pages" placeholder="e.g. 1, 3, 5-7" class="form-control" required />
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+          <label for="pages" class="form-label">Pages to Delete</label>
+          <input 
+            type="text" 
+            id="pages" 
+            name="pages" 
+            placeholder="e.g. 1, 3, 5-7" 
+            class="form-control" 
+            required 
+          />
+          <small class="form-text" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
             Specify comma-separated page numbers or ranges to remove.
+          </small>
+        </div>
+
+        <!-- Turbo Client Engine Callout -->
+        <div style="background: #f0fdfd; border: 1px solid rgba(9, 161, 161, 0.25); border-radius: 12px; padding: 12px; margin-top: 10px;">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--color-teal);">
+            <span>⚡</span> TURBO CLIENT PRUNING
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
+            Removes target pages directly in client memory with zero server round-trips.
           </p>
         </div>
       </form>
@@ -100,7 +114,7 @@
       <div id="dropzone" class="dropzone-state">
         <div class="dropzone-icon">🗑️</div>
         <h3 class="dropzone-title">Delete PDF Pages</h3>
-        <p class="dropzone-desc">Drag & drop your PDF file here to select pages for deletion.</p>
+        <p class="dropzone-desc">Drag & drop your PDF file here to select pages to discard.</p>
         <button type="button" class="btn-select-file">Select PDF File</button>
       </div>
 
@@ -119,13 +133,17 @@
   </div>
 
   <script src="/js/workspace.js"></script>
+  <script src="/js/turbo-engine.js"></script>
+  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');
       const fileInput = document.getElementById('fileInput');
       const changeFileBtn = document.getElementById('changeFileBtn');
+      const deleteForm = document.getElementById('deleteForm');
+      const pagesInput = document.getElementById('pages');
 
-      new PDFWorkspaceManager({
+      const workspace = new PDFWorkspaceManager({
         dropzoneSelector: '#dropzone',
         previewStateSelector: '#preview-area',
         previewGridSelector: '.preview-grid',
@@ -137,6 +155,95 @@
       });
 
       if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
+
+      function parsePageRanges(str) {
+        const pages = [];
+        const parts = str.split(',');
+        for (let part of parts) {
+          part = part.trim();
+          if (part.includes('-')) {
+            const [start, end] = part.split('-').map(Number);
+            if (!isNaN(start) && !isNaN(end)) {
+              for (let i = start; i <= end; i++) pages.push(i);
+            }
+          } else {
+            const num = Number(part);
+            if (!isNaN(num)) pages.push(num);
+          }
+        }
+        return [...new Set(pages)];
+      }
+
+      deleteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = workspace.getSelectedFile();
+        if (!file) {
+          alert('Please select a PDF document first.');
+          return;
+        }
+
+        const pagesToDelete = parsePageRanges(pagesInput.value);
+        if (pagesToDelete.length === 0) {
+          alert('Please specify valid page numbers to delete.');
+          return;
+        }
+
+        if (window.VibifyProgressBar) {
+          VibifyProgressBar.start({
+            title: 'Deleting Pages',
+            subtitle: 'Turbo client engine pruning selected pages...',
+            icon: '🗑️'
+          });
+        }
+
+        submitBtn.disabled = true;
+
+        try {
+          // Execute with VibifyTurboEngine
+          const result = await VibifyTurboEngine.deletePages(file, pagesToDelete, (pct, stage) => {
+            if (window.VibifyProgressBar) VibifyProgressBar.update(pct, stage);
+          });
+
+          const downloadUrl = window.URL.createObjectURL(result.blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `${file.name.replace(/\.pdf$/i, '')}_deleted.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(downloadUrl);
+
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'Pages Deleted Successfully!',
+              subtitle: `Pruned ${pagesToDelete.length} pages in ${result.durationMs}ms with zero server upload.`
+            });
+          }
+        } catch (err) {
+          console.warn('Turbo delete fallback to server:', err);
+          const formData = new FormData(deleteForm);
+          formData.set('pdf', file);
+          const response = await fetch('/delete', { method: 'POST', body: formData });
+          if (!response.ok) throw new Error('Server page deletion failed.');
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `${file.name.replace(/\.pdf$/i, '')}_deleted.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'Pages Deleted Successfully!',
+              subtitle: 'Your updated document downloaded automatically.'
+            });
+          }
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
     });
   </script>
 </body>

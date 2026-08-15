@@ -160,7 +160,7 @@
       
       <!-- Brand Logo -->
       <a href="/" class="flex items-center gap-3 group" title="Vibify Tech - Free Online PDF Tools">
-        <img src="/vibify-logo.svg" alt="Vibify.tech Logo" class="h-9 w-auto object-contain group-hover:scale-105 transition-transform duration-200">
+        <img src="/vibify-logo.svg" alt="Vibify.tech Logo" class="h-8 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform duration-200">
         <span class="sr-only">vibify.tech</span>
       </a>
 
@@ -172,12 +172,31 @@
         <a href="#faq-section" class="hover:text-tealaccent transition-colors">FAQ</a>
       </nav>
 
-      <!-- Action Button -->
-      <div class="flex items-center gap-3">
-        <a href="#tools-section" class="inline-flex items-center justify-center px-4 py-2 text-xs font-extrabold text-white bg-tealaccent hover:bg-tealaccent/90 rounded-xl shadow-sm transition-all hover:shadow-tealaccent/20">
-          Explore All Tools
+      <!-- Action Button & Mobile Menu Toggle -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="#tools-section" class="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs font-extrabold text-white bg-tealaccent hover:bg-tealaccent/90 rounded-xl shadow-sm transition-all hover:shadow-tealaccent/20">
+          <span>All Tools</span>
+          <span class="hidden sm:inline">&nbsp;Directory</span>
         </a>
+        
+        <!-- Mobile Menu Hamburger Button -->
+        <button type="button" id="mobileMenuBtn" class="md:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" aria-label="Toggle Navigation Menu">
+          <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          <svg id="closeMenuIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileMenuDrawer" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
+      <a href="#tools-section" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">🗂️ Tools Directory</a>
+      <a href="#features-section" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">⚡ Features &amp; Privacy</a>
+      <a href="#how-it-works" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">💡 How It Works</a>
+      <a href="#faq-section" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">❓ FAQ</a>
     </div>
   </header>
 
@@ -408,17 +427,21 @@
           </div>
         </a>
 
-        <!-- 13. PDF Maker -->
-        <a href="/tools/pdf-maker.html" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
+        <!-- 13. PDF Maker & AI Drafter -->
+        <a href="/tools/pdf-maker.html" class="group bg-gradient-to-br from-white via-white to-teal-50/50 p-6 rounded-2xl border border-tealaccent/30 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -top-6 -right-6 w-20 h-20 bg-tealaccent/10 rounded-full blur-xl pointer-events-none"></div>
           <div>
-            <div class="w-12 h-12 rounded-xl bg-tealaccent/10 text-tealaccent flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-tealaccent group-hover:text-white transition-all">
-              📝
+            <div class="w-12 h-12 rounded-xl bg-tealaccent text-white flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 shadow-md transition-all">
+              ✨
             </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">PDF Maker</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Create PDFs from scratch using a rich document editor and export directly.</p>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">PDF Maker & AI Drafter</h3>
+              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-tealaccent text-white uppercase tracking-wider">Gemini AI</span>
+            </div>
+            <p class="text-xs text-steel mt-2 leading-relaxed">Draft complete professional documents, proposals, contracts, and invoices instantly powered by Gemini 3.6 AI.</p>
           </div>
           <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
+            Launch AI Drafter Workspace &rarr;
           </div>
         </a>
 
@@ -620,9 +643,40 @@
     </div>
   </footer>
 
-  <!-- Accordion Toggle Script -->
+  <!-- Mobile Menu & Accordion Toggle Script -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Mobile Menu Toggle
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
+      const hamburgerIcon = document.getElementById('hamburgerIcon');
+      const closeMenuIcon = document.getElementById('closeMenuIcon');
+      const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+      if (mobileMenuBtn && mobileMenuDrawer) {
+        mobileMenuBtn.addEventListener('click', () => {
+          const isOpen = !mobileMenuDrawer.classList.contains('hidden');
+          if (isOpen) {
+            mobileMenuDrawer.classList.add('hidden');
+            hamburgerIcon.classList.remove('hidden');
+            closeMenuIcon.classList.add('hidden');
+          } else {
+            mobileMenuDrawer.classList.remove('hidden');
+            hamburgerIcon.classList.add('hidden');
+            closeMenuIcon.classList.remove('hidden');
+          }
+        });
+
+        mobileNavLinks.forEach(link => {
+          link.addEventListener('click', () => {
+            mobileMenuDrawer.classList.add('hidden');
+            if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
+            if (closeMenuIcon) closeMenuIcon.classList.add('hidden');
+          });
+        });
+      }
+
+      // FAQ Accordions
       const faqButtons = document.querySelectorAll('.faq-btn');
       faqButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -644,5 +698,8 @@
     });
   </script>
 
+  <!-- Shared Workspace & Futuristic Engine Scripts -->
+  <script src="/js/futuristic-hud.js"></script>
+  <script src="/js/turbo-engine.js"></script>
 </body>
 </html>

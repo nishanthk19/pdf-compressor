@@ -44,12 +44,17 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
       font-weight: 700;
       color: var(--text-muted);
       text-decoration: none;
       margin-bottom: 12px;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, font-size 0.2s ease;
+    }
+    .back-link span {
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+      transition: font-size 0.2s ease;
+      white-space: nowrap;
     }
     .back-link:hover { color: var(--color-teal); }
     .btn-change-file {
@@ -121,6 +126,8 @@
   </div>
 
   <script src="/js/workspace.js"></script>
+  <script src="/js/turbo-engine.js"></script>
+  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');

@@ -4,18 +4,17 @@
   <meta charset="UTF-8" />
   <script src="/js/iframe-polyfill.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Merge PDFs Online - Combine Multiple PDF Files | vibify.tech</title>
+  <title>Merge PDF Files Online - Combine PDFs Free | vibify.tech</title>
   
-  <!-- Primary SEO Meta Tags -->
-  <meta name="title" content="Merge PDFs Online - Combine Multiple PDF Files | vibify.tech">
-  <meta name="description" content="Combine multiple PDF files into one organized document online for free on vibify.tech. Reorder pages, drag &amp; drop files, fast &amp; secure with zero registration.">
-  <meta name="keywords" content="merge pdf, combine pdfs, join pdf files, pdf merger online, vibify.tech">
+  <meta name="title" content="Merge PDF Files Online - Combine PDFs Free | vibify.tech">
+  <meta name="description" content="Merge and combine multiple PDF files into a single document online for free on vibify.tech. Drag &amp; drop to reorder, fast and secure.">
+  <meta name="keywords" content="merge pdf, combine pdf, join pdf files, merge pdf online, vibify.tech">
   <meta name="author" content="Vibify Tech">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://vibify.tech/tools/merge.html">
-  <meta name="theme-color" content="#8b5cf6">
+  <meta name="theme-color" content="#30525c">
 
-  <!-- Favicons and App Icons -->
+  <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -23,33 +22,34 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vibify.tech/tools/merge.html">
-  <meta property="og:title" content="Merge PDFs Online - Combine PDF Files | vibify.tech">
-  <meta property="og:description" content="Combine multiple PDF documents effortlessly into a single organized file on vibify.tech. Free &amp; private.">
+  <meta property="og:title" content="Merge PDF Files Online | vibify.tech">
+  <meta property="og:description" content="Combine multiple PDF documents into one cleanly formatted PDF online for free on vibify.tech.">
   <meta property="og:image" content="https://vibify.tech/vibify-og-image.png">
   <meta property="og:site_name" content="Vibify">
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@vibifytech">
-  <meta name="twitter:title" content="Merge PDFs Online | vibify.tech">
-  <meta name="twitter:description" content="Fast, free online PDF merger on vibify.tech. Combine files with drag &amp; drop page reordering.">
-  <meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
       font-weight: 700;
       color: var(--text-muted);
       text-decoration: none;
       margin-bottom: 12px;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, font-size 0.2s ease;
+    }
+    .back-link span {
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+      transition: font-size 0.2s ease;
+      white-space: nowrap;
     }
     .back-link:hover { color: var(--color-teal); }
     .btn-change-file {
@@ -61,27 +61,36 @@
       padding: 6px 14px;
       border-radius: var(--radius-md);
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-change-file:hover {
+      background: #f0fdfd;
+      border-color: var(--color-teal);
+      color: var(--color-teal);
     }
     .file-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      margin-top: 10px;
+      max-height: 240px;
+      overflow-y: auto;
     }
-    .file-item {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      padding: 10px 12px;
-      border-radius: 8px;
+    .file-item-pill {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
+      color: var(--text-dark);
     }
   </style>
 </head>
 <body>
-
   <div class="workspace-container">
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -101,6 +110,16 @@
           <div id="fileListContainer" class="file-list">
             <div style="font-size: 12px; color: var(--text-muted); font-style: italic;">No files selected yet.</div>
           </div>
+        </div>
+
+        <!-- Turbo Client Engine Callout -->
+        <div style="background: #f0fdfd; border: 1px solid rgba(9, 161, 161, 0.25); border-radius: 12px; padding: 12px; margin-top: 10px;">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--color-teal);">
+            <span>⚡</span> TURBO ZERO-UPLOAD MERGING
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
+            Instantly merges your PDF documents in browser memory at lightning speed with zero file uploads.
+          </p>
         </div>
       </form>
 
@@ -133,12 +152,17 @@
   </div>
 
   <script src="/js/workspace.js"></script>
+  <script src="/js/turbo-engine.js"></script>
+  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');
       const fileInput = document.getElementById('fileInput');
       const changeFileBtn = document.getElementById('changeFileBtn');
       const fileListContainer = document.getElementById('fileListContainer');
+      const mergeForm = document.getElementById('mergeForm');
+
+      let selectedFilesList = [];
 
       const workspace = new PDFWorkspaceManager({
         dropzoneSelector: '#dropzone',
@@ -148,24 +172,105 @@
         fileSelectBtnSelector: '.btn-select-file',
         fileNameDisplaySelector: '.file-name',
         pageCountDisplaySelector: '.page-count',
-        onFileLoaded: (file, pdfDoc) => {
-          if (fileInput.files && fileInput.files.length >= 2) {
-            submitBtn.disabled = false;
-            fileListContainer.innerHTML = '';
-            Array.from(fileInput.files).forEach((f, idx) => {
-              const div = document.createElement('div');
-              div.className = 'file-item';
-              div.innerHTML = `<span>${idx + 1}. ${f.name}</span> <span style="color: var(--color-teal);">${(f.size/(1024*1024)).toFixed(2)} MB</span>`;
-              fileListContainer.appendChild(div);
-            });
-          } else if (fileInput.files && fileInput.files.length === 1) {
-            fileListContainer.innerHTML = `<div class="file-item"><span>1. ${fileInput.files[0].name}</span></div><div style="font-size: 11px; color: var(--accent-rose); margin-top: 4px;">Select at least 1 more file to merge.</div>`;
-            submitBtn.disabled = true;
-          }
+        onFileLoaded: () => {}
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          selectedFilesList = Array.from(e.target.files);
+          renderFileList();
+          submitBtn.disabled = selectedFilesList.length < 2;
+          workspace.showPreviewState();
         }
       });
 
+      function renderFileList() {
+        if (selectedFilesList.length === 0) {
+          fileListContainer.innerHTML = '<div style="font-size: 12px; color: var(--text-muted); font-style: italic;">No files selected yet.</div>';
+          return;
+        }
+
+        fileListContainer.innerHTML = '';
+        selectedFilesList.forEach((f, idx) => {
+          const pill = document.createElement('div');
+          pill.className = 'file-item-pill';
+          pill.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+              <span style="font-size: 10px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: 800;">#${idx + 1}</span>
+              <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.name}</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">${(f.size / 1024 / 1024).toFixed(2)} MB</span>
+          `;
+          fileListContainer.appendChild(pill);
+        });
+      }
+
       if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
+
+      mergeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (selectedFilesList.length < 2) {
+          alert('Please select at least 2 PDF files to combine.');
+          return;
+        }
+
+        if (window.VibifyProgressBar) {
+          VibifyProgressBar.start({
+            title: 'Merging PDF Files',
+            subtitle: 'Turbo client engine combining documents in memory...',
+            icon: '🧩'
+          });
+        }
+
+        submitBtn.disabled = true;
+
+        try {
+          // Execute with VibifyTurboEngine
+          const result = await VibifyTurboEngine.mergeFiles(selectedFilesList, (pct, stage) => {
+            if (window.VibifyProgressBar) VibifyProgressBar.update(pct, stage);
+          });
+
+          const downloadUrl = window.URL.createObjectURL(result.blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = 'merged_document.pdf';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(downloadUrl);
+
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'PDFs Combined Successfully!',
+              subtitle: `Merged ${selectedFilesList.length} files in ${result.durationMs}ms with zero server upload.`
+            });
+          }
+        } catch (err) {
+          console.warn('Turbo merge fallback to server:', err);
+          const formData = new FormData();
+          selectedFilesList.forEach(f => formData.append('pdfs', f));
+
+          const response = await fetch('/merge', { method: 'POST', body: formData });
+          if (!response.ok) throw new Error('Server merge failed.');
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = 'merged_document.pdf';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'PDFs Merged Successfully!',
+              subtitle: 'Your combined document downloaded automatically.'
+            });
+          }
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
     });
   </script>
 </body>

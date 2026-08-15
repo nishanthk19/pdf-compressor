@@ -96,37 +96,45 @@
 
   <!-- Sticky Top Navbar -->
   <header class="sticky top-0 z-50 bg-slate-900 text-white border-b border-slate-800 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
       
       <!-- Back to Suite -->
-      <a href="/" class="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-colors shrink-0">
-        <img src="/vibify-logo-white.svg" alt="Vibify.tech" class="h-6 w-auto">
-        <span>‹ Back to Suite</span>
+      <a href="/" class="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-colors shrink-0">
+        <img src="/vibify-logo-white.svg" alt="Vibify.tech" class="h-5 sm:h-6 w-auto">
+        <span class="hidden xs:inline">‹ Back</span>
+        <span class="hidden sm:inline">to Suite</span>
       </a>
 
       <!-- Title & Document Status -->
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2 font-black tracking-wide text-base text-teal-400">
-          <span>📝</span> PDF Maker
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-1.5 sm:gap-2 font-black tracking-wide text-sm sm:text-base text-teal-400">
+          <span>📝</span> <span class="hidden xs:inline">PDF Maker</span>
         </div>
-        <span id="saveStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+        <span id="saveStatusBadge" class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Auto-Saved
         </span>
       </div>
 
       <!-- Quick Actions -->
-      <div class="flex items-center gap-2 shrink-0">
-        <button id="clearBtn" type="button" class="hidden md:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-3 py-2 rounded-lg transition-colors cursor-pointer" title="Clear Canvas">
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button id="openAiDraftModalHeaderBtn" type="button" class="inline-flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-lg shadow-teal-500/20 transition-all cursor-pointer">
+          <span class="animate-pulse">✨</span>
+          <span class="hidden xs:inline">AI Studio</span>
+          <span class="hidden sm:inline">(BYOK)</span>
+        </button>
+
+        <button id="clearBtn" type="button" class="hidden lg:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-3 py-2 rounded-lg transition-colors cursor-pointer" title="Clear Canvas">
           🗑️ Clear
         </button>
 
-        <button id="exportPdfBtn" type="button" class="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-lg hover:shadow-teal-500/20 transition-all cursor-pointer">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <button id="exportPdfBtn" type="button" class="inline-flex items-center gap-1.5 sm:gap-2 bg-teal-500 hover:bg-teal-600 text-white font-extrabold text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl shadow-lg hover:shadow-teal-500/20 transition-all cursor-pointer">
+          <svg width="14" height="14" class="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          Export to PDF
+          <span>Export</span>
+          <span class="hidden sm:inline">to PDF</span>
         </button>
       </div>
 
@@ -134,41 +142,41 @@
   </header>
 
   <!-- Workspace Sub-bar: Templates & Formatting Controls -->
-  <div class="bg-slate-800 text-slate-200 border-b border-slate-700 py-2.5 px-4 sm:px-6 lg:px-8 text-xs font-medium shadow-inner">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+  <div class="bg-slate-800 text-slate-200 border-b border-slate-700 py-2.5 px-3 sm:px-6 lg:px-8 text-xs font-medium shadow-inner overflow-x-auto">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 min-w-[320px]">
       
       <!-- Templates Selection Toolbar -->
-      <div class="flex items-center gap-2 overflow-x-auto py-1">
+      <div class="flex items-center gap-2 overflow-x-auto py-1 max-w-full">
         <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px] shrink-0">Templates:</span>
-        <div class="flex items-center gap-1.5">
-          <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1.5 cursor-pointer" data-template="blank">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1 cursor-pointer text-xs" data-template="blank">
             <span>📄</span> Blank
           </button>
-          <button type="button" class="template-btn bg-teal-600 text-white shadow-md ring-2 ring-teal-400/50 px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 cursor-pointer" data-template="proposal">
-            <span>📊</span> Project Proposal
+          <button type="button" class="template-btn bg-teal-600 text-white shadow-md ring-2 ring-teal-400/50 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1 cursor-pointer text-xs" data-template="proposal">
+            <span>📊</span> Proposal
           </button>
-          <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1.5 cursor-pointer" data-template="meeting">
-            <span>📋</span> Meeting Notes
+          <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1 cursor-pointer text-xs" data-template="meeting">
+            <span>📋</span> Notes
           </button>
-          <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1.5 cursor-pointer" data-template="invoice">
-            <span>🧾</span> Invoice / Report
+          <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1 cursor-pointer text-xs" data-template="invoice">
+            <span>🧾</span> Invoice
           </button>
         </div>
       </div>
 
       <!-- Live Page PDF Formatting Options -->
-      <div class="flex items-center gap-3 flex-wrap">
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
         <!-- Sections Visibility Toggles -->
-        <div class="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700">
-          <span class="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Sections:</span>
-          <button type="button" id="toggleHeaderSectionToggle" class="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-500 text-white transition-all cursor-pointer" title="Toggle Header Section">Header</button>
-          <button type="button" id="toggleFooterSectionToggle" class="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-500 text-white transition-all cursor-pointer" title="Toggle Footer Section">Footer</button>
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-slate-900/60 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-700">
+          <span class="text-slate-400 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider">Sections:</span>
+          <button type="button" id="toggleHeaderSectionToggle" class="px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-teal-500 text-white transition-all cursor-pointer" title="Toggle Header Section">Header</button>
+          <button type="button" id="toggleFooterSectionToggle" class="px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-teal-500 text-white transition-all cursor-pointer" title="Toggle Footer Section">Footer</button>
         </div>
 
         <!-- Paper Size -->
-        <div class="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700">
-          <label for="paperSizeSelect" class="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Size:</label>
-          <select id="paperSizeSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer">
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-slate-900/60 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-700">
+          <label for="paperSizeSelect" class="text-slate-400 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider">Size:</label>
+          <select id="paperSizeSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer text-xs">
             <option value="letter" selected class="bg-slate-900 text-white">Letter (8.5" × 11")</option>
             <option value="a4" class="bg-slate-900 text-white">A4 (210 × 297 mm)</option>
             <option value="legal" class="bg-slate-900 text-white">Legal (8.5" × 14")</option>
@@ -176,28 +184,28 @@
         </div>
 
         <!-- Orientation -->
-        <div class="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700">
-          <label for="orientationSelect" class="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Orientation:</label>
-          <select id="orientationSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer">
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-slate-900/60 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-700">
+          <label for="orientationSelect" class="text-slate-400 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider">Orientation:</label>
+          <select id="orientationSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer text-xs">
             <option value="portrait" selected class="bg-slate-900 text-white">📱 Portrait</option>
             <option value="landscape" class="bg-slate-900 text-white">🖥️ Landscape</option>
           </select>
         </div>
 
         <!-- Font Family -->
-        <div class="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700">
-          <label for="fontSelect" class="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Font:</label>
-          <select id="fontSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer">
-            <option value="sans" selected class="bg-slate-900 text-white">Sans-Serif (Modern)</option>
-            <option value="serif" class="bg-slate-900 text-white">Serif (Classic Times)</option>
-            <option value="mono" class="bg-slate-900 text-white">Monospace (Code)</option>
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-slate-900/60 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-700">
+          <label for="fontSelect" class="text-slate-400 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider">Font:</label>
+          <select id="fontSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer text-xs">
+            <option value="sans" selected class="bg-slate-900 text-white">Sans (Modern)</option>
+            <option value="serif" class="bg-slate-900 text-white">Serif (Classic)</option>
+            <option value="mono" class="bg-slate-900 text-white">Mono (Code)</option>
           </select>
         </div>
 
         <!-- Accent Color -->
-        <div class="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700">
-          <label for="accentColorSelect" class="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Theme:</label>
-          <select id="accentColorSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer">
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-slate-900/60 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-700">
+          <label for="accentColorSelect" class="text-slate-400 font-semibold text-[10px] sm:text-[11px] uppercase tracking-wider">Theme:</label>
+          <select id="accentColorSelect" class="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer text-xs">
             <option value="#1e293b" selected class="bg-slate-900 text-white">Classic Slate</option>
             <option value="#09a1a1" class="bg-slate-900 text-white">Vibrant Teal</option>
             <option value="#30525c" class="bg-slate-900 text-white">Garnet Slate</option>
@@ -211,16 +219,16 @@
   </div>
 
   <!-- Main Gray Workspace Canvas -->
-  <main class="flex-grow py-8 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+  <main class="flex-grow py-4 sm:py-8 px-2 sm:px-6 lg:px-8 flex flex-col items-center w-full">
     
     <!-- Premium Quick Block Insertion Bar -->
-    <div class="w-full max-w-4xl mb-6 bg-white/95 backdrop-blur rounded-2xl p-3 border border-slate-300/80 shadow-md flex items-center justify-between gap-2 overflow-x-auto text-xs font-bold text-slate-700">
+    <div class="w-full max-w-4xl mb-4 sm:mb-6 bg-white/95 backdrop-blur rounded-2xl p-2.5 sm:p-3 border border-slate-300/80 shadow-md flex items-center justify-start sm:justify-between gap-2 overflow-x-auto text-xs font-bold text-slate-700">
       <span class="text-slate-400 font-black uppercase tracking-wider text-[10px] shrink-0 pl-1 flex items-center gap-1">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-teal-500">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        Insert Block:
+        Insert:
       </span>
 
       <div class="flex items-center gap-1.5 shrink-0">
@@ -309,55 +317,55 @@
     </div>
 
     <!-- White Paper Sheet Container -->
-    <div id="paperSheet" class="w-full max-w-4xl bg-white rounded-md shadow-2xl border border-slate-300/80 p-8 sm:p-12 min-h-[900px] transition-all duration-300 relative flex flex-col justify-between">
+    <div id="paperSheet" class="w-full max-w-4xl bg-white rounded-md shadow-2xl border border-slate-300/80 p-4 sm:p-8 md:p-12 min-h-[700px] sm:min-h-[900px] transition-all duration-300 relative flex flex-col justify-between">
       
       <!-- Live Watermark Badge -->
-      <div id="canvasBadge" class="absolute top-3 right-6 text-[10px] font-bold uppercase tracking-widest text-slate-300 pointer-events-none select-none flex items-center gap-1.5 z-10">
-        <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+      <div id="canvasBadge" class="absolute top-2 sm:top-3 right-3 sm:right-6 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 pointer-events-none select-none flex items-center gap-1.5 z-10">
+        <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-teal-400"></span>
         <span id="canvasOrientationText">Portrait</span> • <span id="canvasSizeText">Letter</span>
       </div>
 
-      <div class="space-y-6 flex-grow flex flex-col">
+      <div class="space-y-4 sm:space-y-6 flex-grow flex flex-col">
         
         <!-- 1. HEADER SECTION -->
-        <div id="headerSection" class="relative group transition-all rounded-xl p-3 border border-slate-200/80 bg-slate-50/50 hover:border-slate-300">
-          <div class="flex items-center justify-between pb-2 mb-2 border-b-2 border-slate-800 transition-colors" id="headerAccentBorder">
-            <div class="flex-grow mr-4">
+        <div id="headerSection" class="relative group transition-all rounded-xl p-2.5 sm:p-3 border border-slate-200/80 bg-slate-50/50 hover:border-slate-300">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 mb-2 border-b-2 border-slate-800 transition-colors gap-1.5 sm:gap-0" id="headerAccentBorder">
+            <div class="flex-grow sm:mr-4">
               <input type="text" id="headerTitleInput" value="ACME CORPORATION • PROJECT PROPOSAL" placeholder="Header Title / Organization..." class="w-full font-black text-xs sm:text-sm uppercase tracking-wider text-slate-800 bg-transparent focus:outline-none focus:bg-white focus:ring-2 focus:ring-teal-500 rounded px-1 transition-all" />
             </div>
-            <div class="shrink-0 text-right">
-              <input type="text" id="headerSubtitleInput" value="Ref: #2026-089 • August 2026" placeholder="Sub-header / Date / Ref..." class="text-xs text-slate-500 font-semibold bg-transparent text-right focus:outline-none focus:bg-white focus:ring-2 focus:ring-teal-500 rounded px-1 transition-all" />
+            <div class="shrink-0 text-left sm:text-right">
+              <input type="text" id="headerSubtitleInput" value="Ref: #2026-089 • August 2026" placeholder="Sub-header / Date / Ref..." class="text-xs text-slate-500 font-semibold bg-transparent text-left sm:text-right focus:outline-none focus:bg-white focus:ring-2 focus:ring-teal-500 rounded px-1 transition-all" />
             </div>
           </div>
           <!-- Section Tag Badge -->
           <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none">
             <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Header Section</span>
-            <button type="button" id="hideHeaderBtn" class="text-slate-400 hover:text-rose-500 text-[10px] font-bold cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">Hide Header</button>
+            <button type="button" id="hideHeaderBtn" class="text-slate-400 hover:text-rose-500 text-[10px] font-bold cursor-pointer opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity">Hide Header</button>
           </div>
         </div>
 
         <!-- 2. BODY CONTENT SECTION -->
-        <div id="bodySection" class="flex-grow relative group transition-all rounded-xl p-3 sm:p-4 border border-slate-200/80 bg-white">
+        <div id="bodySection" class="flex-grow relative group transition-all rounded-xl p-2.5 sm:p-4 border border-slate-200/80 bg-white">
           <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100 select-none">
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Body Content Section</span>
-            <span class="text-[10px] text-slate-300 font-semibold">Editor.js Multi-Block Canvas</span>
+            <span class="text-[10px] text-slate-300 font-semibold hidden sm:inline">Editor.js Multi-Block Canvas</span>
           </div>
           <!-- Editor.js Canvas Holder -->
-          <div id="editorjs" class="prose max-w-none min-h-[500px]"></div>
+          <div id="editorjs" class="prose max-w-none min-h-[400px] sm:min-h-[500px]"></div>
         </div>
 
         <!-- 3. FOOTER SECTION -->
-        <div id="footerSection" class="relative group transition-all rounded-xl p-3 border border-slate-200/80 bg-slate-50/50 hover:border-slate-300 mt-auto">
+        <div id="footerSection" class="relative group transition-all rounded-xl p-2.5 sm:p-3 border border-slate-200/80 bg-slate-50/50 hover:border-slate-300 mt-auto">
           <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 select-none">
             <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Footer Section</span>
-            <button type="button" id="hideFooterBtn" class="text-slate-400 hover:text-rose-500 text-[10px] font-bold cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">Hide Footer</button>
+            <button type="button" id="hideFooterBtn" class="text-slate-400 hover:text-rose-500 text-[10px] font-bold cursor-pointer opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity">Hide Footer</button>
           </div>
-          <div class="flex items-center justify-between pt-2 border-t-2 border-slate-300 transition-colors" id="footerAccentBorder">
-            <div class="flex-grow mr-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pt-2 border-t-2 border-slate-300 transition-colors gap-1 sm:gap-0" id="footerAccentBorder">
+            <div class="flex-grow sm:mr-4">
               <input type="text" id="footerLeftInput" value="Confidential • For Internal Use Only" placeholder="Footer left note..." class="w-full text-xs text-slate-600 font-medium bg-transparent focus:outline-none focus:bg-white focus:ring-2 focus:ring-teal-500 rounded px-1 transition-all" />
             </div>
-            <div class="shrink-0 text-right">
-              <input type="text" id="footerRightInput" value="Page 1 of 1" placeholder="Footer right page info..." class="text-xs text-slate-500 font-semibold bg-transparent text-right focus:outline-none focus:bg-white focus:ring-2 focus:ring-teal-500 rounded px-1 transition-all" />
+            <div class="shrink-0 text-left sm:text-right">
+              <input type="text" id="footerRightInput" value="Page 1 of 1" placeholder="Footer right page info..." class="text-xs text-slate-500 font-semibold bg-transparent text-left sm:text-right focus:outline-none focus:bg-white focus:ring-2 focus:ring-teal-500 rounded px-1 transition-all" />
             </div>
           </div>
         </div>
@@ -367,15 +375,15 @@
     </div>
 
     <!-- Document Live Metrics -->
-    <div id="paperMetricsBar" class="w-full max-w-4xl mt-4 flex items-center justify-between text-xs text-slate-500 font-semibold px-2">
-      <div class="flex items-center gap-4">
+    <div id="paperMetricsBar" class="w-full max-w-4xl mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 font-semibold px-2">
+      <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
         <span>Blocks: <strong id="blockCount" class="text-slate-800 font-black">0</strong></span>
         <span>Words: <strong id="wordCount" class="text-slate-800 font-black">0</strong></span>
-        <span>Reading Time: <strong id="readTime" class="text-slate-800 font-black">0 min</strong></span>
+        <span>Reading: <strong id="readTime" class="text-slate-800 font-black">0 min</strong></span>
       </div>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        PDF Engine: <span class="text-teal-600 font-bold">html2pdf.js + Editor.js v2</span>
+        <span class="text-teal-600 font-bold">html2pdf.js</span>
       </div>
     </div>
 
@@ -1145,7 +1153,469 @@
           `;
         }
       });
+
+      // ==========================================
+      // GEMINI AI DOCUMENT DRAFTER MODAL LOGIC
+      // ==========================================
+      const aiModal = document.getElementById('aiDraftModal');
+      const openAiModalBtn = document.getElementById('openAiDraftModalHeaderBtn');
+      const closeAiModalBtn = document.getElementById('closeAiDraftModalBtn');
+      const cancelAiModalBtn = document.getElementById('cancelAiDraftBtn');
+      const generateAiBtn = document.getElementById('generateAiDraftBtn');
+      const promptInput = document.getElementById('aiPromptInput');
+      const statusBox = document.getElementById('aiDraftStatusBox');
+
+      let attachedImageBase64 = null;
+      let attachedImageMimeType = null;
+
+      function openAiModal() {
+        if (aiModal) {
+          aiModal.classList.remove('hidden');
+          promptInput.focus();
+        }
+      }
+
+      function closeAiModal() {
+        if (aiModal) {
+          aiModal.classList.add('hidden');
+          statusBox.classList.add('hidden');
+        }
+      }
+
+      if (openAiModalBtn) openAiModalBtn.addEventListener('click', openAiModal);
+      if (closeAiModalBtn) closeAiModalBtn.addEventListener('click', closeAiModal);
+      if (cancelAiModalBtn) cancelAiModalBtn.addEventListener('click', closeAiModal);
+
+      // AI Prompt Chips
+      document.querySelectorAll('.ai-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const promptText = chip.getAttribute('data-prompt');
+          if (promptText && promptInput) {
+            promptInput.value = promptText;
+            promptInput.focus();
+            showToast('Prompt selected! Click "Generate Document Draft" to start.');
+          }
+        });
+      });
+
+      // Image Attachment Handler
+      const aiImageInput = document.getElementById('aiImageFileInput');
+      const aiImageBrowseBtn = document.getElementById('aiImageBrowseBtn');
+      const aiImageDropzone = document.getElementById('aiImageDropzone');
+
+      if (aiImageBrowseBtn && aiImageInput) {
+        aiImageBrowseBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          aiImageInput.click();
+        });
+      }
+
+      if (aiImageDropzone && aiImageInput) {
+        aiImageDropzone.addEventListener('click', () => {
+          aiImageInput.click();
+        });
+
+        aiImageInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            if (!file.type.startsWith('image/')) {
+              showToast('Please select a valid image file.', 'error');
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+              attachedImageBase64 = evt.target.result;
+              attachedImageMimeType = file.type || 'image/png';
+              document.getElementById('aiImageStatusText').textContent = `📸 Attached: ${file.name} (${Math.round(file.size/1024)} KB)`;
+              document.getElementById('aiImageStatusText').className = 'text-teal-400 text-xs font-bold';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      // Provider Selection & BYOK Key Storage logic
+      const providerSelect = document.getElementById('aiProviderSelect');
+      const apiKeyInput = document.getElementById('aiApiKeyInput');
+      const customEndpointContainer = document.getElementById('aiCustomEndpointContainer');
+      const customEndpointInput = document.getElementById('aiCustomEndpointInput');
+
+      // Load saved BYOK keys from localStorage
+      function getSavedByokKeys() {
+        try {
+          return JSON.parse(localStorage.getItem('vibify_byok_keys') || '{}');
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function updateProviderFields() {
+        if (!providerSelect || !apiKeyInput) return;
+        const selectedProvider = providerSelect.value;
+        const savedKeys = getSavedByokKeys();
+        apiKeyInput.value = savedKeys[selectedProvider] || '';
+
+        if (selectedProvider === 'custom') {
+          if (customEndpointContainer) customEndpointContainer.classList.remove('hidden');
+        } else {
+          if (customEndpointContainer) customEndpointContainer.classList.add('hidden');
+        }
+      }
+
+      if (providerSelect) {
+        providerSelect.addEventListener('change', updateProviderFields);
+      }
+
+      if (apiKeyInput) {
+        apiKeyInput.addEventListener('input', () => {
+          const selectedProvider = providerSelect ? providerSelect.value : 'google';
+          const savedKeys = getSavedByokKeys();
+          savedKeys[selectedProvider] = apiKeyInput.value.trim();
+          try {
+            localStorage.setItem('vibify_byok_keys', JSON.stringify(savedKeys));
+          } catch (e) {}
+        });
+      }
+
+      // Initialize provider fields on load
+      updateProviderFields();
+
+      // Generate AI Draft Action
+      if (generateAiBtn) {
+        generateAiBtn.addEventListener('click', async () => {
+          const prompt = (promptInput.value || '').trim();
+          const provider = providerSelect ? providerSelect.value : 'google';
+          const apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
+          const customEndpoint = customEndpointInput ? customEndpointInput.value.trim() : '';
+          const tone = document.getElementById('aiToneSelect').value;
+          const action = document.getElementById('aiActionModeSelect').value;
+          const modelTier = document.getElementById('aiModelTierSelect').value;
+          const useThinking = document.getElementById('aiThinkingToggle').checked;
+
+          if (!prompt && !attachedImageBase64) {
+            statusBox.className = "p-3 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-2";
+            statusBox.innerHTML = `⚠️ Please enter a prompt or attach a document image for AI to draft.`;
+            statusBox.classList.remove('hidden');
+            return;
+          }
+
+          // UI Loading State
+          generateAiBtn.disabled = true;
+          generateAiBtn.classList.add('opacity-75', 'cursor-wait');
+          document.getElementById('generateAiBtnText').textContent = useThinking ? "🧠 High Thinking in Progress..." : "✨ AI Studio Drafting...";
+
+          let providerLabel = provider.toUpperCase();
+          if (provider === 'google') providerLabel = "Google Gemini";
+          else if (provider === 'openai') providerLabel = "OpenAI";
+          else if (provider === 'anthropic') providerLabel = "Anthropic Claude";
+          else if (provider === 'deepseek') providerLabel = "DeepSeek";
+          else if (provider === 'custom') providerLabel = "Custom API";
+
+          if (window.VibifyProgressBar) {
+            window.VibifyProgressBar.simulate({
+              icon: useThinking ? '🧠' : '✨',
+              title: `Drafting with ${providerLabel}`,
+              subtitle: 'Analyzing requirements, constructing document structure, and drafting Editor.js blocks...',
+              stages: [
+                { at: 20, msg: `Connecting to ${providerLabel} API...` },
+                { at: 50, msg: 'Drafting structured headings, paragraphs & tables...' },
+                { at: 80, msg: 'Validating block schema & header/footer metadata...' },
+                { at: 95, msg: 'Applying generated draft to canvas...' }
+              ]
+            });
+          }
+
+          statusBox.className = "p-3 rounded-xl text-xs font-semibold bg-teal-500/20 text-teal-200 border border-teal-500/30 flex items-center gap-2 animate-pulse";
+          statusBox.innerHTML = `<span class="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span> ${providerLabel} AI is processing and structuring your document...`;
+          statusBox.classList.remove('hidden');
+
+          try {
+            let currentContent = '';
+            if (action === 'expand' || action === 'rewrite') {
+              const saved = await editor.save();
+              currentContent = saved.blocks || [];
+            }
+
+            const res = await fetch('/api/ai/draft', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                provider,
+                apiKey,
+                customEndpoint,
+                prompt,
+                tone,
+                action,
+                modelTier,
+                useThinking,
+                currentContent,
+                fileBase64: attachedImageBase64,
+                fileMimeType: attachedImageMimeType
+              })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success || !data.draft) {
+              throw new Error(data.error || 'Failed to draft document using AI.');
+            }
+
+            const draft = data.draft;
+
+            // 1. Update Header Title & Subtitle if returned
+            if (draft.headerTitle) {
+              const titleEl = document.getElementById('headerTitleInput');
+              if (titleEl) titleEl.value = draft.headerTitle;
+            }
+            if (draft.headerSubtitle) {
+              const subEl = document.getElementById('headerSubtitleInput');
+              if (subEl) subEl.value = draft.headerSubtitle;
+            }
+
+            // 2. Update Footer left/right if returned
+            if (draft.footerLeft) {
+              const fLeft = document.getElementById('footerLeftInput');
+              if (fLeft) fLeft.value = draft.footerLeft;
+            }
+            if (draft.footerRight) {
+              const fRight = document.getElementById('footerRightInput');
+              if (fRight) fRight.value = draft.footerRight;
+            }
+
+            // 3. Render Blocks onto Editor.js canvas
+            if (draft.blocks && Array.isArray(draft.blocks) && draft.blocks.length > 0) {
+              if (action === 'expand') {
+                const currentSaved = await editor.save();
+                const combinedBlocks = [...(currentSaved.blocks || []), ...draft.blocks];
+                await editor.render({ blocks: combinedBlocks });
+              } else {
+                await editor.render({ blocks: draft.blocks });
+              }
+            }
+
+            updateMetrics();
+            closeAiModal();
+            
+            if (data.fallbackNotice) {
+              showToast(`ℹ️ ${data.fallbackNotice}`, 'warning');
+            } else {
+              showToast(`✨ Document drafted with ${data.modelUsed || providerLabel}${data.thinkingMode ? ' (Thinking Mode)' : ''}!`);
+            }
+
+            // Clear prompt and attached image
+            attachedImageBase64 = null;
+            attachedImageMimeType = null;
+            if (document.getElementById('aiImageStatusText')) {
+              document.getElementById('aiImageStatusText').textContent = 'Attach document image/scan for AI analysis...';
+              document.getElementById('aiImageStatusText').className = 'text-slate-400 text-xs font-medium';
+            }
+          } catch (err) {
+            console.error('AI draft client error:', err);
+            statusBox.className = "p-3 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-between gap-3 flex-wrap";
+            
+            let errHtml = `<div class="flex-grow">⚠️ Error: ${err.message}</div>`;
+            if (provider !== 'google') {
+              errHtml += `<button type="button" id="switchToGeminiBtn" class="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs rounded-lg shadow-md transition-all cursor-pointer shrink-0">✨ Switch to Google Gemini (Built-in)</button>`;
+            }
+            statusBox.innerHTML = errHtml;
+            statusBox.classList.remove('hidden');
+
+            const switchBtn = document.getElementById('switchToGeminiBtn');
+            if (switchBtn) {
+              switchBtn.addEventListener('click', () => {
+                if (providerSelect) {
+                  providerSelect.value = 'google';
+                  updateProviderFields();
+                }
+                statusBox.className = "p-3 rounded-xl text-xs font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30";
+                statusBox.innerHTML = `✅ Switched to Google Gemini! Click "Generate Document Draft" to continue drafting.`;
+              });
+            }
+          } finally {
+            if (window.VibifyProgressBar) window.VibifyProgressBar.hide();
+            generateAiBtn.disabled = false;
+            generateAiBtn.classList.remove('opacity-75', 'cursor-wait');
+            document.getElementById('generateAiBtnText').textContent = "Generate Document Draft";
+          }
+        });
+      }
+
     });
   </script>
+
+  <!-- MULTI-LLM BYOK AI STUDIO MODAL -->
+  <div id="aiDraftModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden transition-opacity">
+    <div class="bg-slate-900 text-white rounded-3xl border border-slate-700 shadow-2xl max-w-2xl w-full p-6 sm:p-8 relative overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Ambient Top Glow -->
+      <div class="absolute -top-24 -right-24 w-60 h-60 bg-gradient-to-br from-teal-500/20 to-indigo-500/30 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800 relative z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-500 to-indigo-600 flex items-center justify-center shadow-lg text-lg">
+            ✨
+          </div>
+          <div>
+            <h3 class="font-black text-lg text-white flex items-center gap-2">
+              AI Document Studio (BYOK)
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30">Multi-LLM</span>
+            </h3>
+            <p class="text-xs text-slate-400 font-medium">Use Google Gemini, OpenAI, Anthropic Claude, DeepSeek or your own custom API</p>
+          </div>
+        </div>
+        <button id="closeAiDraftModalBtn" type="button" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-base">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Content Body -->
+      <div class="py-4 space-y-4 overflow-y-auto flex-grow relative z-10 pr-1">
+
+        <!-- LLM Provider & BYOK API Key Section -->
+        <div class="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="aiProviderSelect" class="block text-xs font-bold uppercase tracking-wider text-teal-400 mb-1">AI Model Provider:</label>
+              <select id="aiProviderSelect" class="w-full bg-slate-900 text-slate-100 text-xs font-bold rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+                <option value="google" selected>🟢 Google Gemini (Default / Built-in)</option>
+                <option value="openai">🤖 OpenAI (GPT-4o / o3-mini)</option>
+                <option value="anthropic">🧠 Anthropic (Claude 3.5 Sonnet / Haiku)</option>
+                <option value="deepseek">🚀 DeepSeek (V3 / R1 Reasoner)</option>
+                <option value="custom">⚡ Custom OpenAI-Compatible / Local Endpoint</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="aiApiKeyInput" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">API Key (Optional / BYOK):</label>
+              <input type="password" id="aiApiKeyInput" placeholder="Leave empty for default server key or paste key..." class="w-full bg-slate-900 text-slate-100 placeholder-slate-500 text-xs font-mono rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+            </div>
+          </div>
+
+          <!-- Custom Endpoint Input (visible only when provider === 'custom') -->
+          <div id="aiCustomEndpointContainer" class="hidden">
+            <label for="aiCustomEndpointInput" class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">Custom API Base URL Endpoint:</label>
+            <input type="text" id="aiCustomEndpointInput" placeholder="https://api.groq.com/openai/v1 or http://localhost:11434/v1" class="w-full bg-slate-900 text-slate-100 placeholder-slate-500 text-xs font-mono rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+        </div>
+        
+        <!-- Preset Prompt Chips -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Popular Document Prompts:</label>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" class="ai-chip bg-slate-800 hover:bg-teal-600/30 hover:border-teal-500 text-slate-300 hover:text-teal-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center gap-1.5" data-prompt="Draft a formal Non-Disclosure Agreement (NDA) between two technology companies including confidentiality obligations, exclusions, and 3-year term.">
+              <span>🔒</span> NDA Agreement
+            </button>
+            <button type="button" class="ai-chip bg-slate-800 hover:bg-teal-600/30 hover:border-teal-500 text-slate-300 hover:text-teal-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center gap-1.5" data-prompt="Draft a detailed software development project proposal with executive summary, deliverables table, timeline checklist, and cost breakdown.">
+              <span>📊</span> Project Proposal
+            </button>
+            <button type="button" class="ai-chip bg-slate-800 hover:bg-teal-600/30 hover:border-teal-500 text-slate-300 hover:text-teal-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center gap-1.5" data-prompt="Draft an itemized consulting invoice statement including breakdown table of services, hourly rates, payment terms Net-14, and wire transfer details.">
+              <span>🧾</span> Consulting Invoice
+            </button>
+            <button type="button" class="ai-chip bg-slate-800 hover:bg-teal-600/30 hover:border-teal-500 text-slate-300 hover:text-teal-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center gap-1.5" data-prompt="Draft executive meeting minutes and action items checklist for Q3 product roadmap alignment.">
+              <span>📋</span> Meeting Minutes
+            </button>
+            <button type="button" class="ai-chip bg-slate-800 hover:bg-teal-600/30 hover:border-teal-500 text-slate-300 hover:text-teal-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center gap-1.5" data-prompt="Draft a formal employment offer letter detailing job title, start date, compensation package, and acceptance checklist.">
+              <span>📜</span> Job Offer Letter
+            </button>
+          </div>
+        </div>
+
+        <!-- Prompt Textarea -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="aiPromptInput" class="block text-xs font-bold uppercase tracking-wider text-slate-300">Document Prompt or Instructions:</label>
+            <span class="text-[11px] text-teal-400 font-semibold">Be specific for best results</span>
+          </div>
+          <textarea id="aiPromptInput" rows="3" placeholder="Describe the document, contract, proposal, or letter you want AI to draft..." class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-xl p-3 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all resize-none"></textarea>
+        </div>
+
+        <!-- Tone & Action & Model Settings Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Model Intelligence Tier -->
+          <div>
+            <label for="aiModelTierSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Model Speed / Tier:</label>
+            <select id="aiModelTierSelect" class="w-full bg-slate-800 text-slate-200 text-xs font-bold rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+              <option value="general" selected>🌟 Standard / Balanced</option>
+              <option value="fast">⚡ Fast Speed</option>
+              <option value="complex">🎯 Deep / Complex</option>
+            </select>
+          </div>
+
+          <!-- Tone Selector -->
+          <div>
+            <label for="aiToneSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Desired Tone & Style:</label>
+            <select id="aiToneSelect" class="w-full bg-slate-800 text-slate-200 text-xs font-bold rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+              <option value="Professional & Formal" selected>👔 Professional & Formal</option>
+              <option value="Executive Brief">💼 Executive & Concise</option>
+              <option value="Legal & Binding">⚖️ Legal & Structured</option>
+              <option value="Persuasive Pitch">🚀 Persuasive & Modern</option>
+              <option value="Friendly & Clear">😊 Friendly & Clear</option>
+            </select>
+          </div>
+
+          <!-- Action Mode -->
+          <div>
+            <label for="aiActionModeSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Drafting Target:</label>
+            <select id="aiActionModeSelect" class="w-full bg-slate-800 text-slate-200 text-xs font-bold rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+              <option value="draft" selected>✨ Draft Complete New Document</option>
+              <option value="expand">➕ Append to Existing Canvas</option>
+              <option value="rewrite">✍️ Rewrite Current Canvas Content</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- High Thinking Mode Toggle Box -->
+        <div class="p-3 bg-slate-950/80 rounded-2xl border border-indigo-500/30 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-sm font-black">
+              🧠
+            </div>
+            <div>
+              <div class="text-xs font-black text-white flex items-center gap-2">
+                Enable Reasoning / Thinking Mode
+              </div>
+              <p class="text-[11px] text-slate-400">Enables deep reasoning models (e.g. Gemini 3.1 Pro preview thinking, DeepSeek Reasoner, OpenAI o3-mini) for complex legal and technical documents.</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" id="aiThinkingToggle" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+          </label>
+        </div>
+
+        <!-- Optional Reference Document Image Upload -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Reference Document Image / Scan (Optional):</label>
+          <div id="aiImageDropzone" class="border-2 border-dashed border-slate-700 hover:border-teal-500/80 rounded-xl p-3 text-center transition-colors bg-slate-950/60 cursor-pointer flex items-center justify-between gap-3">
+            <input type="file" id="aiImageFileInput" accept="image/*" class="hidden" />
+            <div class="flex items-center gap-2 text-slate-400 text-xs font-medium">
+              <span>📸</span>
+              <span id="aiImageStatusText">Attach document image/scan for AI analysis...</span>
+            </div>
+            <button type="button" id="aiImageBrowseBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-1 rounded-lg border border-slate-700 cursor-pointer">Browse</button>
+          </div>
+        </div>
+
+        <!-- Status/Error Message Container -->
+        <div id="aiDraftStatusBox" class="hidden p-3 rounded-xl text-xs font-medium border flex items-center gap-2"></div>
+
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="pt-4 border-t border-slate-800 flex items-center justify-between gap-3 relative z-10">
+        <button id="cancelAiDraftBtn" type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
+          Cancel
+        </button>
+
+        <button id="generateAiDraftBtn" type="button" class="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-400 hover:to-indigo-500 text-white font-extrabold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-teal-500/20 transition-all cursor-pointer">
+          <span>✨</span>
+          <span id="generateAiBtnText">Generate Document Draft</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+  <script src="/js/futuristic-hud.js"></script>
 </body>
 </html>
+

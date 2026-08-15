@@ -41,6 +41,7 @@ body {
   background-color: var(--bg-main);
   height: 100vh;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* 2-Column Workspace Wrapper */
@@ -51,7 +52,7 @@ body {
   overflow: hidden;
 }
 
-/* Left Sidebar (~340px fixed width) */
+/* Left Sidebar (~340px fixed width on desktop) */
 .sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
@@ -68,6 +69,28 @@ body {
   padding: 20px 24px;
   border-bottom: 1px solid var(--border-color);
   background-color: #fafbfc;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 12px;
+  transition: color 0.2s ease, font-size 0.2s ease;
+}
+
+.back-link span {
+  font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+  transition: font-size 0.2s ease;
+  white-space: nowrap;
+}
+
+.back-link:hover {
+  color: var(--accent-teal);
 }
 
 .sidebar-header h2 {
@@ -369,3 +392,336 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ==========================================================================
+   UNIVERSAL SERVICE PROGRESS BAR MODAL
+   ========================================================================== */
+.vibify-progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.vibify-progress-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vibify-progress-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.vibify-progress-overlay.active .vibify-progress-card {
+  transform: scale(1);
+}
+
+.vibify-progress-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #09A1A1, #30525C);
+  color: #ffffff;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 10px 20px -5px rgba(9, 161, 161, 0.3);
+  animation: vibifyPulse 2s infinite ease-in-out;
+}
+
+@keyframes vibifyPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.vibify-progress-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #30525C;
+  margin-bottom: 4px;
+}
+
+.vibify-progress-subtitle {
+  font-size: 13px;
+  color: #5484A4;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.vibify-progress-track {
+  width: 100%;
+  height: 12px;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.vibify-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #09A1A1, #6366f1, #30525C);
+  background-size: 200% 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  animation: vibifyShimmer 1.5s infinite linear;
+}
+
+@keyframes vibifyShimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+.vibify-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.vibify-progress-stage {
+  color: #09A1A1;
+}
+
+.vibify-progress-percent {
+  color: #30525C;
+  font-family: monospace;
+}
+
+/* ==========================================================================
+   RESPONSIVE MOBILE WORKSPACE LAYOUT (Phones & Tablets <= 860px)
+   ========================================================================== */
+@media (max-width: 860px) {
+  body {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .workspace-container {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+  }
+
+  /* Full-width Stacked Sidebar */
+  .sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 16px rgba(48, 82, 92, 0.05) !important;
+    order: 1;
+  }
+
+  .sidebar-header {
+    padding: 14px 16px !important;
+  }
+
+  .sidebar-header h2 {
+    font-size: 15px !important;
+  }
+
+  .sidebar-body {
+    padding: 14px 16px !important;
+    overflow: visible !important;
+    gap: 16px !important;
+  }
+
+  .sidebar-footer {
+    padding: 12px 16px !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 40 !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border-top: 1px solid var(--border-color) !important;
+    box-shadow: 0 -4px 16px rgba(48, 82, 92, 0.12) !important;
+  }
+
+  /* Main Workspace Area */
+  .main-workspace {
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 16px 12px 28px 12px !important;
+    overflow: visible !important;
+    order: 2;
+  }
+
+  /* Mobile Dropzone */
+  .dropzone-state {
+    padding: 28px 16px !important;
+    border-radius: 18px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .dropzone-icon {
+    width: 54px !important;
+    height: 54px !important;
+    font-size: 24px !important;
+    border-radius: 16px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .dropzone-title {
+    font-size: 16px !important;
+  }
+
+  .dropzone-desc {
+    font-size: 12px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .btn-select-file {
+    width: 100% !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    padding: 12px 20px !important;
+  }
+
+  /* Preview State & Grid */
+  .preview-state {
+    max-width: 100% !important;
+    gap: 14px !important;
+  }
+
+  .preview-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
+  }
+
+  .file-info {
+    font-size: 12px !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    word-break: break-all !important;
+  }
+
+  .btn-change-file {
+    width: 100% !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 12px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .thumbnail-card {
+    padding: 8px !important;
+    border-radius: 12px !important;
+  }
+
+  .thumbnail-footer {
+    font-size: 11px !important;
+  }
+
+  /* Forms & Touch targets */
+  .form-control {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+
+  .btn-primary-action {
+    min-height: 48px !important;
+    font-size: 13px !important;
+    padding: 12px 16px !important;
+  }
+
+  .target-presets {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .preset-btn {
+    padding: 8px 4px !important;
+    min-height: 38px !important;
+    font-size: 11px !important;
+  }
+
+  .position-grid-container {
+    max-width: 160px !important;
+    margin: 0 auto !important;
+  }
+
+  .grid-cell {
+    min-height: 36px !important;
+    font-size: 10px !important;
+  }
+
+  /* Progress Bar Card on mobile */
+  .vibify-progress-card {
+    padding: 24px 18px !important;
+    width: 92% !important;
+    border-radius: 20px !important;
+  }
+
+  .vibify-progress-icon {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 22px !important;
+  }
+
+  .vibify-progress-title {
+    font-size: 16px !important;
+  }
+
+  .vibify-progress-subtitle {
+    font-size: 12px !important;
+  }
+}
+
+/* Extra small devices (<= 480px) */
+@media (max-width: 480px) {
+  .preview-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  
+  .target-presets {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+

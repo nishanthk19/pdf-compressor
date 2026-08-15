@@ -183,9 +183,198 @@ class PDFWorkspaceManager {
   }
 }
 
+/* ==========================================================================
+   UNIVERSAL VIBIFY SERVICE PROGRESS BAR CONTROLLER
+   ========================================================================== */
+class VibifyProgressBarController {
+  constructor() {
+    this.overlayElem = null;
+    this.fillElem = null;
+    this.percentElem = null;
+    this.stageElem = null;
+    this.titleElem = null;
+    this.subtitleElem = null;
+    this.iconElem = null;
+    this.timer = null;
+    this.currentPercent = 0;
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.createModalDOM());
+    } else {
+      this.createModalDOM();
+    }
+  }
+
+  createModalDOM() {
+    if (!document.body) return;
+    let overlay = document.getElementById('vibifyProgressOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'vibifyProgressOverlay';
+      overlay.className = 'vibify-progress-overlay';
+      overlay.innerHTML = `
+        <div class="vibify-progress-card">
+          <div id="vibifyProgressIcon" class="vibify-progress-icon">⚡</div>
+          <h3 id="vibifyProgressTitle" class="vibify-progress-title">Processing Request</h3>
+          <p id="vibifyProgressSubtitle" class="vibify-progress-subtitle">Optimizing, processing, and generating your PDF...</p>
+          <div class="vibify-progress-track">
+            <div id="vibifyProgressFill" class="vibify-progress-fill"></div>
+          </div>
+          <div class="vibify-progress-meta">
+            <span id="vibifyProgressStage" class="vibify-progress-stage">Initializing...</span>
+            <span id="vibifyProgressPercent" class="vibify-progress-percent">0%</span>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    this.overlayElem = overlay;
+    this.fillElem = overlay.querySelector('#vibifyProgressFill');
+    this.percentElem = overlay.querySelector('#vibifyProgressPercent');
+    this.stageElem = overlay.querySelector('#vibifyProgressStage');
+    this.titleElem = overlay.querySelector('#vibifyProgressTitle');
+    this.subtitleElem = overlay.querySelector('#vibifyProgressSubtitle');
+    this.iconElem = overlay.querySelector('#vibifyProgressIcon');
+  }
+
+  start(options = {}) {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    this.createModalDOM();
+    const icon = options.icon || '⚡';
+    const title = options.title || 'Processing Request';
+    const subtitle = options.subtitle || 'Please wait while Vibify processes your document...';
+    const stage = options.stage || options.stageMessage || 'Starting service engine...';
+    const startPercent = options.initialPercent !== undefined ? options.initialPercent : 5;
+
+    if (this.iconElem) this.iconElem.textContent = icon;
+    if (this.titleElem) this.titleElem.textContent = title;
+    if (this.subtitleElem) this.subtitleElem.textContent = subtitle;
+    if (this.stageElem) this.stageElem.textContent = stage;
+    this.update(startPercent, stage);
+
+    if (this.overlayElem) {
+      this.overlayElem.classList.add('active');
+    }
+  }
+
+  show(options = {}) {
+    this.start(options);
+  }
+
+  update(percent, stageMessage) {
+    if (!this.overlayElem) this.createModalDOM();
+    this.currentPercent = Math.min(100, Math.max(0, Math.round(percent)));
+    if (this.fillElem) this.fillElem.style.width = `${this.currentPercent}%`;
+    if (this.percentElem) this.percentElem.textContent = `${this.currentPercent}%`;
+    if (stageMessage && this.stageElem) this.stageElem.textContent = stageMessage;
+  }
+
+  complete(options = {}) {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    const title = options.title || 'Processing Complete!';
+    const subtitle = options.subtitle || 'Your document is ready.';
+    const icon = options.icon || '✅';
+    const stage = options.stage || options.stageMessage || 'Complete!';
+
+    if (this.iconElem) this.iconElem.textContent = icon;
+    if (this.titleElem) this.titleElem.textContent = title;
+    if (this.subtitleElem) this.subtitleElem.textContent = subtitle;
+    this.update(100, stage);
+
+    setTimeout(() => {
+      this.hide();
+    }, 1200);
+  }
+
+  fail(options = {}) {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    const title = options.title || 'Operation Failed';
+    const subtitle = options.subtitle || 'An error occurred during processing.';
+    const icon = options.icon || '❌';
+
+    if (this.iconElem) this.iconElem.textContent = icon;
+    if (this.titleElem) this.titleElem.textContent = title;
+    if (this.subtitleElem) this.subtitleElem.textContent = subtitle;
+    if (this.stageElem) this.stageElem.textContent = 'Error';
+
+    setTimeout(() => {
+      this.hide();
+    }, 3000);
+  }
+
+  simulate(options = {}) {
+    this.start(options);
+    const stages = options.stages || [
+      { at: 15, msg: 'Reading file & validating structure...' },
+      { at: 45, msg: 'Applying PDF transform engine...' },
+      { at: 75, msg: 'Rebuilding pages & compressing stream...' },
+      { at: 92, msg: 'Finalizing document download...' }
+    ];
+
+    if (this.timer) clearInterval(this.timer);
+
+    this.timer = setInterval(() => {
+      if (this.currentPercent < 95) {
+        this.currentPercent += Math.floor(Math.random() * 6) + 2;
+        const matchingStage = stages.find(s => this.currentPercent >= s.at && this.currentPercent < s.at + 15);
+        const stageMsg = matchingStage ? matchingStage.msg : (options.stage || options.stageMessage || 'Processing service...');
+        this.update(this.currentPercent, stageMsg);
+      }
+    }, 250);
+  }
+
+  hide() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    if (this.overlayElem) {
+      this.overlayElem.classList.remove('active');
+    }
+  }
+}
+
+window.VibifyProgressBar = new VibifyProgressBarController();
+
+// Auto-hook forms on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  const forms = document.querySelectorAll('form');
+  forms.forEach(form => {
+    form.addEventListener('submit', () => {
+      const pageTitle = document.title || 'PDF Tool';
+      let icon = '⚡';
+      if (pageTitle.includes('Compress')) icon = '🗜️';
+      else if (pageTitle.includes('Merge')) icon = '🧩';
+      else if (pageTitle.includes('Word')) icon = '📄';
+      else if (pageTitle.includes('OCR')) icon = '🔍';
+      else if (pageTitle.includes('Protect')) icon = '🔒';
+      else if (pageTitle.includes('Unlock')) icon = '🔓';
+      else if (pageTitle.includes('Rotate')) icon = '🔄';
+      else if (pageTitle.includes('Delete')) icon = '🗑️';
+      else if (pageTitle.includes('Extract')) icon = '✂️';
+
+      window.VibifyProgressBar.simulate({
+        icon,
+        title: `Running ${pageTitle.split('-')[0].trim()}`,
+        subtitle: 'Vibify is processing your document. Please wait...'
+      });
+    });
+  });
+});
+
 // Export for module or global script usage
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { PDFWorkspaceManager };
+  module.exports = { PDFWorkspaceManager, VibifyProgressBar: window.VibifyProgressBar };
 } else {
   window.PDFWorkspaceManager = PDFWorkspaceManager;
 }
+

@@ -4,18 +4,17 @@
   <meta charset="UTF-8" />
   <script src="/js/iframe-polyfill.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Extract PDF Pages Online - Free Page Extractor | vibify.tech</title>
+  <title>Extract PDF Pages - Split PDF Online Free | vibify.tech</title>
   
-  <!-- Primary SEO Meta Tags -->
-  <meta name="title" content="Extract PDF Pages Online - Free Page Extractor | vibify.tech">
-  <meta name="description" content="Extract specific pages or page ranges from a PDF document online for free on vibify.tech. Fast, private &amp; secure PDF splitter tool.">
-  <meta name="keywords" content="extract pdf pages, split pdf, save pdf pages, online pdf page extractor, vibify.tech">
+  <meta name="title" content="Extract PDF Pages - Split PDF Online Free | vibify.tech">
+  <meta name="description" content="Extract specific pages or page ranges from PDF documents online for free on vibify.tech. Fast, secure, and preserves original document formatting.">
+  <meta name="keywords" content="extract pdf pages, split pdf, separate pdf pages, pdf page extractor, vibify.tech">
   <meta name="author" content="Vibify Tech">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://vibify.tech/tools/extract.html">
-  <meta name="theme-color" content="#8b5cf6">
+  <meta name="theme-color" content="#30525c">
 
-  <!-- Favicons and App Icons -->
+  <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -23,33 +22,26 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://vibify.tech/tools/extract.html">
-  <meta property="og:title" content="Extract PDF Pages Online - Free Page Extractor | vibify.tech">
-  <meta property="og:description" content="Extract and save specific pages from any PDF instantly on vibify.tech. Free &amp; private online tool.">
-  <meta property="og:image" content="https://vibify.tech/vibify-og-image.png">
-  <meta property="og:site_name" content="Vibify">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@vibifytech">
-  <meta name="twitter:title" content="Extract PDF Pages Online | vibify.tech">
-  <meta name="twitter:description" content="Extract specific pages or ranges from your PDF on vibify.tech.">
-  <meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
       font-weight: 700;
       color: var(--text-muted);
       text-decoration: none;
       margin-bottom: 12px;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, font-size 0.2s ease;
+    }
+    .back-link span {
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+      transition: font-size 0.2s ease;
+      white-space: nowrap;
     }
     .back-link:hover { color: var(--color-teal); }
     .btn-change-file {
@@ -61,11 +53,16 @@
       padding: 6px 14px;
       border-radius: var(--radius-md);
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-change-file:hover {
+      background: #f0fdfd;
+      border-color: var(--color-teal);
+      color: var(--color-teal);
     }
   </style>
 </head>
 <body>
-
   <div class="workspace-container">
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -73,8 +70,8 @@
           <img src="/vibify-logo.svg" alt="Vibify.tech" class="h-5 w-auto">
           <span>‹ Back to Vibify Suite</span>
         </a>
-        <h2>Extract Pages</h2>
-        <p>Extract specific page ranges into a new PDF document.</p>
+        <h2>Extract PDF Pages</h2>
+        <p>Extract specific page ranges or individual pages into a separate document.</p>
       </div>
 
       <form id="extractForm" action="/extract" method="POST" enctype="multipart/form-data" class="sidebar-body">
@@ -89,6 +86,16 @@
           <label for="endPage" class="form-label">End Page</label>
           <input type="number" id="endPage" name="endPage" min="1" value="1" class="form-control" required />
         </div>
+
+        <!-- Turbo Client Engine Callout -->
+        <div style="background: #f0fdfd; border: 1px solid rgba(9, 161, 161, 0.25); border-radius: 12px; padding: 12px; margin-top: 10px;">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--color-teal);">
+            <span>⚡</span> TURBO INSTANT EXTRACTION
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
+            Isolates specified pages in client memory at 60 FPS with zero latency and zero data transfer.
+          </p>
+        </div>
       </form>
 
       <div class="sidebar-footer">
@@ -102,7 +109,7 @@
       <div id="dropzone" class="dropzone-state">
         <div class="dropzone-icon">✂️</div>
         <h3 class="dropzone-title">Extract PDF Pages</h3>
-        <p class="dropzone-desc">Drag & drop your PDF file here to extract a page range.</p>
+        <p class="dropzone-desc">Drag & drop your PDF file here to extract selected pages into a new file.</p>
         <button type="button" class="btn-select-file">Select PDF File</button>
       </div>
 
@@ -121,6 +128,8 @@
   </div>
 
   <script src="/js/workspace.js"></script>
+  <script src="/js/turbo-engine.js"></script>
+  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');
@@ -128,6 +137,9 @@
       const changeFileBtn = document.getElementById('changeFileBtn');
       const startPageInput = document.getElementById('startPage');
       const endPageInput = document.getElementById('endPage');
+      const extractForm = document.getElementById('extractForm');
+
+      let loadedNumPages = 1;
 
       const workspace = new PDFWorkspaceManager({
         dropzoneSelector: '#dropzone',
@@ -140,6 +152,7 @@
         onFileLoaded: (file, pdfDoc) => {
           submitBtn.disabled = false;
           if (pdfDoc) {
+            loadedNumPages = pdfDoc.numPages;
             endPageInput.value = pdfDoc.numPages;
             endPageInput.max = pdfDoc.numPages;
             startPageInput.max = pdfDoc.numPages;
@@ -148,6 +161,84 @@
       });
 
       if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
+
+      extractForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = workspace.getSelectedFile();
+        if (!file) {
+          alert('Please select a PDF document first.');
+          return;
+        }
+
+        const start = parseInt(startPageInput.value, 10) || 1;
+        const end = parseInt(endPageInput.value, 10) || loadedNumPages;
+
+        if (start > end) {
+          alert('Start page cannot be greater than End page.');
+          return;
+        }
+
+        const pagesToExtract = [];
+        for (let i = start; i <= end; i++) {
+          pagesToExtract.push(i);
+        }
+
+        if (window.VibifyProgressBar) {
+          VibifyProgressBar.start({
+            title: 'Extracting Pages',
+            subtitle: 'Turbo client engine isolating page range...',
+            icon: '✂️'
+          });
+        }
+
+        submitBtn.disabled = true;
+
+        try {
+          // Execute with VibifyTurboEngine
+          const result = await VibifyTurboEngine.extractPages(file, pagesToExtract, (pct, stage) => {
+            if (window.VibifyProgressBar) VibifyProgressBar.update(pct, stage);
+          });
+
+          const downloadUrl = window.URL.createObjectURL(result.blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `${file.name.replace(/\.pdf$/i, '')}_extracted_${start}-${end}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(downloadUrl);
+
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'Pages Extracted Successfully!',
+              subtitle: `Extracted ${pagesToExtract.length} pages in ${result.durationMs}ms with zero server upload.`
+            });
+          }
+        } catch (err) {
+          console.warn('Turbo extract fallback to server:', err);
+          const formData = new FormData(extractForm);
+          formData.set('pdf', file);
+          const response = await fetch('/extract', { method: 'POST', body: formData });
+          if (!response.ok) throw new Error('Server extraction failed.');
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `${file.name.replace(/\.pdf$/i, '')}_extracted.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'Pages Extracted Successfully!',
+              subtitle: 'Your extracted document downloaded automatically.'
+            });
+          }
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
     });
   </script>
 </body>

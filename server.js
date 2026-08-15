@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { execSync, spawn } = require('child_process');
+const { GoogleGenAI, Type } = require('@google/genai');
 const pdfHelpers = require('./pdf-helpers');
 
 const app = express();
@@ -46,9 +47,513 @@ const upload = multer({
 });
 
 // Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.static(publicDir));
+
+// ==========================================
+// HELPER: SAFE & REPAIRING JSON PARSING
+// ==========================================
+function cleanAndParseJSON(rawText) {
+  if (!rawText || typeof rawText !== 'string') return null;
+  let text = rawText.trim();
+  // Strip markdown code fence if present
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err1) {
+    // Sanitize unescaped control characters inside strings
+    const sanitized = text.replace(/[\u0000-\u001F]+/g, (match) => {
+      if (match === '\n') return '\\n';
+      if (match === '\r') return '\\r';
+      if (match === '\t') return '\\t';
+      return '';
+    });
+
+    try {
+      return JSON.parse(sanitized);
+    } catch (err2) {
+      // Smart repair for truncated JSON string literals and unclosed brackets
+      let inString = false;
+      let escaped = false;
+      let openBrackets = [];
+
+      for (let i = 0; i < sanitized.length; i++) {
+        const char = sanitized[i];
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (char === '\\') {
+          escaped = true;
+          continue;
+        }
+        if (char === '"') {
+          inString = !inString;
+          continue;
+        }
+        if (!inString) {
+          if (char === '{' || char === '[') {
+            openBrackets.push(char);
+          } else if (char === '}' || char === ']') {
+            openBrackets.pop();
+          }
+        }
+      }
+
+      let repaired = sanitized;
+      if (inString) {
+        repaired += '"';
+      }
+
+      for (let i = openBrackets.length - 1; i >= 0; i--) {
+        const b = openBrackets[i];
+        if (b === '{') repaired += '}';
+        if (b === '[') repaired += ']';
+      }
+
+      try {
+        return JSON.parse(repaired);
+      } catch (err3) {
+        // Fallback: locate last valid closing brace
+        const lastCurly = sanitized.lastIndexOf('}');
+        if (lastCurly > 0) {
+          try {
+            return JSON.parse(sanitized.substring(0, lastCurly + 1));
+          } catch (e4) {
+            try {
+              return JSON.parse(sanitized.substring(0, lastCurly + 1) + ']}');
+            } catch (e5) {
+              // ignore
+            }
+          }
+        }
+        throw err1;
+      }
+    }
+  }
+}
+
+// ==========================================
+// ==========================================
+// BYOK MULTI-LLM DOCUMENT DRAFTING API (/api/gemini/draft & /api/ai/draft)
+// Supports Google Gemini, OpenAI, Anthropic Claude, DeepSeek & Custom OpenAI-compatible APIs
+// ==========================================
+async function runGeminiDraftRequest({ userApiKey, requestedModel, useThinking, modelTier, fileBase64, fileMimeType, userPromptText, systemInstruction }) {
+  const apiKey = userApiKey || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('Gemini API Key is missing. Please enter your BYOK key or configure GEMINI_API_KEY in server secrets.');
+  }
+
+  const ai = new GoogleGenAI({
+    apiKey: apiKey,
+    httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+  });
+
+  const candidateModels = [];
+  if (requestedModel) {
+    candidateModels.push({ model: requestedModel, thinking: useThinking });
+  }
+  if (useThinking || modelTier === 'complex') {
+    candidateModels.push({ model: 'gemini-3.1-pro-preview', thinking: true });
+    candidateModels.push({ model: 'gemini-3.6-flash', thinking: false });
+    candidateModels.push({ model: 'gemini-3.5-flash', thinking: false });
+    candidateModels.push({ model: 'gemini-3.1-flash-lite', thinking: false });
+  } else if (modelTier === 'fast') {
+    candidateModels.push({ model: 'gemini-3.1-flash-lite', thinking: false });
+    candidateModels.push({ model: 'gemini-3.6-flash', thinking: false });
+    candidateModels.push({ model: 'gemini-3.5-flash', thinking: false });
+  } else {
+    candidateModels.push({ model: 'gemini-3.5-flash', thinking: false });
+    candidateModels.push({ model: 'gemini-3.6-flash', thinking: false });
+    candidateModels.push({ model: 'gemini-3.1-flash-lite', thinking: false });
+  }
+
+  const contentsArray = [];
+  if (fileBase64) {
+    const cleanBase64 = fileBase64.replace(/^data:[^;]+;base64,/, '');
+    contentsArray.push({
+      inlineData: {
+        data: cleanBase64,
+        mimeType: fileMimeType || 'image/png'
+      }
+    });
+  }
+  contentsArray.push({ text: userPromptText });
+
+  let parsedData = null;
+  let successfulModel = '';
+  let usedThinking = false;
+  let lastError = null;
+
+  for (const candidate of candidateModels) {
+    let attempts = 0;
+    while (attempts < 2) {
+      attempts++;
+      try {
+        const generateConfig = {
+          systemInstruction,
+          responseMimeType: 'application/json'
+        };
+        if (candidate.thinking) {
+          generateConfig.thinkingConfig = { thinkingLevel: 'HIGH' };
+        }
+
+        const response = await ai.models.generateContent({
+          model: candidate.model,
+          contents: contentsArray.length === 1 ? contentsArray[0].text : { parts: contentsArray },
+          config: generateConfig
+        });
+
+        const responseText = response.text;
+        if (responseText) {
+          parsedData = cleanAndParseJSON(responseText);
+          if (parsedData && parsedData.headerTitle && Array.isArray(parsedData.blocks)) {
+            successfulModel = candidate.model;
+            usedThinking = candidate.thinking;
+            break;
+          }
+        }
+      } catch (candidateErr) {
+        const errStr = candidateErr.message || String(candidateErr);
+        console.warn(`[Gemini BYOK] Candidate ${candidate.model} failed:`, errStr);
+        lastError = candidateErr;
+        if (attempts < 2 && (errStr.includes('503') || errStr.includes('429'))) {
+          await new Promise(r => setTimeout(r, 800));
+        } else {
+          break;
+        }
+      }
+    }
+    if (parsedData) break;
+  }
+
+  if (!parsedData && lastError) {
+    throw new Error(`Gemini Error: ${lastError.message || lastError}`);
+  }
+
+  return { parsedData, successfulModel, usedThinking };
+}
+
+const handleAiDraftRequest = async (req, res) => {
+  try {
+    const { 
+      provider = 'google', // 'google' | 'openai' | 'anthropic' | 'deepseek' | 'custom'
+      apiKey: userApiKey,
+      customEndpoint,
+      model: requestedModel,
+      prompt, 
+      action = 'draft', 
+      tone = 'Professional', 
+      currentContent = '', 
+      fileBase64, 
+      fileMimeType,
+      modelTier = 'general', // 'fast', 'general', 'complex'
+      useThinking = false
+    } = req.body;
+
+    if (!prompt && !fileBase64 && !currentContent) {
+      return res.status(400).json({ error: 'Please provide a document prompt, existing text, or uploaded document image.' });
+    }
+
+    const systemInstruction = `You are an expert document drafting and AI intelligence assistant for Vibify PDF Maker.
+Your task is to draft, structure, analyze, outline, expand, or refine professional documents.
+You must return your output strictly in JSON format matching the schema provided.
+
+Rules for Editor.js blocks output:
+1. 'blocks' is an array of Editor.js formatted content blocks.
+2. Allowed block types:
+   - 'header': data has 'text' (string with HTML tags like <strong>) and 'level' (1, 2, or 3).
+   - 'paragraph': data has 'text' (string with HTML tags like <strong>, <em>, <br>, <a href="...">).
+   - 'list': data has 'style' ('unordered' or 'ordered') and 'items' (array of strings).
+   - 'checklist': data has 'items' (array of strings or objects {text: string, checked: boolean}).
+   - 'table': data has 'content' (2D array of strings where first row represents column headers).
+   - 'quote': data has 'text' (string) and 'caption' (string).
+   - 'warning': data has 'title' (string) and 'message' (string).
+   - 'code': data has 'code' (string).
+   - 'delimiter': data is an empty object {}.
+3. Produce well-written, realistic, comprehensive, and professional text without placeholders like "[Insert Date]". Fill in realistic representative values unless guided otherwise.
+4. Provide appropriate 'headerTitle' (e.g., 'NON-DISCLOSURE AGREEMENT'), 'headerSubtitle' (e.g., 'Ref: #2026-NDA • August 2026'), 'footerLeft' (e.g. 'Confidential & Proprietary'), and 'footerRight' (e.g. 'Page 1 of 1').
+
+Required Output JSON Schema Structure:
+{
+  "headerTitle": "Document Title",
+  "headerSubtitle": "Subheader or Date",
+  "footerLeft": "Footer Left Note",
+  "footerRight": "Footer Right Note",
+  "summary": "Brief 1-2 sentence overview",
+  "analysisNotes": ["Key point 1", "Key point 2"],
+  "blocks": [
+    { "type": "header", "data": { "text": "Heading text", "level": 1 } },
+    { "type": "paragraph", "data": { "text": "Paragraph text..." } }
+  ]
+}`;
+
+    let userPromptText = `Document Action: ${action.toUpperCase()}\nRequested Tone/Style: ${tone}\nUser Instruction / Topic: ${prompt || 'Draft a formal, comprehensive document.'}`;
+
+    if (currentContent) {
+      const currentStr = typeof currentContent === 'string' ? currentContent : JSON.stringify(currentContent);
+      userPromptText += `\n\nExisting Canvas Content:\n${currentStr.substring(0, 3000)}`;
+    }
+
+    let parsedData = null;
+    let successfulModel = '';
+    let usedThinking = false;
+    let usedProvider = provider;
+    let fallbackNotice = null;
+
+    // ==================== PROVIDER 1: GOOGLE GEMINI ====================
+    if (provider === 'google') {
+      try {
+        const result = await runGeminiDraftRequest({
+          userApiKey, requestedModel, useThinking, modelTier, fileBase64, fileMimeType, userPromptText, systemInstruction
+        });
+        parsedData = result.parsedData;
+        successfulModel = result.successfulModel;
+        usedThinking = result.usedThinking;
+      } catch (geminiErr) {
+        return res.status(400).json({ error: geminiErr.message || 'Gemini API call failed.' });
+      }
+    }
+
+    // ==================== NON-GOOGLE PROVIDERS WITH AUTO-FALLBACK ====================
+    else {
+      let providerErrMessage = '';
+
+      try {
+        // --- OpenAI ---
+        if (provider === 'openai') {
+          const apiKey = userApiKey || process.env.OPENAI_API_KEY;
+          if (!apiKey) throw new Error('OpenAI API Key is missing. Please enter your OpenAI BYOK key.');
+
+          const targetModel = requestedModel || (useThinking ? 'o3-mini' : (modelTier === 'fast' ? 'gpt-4o-mini' : 'gpt-4o'));
+          const requestPayload = {
+            model: targetModel,
+            messages: [
+              { role: 'system', content: systemInstruction },
+              { role: 'user', content: userPromptText }
+            ],
+            response_format: { type: 'json_object' }
+          };
+
+          const openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestPayload)
+          });
+
+          const openAiJson = await openAiRes.json();
+          if (!openAiRes.ok) {
+            throw new Error(openAiJson.error?.message || `OpenAI API returned HTTP ${openAiRes.status}`);
+          }
+
+          const replyText = openAiJson.choices?.[0]?.message?.content;
+          parsedData = cleanAndParseJSON(replyText);
+          successfulModel = targetModel;
+          usedThinking = useThinking || targetModel.includes('o3') || targetModel.includes('o1');
+        }
+
+        // --- Anthropic Claude ---
+        else if (provider === 'anthropic') {
+          const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
+          if (!apiKey) throw new Error('Anthropic API Key is missing. Please enter your Anthropic BYOK key.');
+
+          const targetModel = requestedModel || (modelTier === 'fast' ? 'claude-3-5-haiku-20241022' : 'claude-3-5-sonnet-20241022');
+          const requestPayload = {
+            model: targetModel,
+            max_tokens: 4096,
+            system: systemInstruction,
+            messages: [{ role: 'user', content: userPromptText }]
+          };
+
+          const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'x-api-key': apiKey,
+              'anthropic-version': '2023-06-01',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestPayload)
+          });
+
+          const claudeJson = await claudeRes.json();
+          if (!claudeRes.ok) {
+            throw new Error(claudeJson.error?.message || `Anthropic API returned HTTP ${claudeRes.status}`);
+          }
+
+          const replyText = claudeJson.content?.[0]?.text;
+          parsedData = cleanAndParseJSON(replyText);
+          successfulModel = targetModel;
+        }
+
+        // --- DeepSeek ---
+        else if (provider === 'deepseek') {
+          const apiKey = userApiKey || process.env.DEEPSEEK_API_KEY;
+          if (!apiKey) throw new Error('DeepSeek API Key is missing. Please enter your DeepSeek BYOK key.');
+
+          const targetModel = requestedModel || (useThinking || modelTier === 'complex' ? 'deepseek-reasoner' : 'deepseek-chat');
+
+          const deepseekRes = await fetch('https://api.deepseek.com/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: targetModel,
+              messages: [
+                { role: 'system', content: systemInstruction },
+                { role: 'user', content: userPromptText }
+              ],
+              response_format: { type: 'json_object' }
+            })
+          });
+
+          const deepseekJson = await deepseekRes.json();
+          if (!deepseekRes.ok) {
+            throw new Error(deepseekJson.error?.message || `DeepSeek API returned HTTP ${deepseekRes.status}`);
+          }
+
+          const replyText = deepseekJson.choices?.[0]?.message?.content;
+          parsedData = cleanAndParseJSON(replyText);
+          successfulModel = targetModel;
+          usedThinking = targetModel.includes('reasoner');
+        }
+
+        // --- Custom OpenAI-Compatible API ---
+        else if (provider === 'custom') {
+          if (!customEndpoint) throw new Error('Custom API Base URL endpoint is required (e.g. https://api.groq.com/openai/v1 or http://localhost:11434/v1).');
+
+          let targetUrl = customEndpoint.trim();
+          if (!targetUrl.endsWith('/chat/completions')) {
+            targetUrl = targetUrl.replace(/\/$/, '') + '/chat/completions';
+          }
+
+          const targetModel = requestedModel || 'default-model';
+          const headers = { 'Content-Type': 'application/json' };
+          if (userApiKey) {
+            headers['Authorization'] = `Bearer ${userApiKey}`;
+          }
+
+          const customRes = await fetch(targetUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              model: targetModel,
+              messages: [
+                { role: 'system', content: systemInstruction },
+                { role: 'user', content: userPromptText }
+              ]
+            })
+          });
+
+          const customJson = await customRes.json();
+          if (!customRes.ok) {
+            throw new Error(customJson.error?.message || customJson.message || `Custom API returned HTTP ${customRes.status}`);
+          }
+
+          const replyText = customJson.choices?.[0]?.message?.content || JSON.stringify(customJson);
+          parsedData = cleanAndParseJSON(replyText);
+          successfulModel = targetModel;
+        }
+
+      } catch (err) {
+        providerErrMessage = err.message || String(err);
+        console.warn(`[AI Draft] Provider ${provider} failed: ${providerErrMessage}`);
+
+        // Try automatic fallback to Google Gemini
+        if (process.env.GEMINI_API_KEY || userApiKey) {
+          try {
+            console.log(`[AI Draft] Attempting automatic fallback to Google Gemini...`);
+            const fallbackRes = await runGeminiDraftRequest({
+              userApiKey: process.env.GEMINI_API_KEY ? '' : userApiKey,
+              requestedModel: null,
+              useThinking,
+              modelTier,
+              fileBase64,
+              fileMimeType,
+              userPromptText,
+              systemInstruction
+            });
+
+            parsedData = fallbackRes.parsedData;
+            successfulModel = `${fallbackRes.successfulModel} (Fallback from ${provider.toUpperCase()})`;
+            usedThinking = fallbackRes.usedThinking;
+            usedProvider = 'google';
+            fallbackNotice = `Note: ${provider.toUpperCase()} failed (${providerErrMessage}). Drafted using Google Gemini.`;
+          } catch (fallbackErr) {
+            console.error(`[AI Draft] Fallback to Gemini also failed:`, fallbackErr.message);
+          }
+        }
+      }
+
+      if (!parsedData) {
+        return res.status(400).json({
+          error: `${provider.toUpperCase()} API Error: ${providerErrMessage}. You can switch provider to Google Gemini (built-in) or update your BYOK API key.`
+        });
+      }
+    }
+
+    // Post-process blocks for Editor.js compatibility
+    if (parsedData.blocks && Array.isArray(parsedData.blocks)) {
+      parsedData.blocks = parsedData.blocks.map(b => {
+        if (!b || typeof b !== 'object') return null;
+        let blockType = (b.type || 'paragraph').toLowerCase();
+        let blockData = b.data || {};
+
+        if (blockType === 'header') {
+          if (typeof blockData.text !== 'string') blockData.text = 'Section Title';
+          blockData.level = Math.min(3, Math.max(1, parseInt(blockData.level) || 2));
+        } else if (blockType === 'paragraph') {
+          if (typeof blockData.text !== 'string') blockData.text = String(blockData.text || '');
+        } else if (blockType === 'list') {
+          if (!Array.isArray(blockData.items)) blockData.items = [String(blockData.text || 'Item')];
+          blockData.style = blockData.style === 'ordered' ? 'ordered' : 'unordered';
+        } else if (blockType === 'checklist') {
+          if (!Array.isArray(blockData.items)) blockData.items = [];
+          blockData.items = blockData.items.map(i => {
+            if (typeof i === 'string') return { text: i, checked: false };
+            return { text: i.text || '', checked: Boolean(i.checked) };
+          });
+        } else if (blockType === 'table') {
+          if (!Array.isArray(blockData.content)) {
+            blockData.content = [['Header 1', 'Header 2'], ['Value 1', 'Value 2']];
+          }
+        } else if (blockType === 'quote') {
+          if (typeof blockData.text !== 'string') blockData.text = '';
+          if (typeof blockData.caption !== 'string') blockData.caption = '';
+        } else if (blockType === 'warning') {
+          if (typeof blockData.title !== 'string') blockData.title = 'Notice';
+          if (typeof blockData.message !== 'string') blockData.message = '';
+        } else if (blockType === 'code') {
+          if (typeof blockData.code !== 'string') blockData.code = '';
+        }
+
+        return { type: blockType, data: blockData };
+      }).filter(Boolean);
+    }
+
+    res.json({ 
+      success: true, 
+      provider: usedProvider,
+      modelUsed: successfulModel, 
+      thinkingMode: usedThinking,
+      fallbackNotice,
+      draft: parsedData 
+    });
+  } catch (err) {
+    console.error('AI Draft Error:', err);
+    res.status(500).json({ error: err.message || 'Failed to generate document draft.' });
+  }
+};
+
+app.post('/api/gemini/draft', handleAiDraftRequest);
+app.post('/api/ai/draft', handleAiDraftRequest);
 
 // Helper for aggressive file deletion using fs.unlinkSync
 function safeUnlinkSync(filePaths) {
@@ -74,7 +579,7 @@ app.get('/overlay-editor', (req, res) => {
   res.sendFile(path.join(publicDir, 'overlay-editor.html'));
 });
 
-app.get('/paginate-editor', (req, res) => {
+app.get(['/paginate-editor', '/number', '/tools/paginate', '/tools/paginate.html', '/tools/number', '/tools/number.html'], (req, res) => {
   res.sendFile(path.join(publicDir, 'paginate-editor.html'));
 });
 

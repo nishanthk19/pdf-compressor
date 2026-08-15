@@ -4,18 +4,17 @@
   <meta charset="UTF-8" />
   <script src="/js/iframe-polyfill.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rotate PDF Pages Online - Permanently Rotate PDF | vibify.tech</title>
+  <title>Rotate PDF - Free Online PDF Page Rotator | vibify.tech</title>
   
-  <!-- Primary SEO Meta Tags -->
-  <meta name="title" content="Rotate PDF Pages Online - Permanently Rotate PDF | vibify.tech">
-  <meta name="description" content="Rotate PDF pages 90, 180, or 270 degrees clockwise or counterclockwise online for free on vibify.tech. Permanent orientation fix for documents.">
-  <meta name="keywords" content="rotate pdf, turn pdf pages, fix pdf orientation, online pdf rotator, vibify.tech">
+  <meta name="title" content="Rotate PDF - Free Online PDF Page Rotator | vibify.tech">
+  <meta name="description" content="Rotate PDF pages online for free on vibify.tech. Rotate all pages or specific pages 90, 180, or 270 degrees clockwise or counterclockwise. Fast &amp; secure.">
+  <meta name="keywords" content="rotate pdf, rotate pdf pages, turn pdf, rotate pdf online, vibify.tech">
   <meta name="author" content="Vibify Tech">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://vibify.tech/tools/rotate.html">
-  <meta name="theme-color" content="#8b5cf6">
+  <meta name="theme-color" content="#30525c">
 
-  <!-- Favicons and App Icons -->
+  <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -26,30 +25,38 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vibify.tech/tools/rotate.html">
-  <meta property="og:title" content="Rotate PDF Pages Online | vibify.tech">
-  <meta property="og:description" content="Rotate PDF pages clockwise or counterclockwise online for free on vibify.tech.">
+  <meta property="og:title" content="Rotate PDF Online | vibify.tech">
+  <meta property="og:description" content="Rotate all or selected pages of your PDF document online for free on vibify.tech.">
   <meta property="og:image" content="https://vibify.tech/vibify-og-image.png">
   <meta property="og:site_name" content="Vibify">
 
-  <!-- Twitter Card -->
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@vibifytech">
-  <meta name="twitter:title" content="Rotate PDF Pages Online | vibify.tech">
-  <meta name="twitter:description" content="Permanently fix PDF page orientations on vibify.tech.">
+  <meta name="twitter:title" content="Rotate PDF Online | vibify.tech">
+  <meta name="twitter:description" content="Rotate your PDF pages 90, 180, or 270 degrees easily on vibify.tech.">
   <meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
+
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
       font-weight: 700;
       color: var(--text-muted);
       text-decoration: none;
       margin-bottom: 12px;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, font-size 0.2s ease;
+    }
+    .back-link span {
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+      transition: font-size 0.2s ease;
+      white-space: nowrap;
     }
     .back-link:hover { color: var(--color-teal); }
     .btn-change-file {
@@ -61,11 +68,16 @@
       padding: 6px 14px;
       border-radius: var(--radius-md);
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-change-file:hover {
+      background: #f0fdfd;
+      border-color: var(--color-teal);
+      color: var(--color-teal);
     }
   </style>
 </head>
 <body>
-
   <div class="workspace-container">
     <aside class="sidebar">
       <div class="sidebar-header">
@@ -87,6 +99,25 @@
             <option value="180">180° Upside Down</option>
             <option value="270">270° Counter-Clockwise</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label for="pages" class="form-label">Pages to Rotate</label>
+          <select id="pages" name="pages" class="form-control">
+            <option value="all" selected>All Pages</option>
+            <option value="odd">Odd Pages Only</option>
+            <option value="even">Even Pages Only</option>
+          </select>
+        </div>
+
+        <!-- Turbo Mode Callout -->
+        <div style="background: #f0fdfd; border: 1px solid rgba(9, 161, 161, 0.25); border-radius: 12px; padding: 12px; margin-top: 10px;">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--color-teal);">
+            <span>⚡</span> VITE-INSPIRED TURBO CLIENT ENGINE
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
+            0-latency client execution enabled. Rotations execute directly in your browser with zero network transfer.
+          </p>
         </div>
       </form>
 
@@ -120,13 +151,18 @@
   </div>
 
   <script src="/js/workspace.js"></script>
+  <script src="/js/turbo-engine.js"></script>
+  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');
       const fileInput = document.getElementById('fileInput');
       const changeFileBtn = document.getElementById('changeFileBtn');
+      const rotateForm = document.getElementById('rotateForm');
+      const angleSelect = document.getElementById('angle');
+      const pagesSelect = document.getElementById('pages');
 
-      new PDFWorkspaceManager({
+      const workspace = new PDFWorkspaceManager({
         dropzoneSelector: '#dropzone',
         previewStateSelector: '#preview-area',
         previewGridSelector: '.preview-grid',
@@ -138,6 +174,75 @@
       });
 
       if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
+
+      // Turbo Client-Side Execution with fallback
+      rotateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = workspace.getSelectedFile();
+        if (!file) {
+          alert('Please select a PDF document first.');
+          return;
+        }
+
+        const angle = parseInt(angleSelect.value, 10) || 90;
+        const pageSelection = pagesSelect.value || 'all';
+
+        if (window.VibifyProgressBar) {
+          VibifyProgressBar.start({
+            title: 'Rotating PDF Document',
+            subtitle: 'Turbo client engine rotating document pages...',
+            icon: '🔄'
+          });
+        }
+
+        submitBtn.disabled = true;
+
+        try {
+          // Execute with VibifyTurboEngine (WASM/ESM Client-side)
+          const result = await VibifyTurboEngine.rotatePdf(file, angle, pageSelection, (pct, stage) => {
+            if (window.VibifyProgressBar) VibifyProgressBar.update(pct, stage);
+          });
+
+          const downloadUrl = window.URL.createObjectURL(result.blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `${file.name.replace(/\.pdf$/i, '')}_rotated.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(downloadUrl);
+
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'PDF Rotated Successfully!',
+              subtitle: `Processed in ${result.durationMs}ms using ${result.engine}.`
+            });
+          }
+        } catch (err) {
+          console.warn('Client-side rotation fallback to server:', err);
+          // Fallback to server POST
+          const formData = new FormData(rotateForm);
+          formData.set('pdf', file);
+          const response = await fetch('/rotate', { method: 'POST', body: formData });
+          if (!response.ok) throw new Error('Server rotation failed.');
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `${file.name.replace(/\.pdf$/i, '')}_rotated.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          if (window.VibifyProgressBar) {
+            VibifyProgressBar.complete({
+              title: 'PDF Rotated Successfully!',
+              subtitle: 'Your rotated document downloaded automatically.'
+            });
+          }
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
     });
   </script>
 </body>
