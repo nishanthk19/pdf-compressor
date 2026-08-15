@@ -20,8 +20,8 @@ const PORT = process.env.PORT || 3000;
 
 // Initialize SuperTokens Node SDK
 const SUPERTOKENS_CONNECTION_URI = process.env.SUPERTOKENS_CONNECTION_URI || 'http://supertokens:3567';
-const API_DOMAIN = process.env.API_DOMAIN || process.env.APP_URL || `http://localhost:${PORT}`;
-const WEBSITE_DOMAIN = process.env.WEBSITE_DOMAIN || process.env.APP_URL || `http://localhost:${PORT}`;
+const API_DOMAIN = process.env.API_DOMAIN || 'https://vibify.tech';
+const WEBSITE_DOMAIN = process.env.WEBSITE_DOMAIN || 'https://vibify.tech';
 
 supertokens.init({
   framework: 'express',
@@ -34,7 +34,7 @@ supertokens.init({
     apiDomain: API_DOMAIN,
     websiteDomain: WEBSITE_DOMAIN,
     apiBasePath: '/auth',
-    websiteBasePath: '/auth.html',
+    websiteBasePath: '/auth',
   },
   recipeList: [
     EmailPassword.init(),
@@ -120,9 +120,26 @@ app.use(
   })
 );
 app.use(supertokensMiddleware());
+
+// Clean URL Middleware: Redirect requests with .html extension to clean URLs
+app.use((req, res, next) => {
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    const pathname = req.path || '';
+    if (pathname.endsWith('.html')) {
+      const search = req.url && req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+      if (pathname === '/index.html') {
+        return res.redirect(301, '/' + search);
+      }
+      const cleanPath = pathname.slice(0, -5);
+      return res.redirect(301, cleanPath + search);
+    }
+  }
+  next();
+});
+
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
-app.use(express.static(publicDir));
+app.use(express.static(publicDir, { extensions: ['html'] }));
 
 // ==========================================
 // HELPER: SAFE & REPAIRING JSON PARSING
@@ -648,16 +665,37 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
+app.get(['/auth', '/auth/callback', '/auth/callback/:provider'], (req, res) => {
+  res.sendFile(path.join(publicDir, 'auth.html'));
+});
+
 app.get('/overlay-editor', (req, res) => {
   res.sendFile(path.join(publicDir, 'overlay-editor.html'));
 });
 
-app.get(['/paginate-editor', '/number', '/tools/paginate', '/tools/paginate.html', '/tools/number', '/tools/number.html'], (req, res) => {
+app.get(['/paginate-editor', '/number', '/tools/paginate', '/tools/number'], (req, res) => {
   res.sendFile(path.join(publicDir, 'paginate-editor.html'));
 });
 
 app.get('/add-text', (req, res) => {
   res.sendFile(path.join(publicDir, 'tools', 'add-text.html'));
+});
+
+app.get('/editor', (req, res) => {
+  res.sendFile(path.join(publicDir, 'editor.html'));
+});
+
+app.get('/flow-editor', (req, res) => {
+  res.sendFile(path.join(publicDir, 'flow-editor.html'));
+});
+
+app.get('/tools/:tool', (req, res, next) => {
+  const toolName = req.params.tool;
+  const toolFilePath = path.join(publicDir, 'tools', `${toolName}.html`);
+  if (fs.existsSync(toolFilePath)) {
+    return res.sendFile(toolFilePath);
+  }
+  next();
 });
 
 app.get('/robots.txt', (req, res) => {

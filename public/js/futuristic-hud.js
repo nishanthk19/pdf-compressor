@@ -7,18 +7,18 @@
 class VibifyFuturisticHUD {
   constructor() {
     this.tools = [
-      { id: 'compress', name: 'Compress PDF', icon: '🗜️', path: '/tools/compress.html', tag: 'Ghostscript • 4 Presets' },
-      { id: 'merge', name: 'Merge PDFs', icon: '📑', path: '/tools/merge.html', tag: 'Multi-document Combine' },
-      { id: 'split', name: 'Extract & Split PDF', icon: '✂️', path: '/tools/extract.html', tag: 'Page Ranges • Split' },
-      { id: 'rotate', name: 'Rotate PDF', icon: '🔄', path: '/tools/rotate.html', tag: '0-Latency 90°/180°/270°' },
-      { id: 'delete', name: 'Delete Pages', icon: '🗑️', path: '/tools/delete.html', tag: 'Selective Page Removal' },
+      { id: 'compress', name: 'Compress PDF', icon: '🗜️', path: '/tools/compress', tag: 'Ghostscript • 4 Presets' },
+      { id: 'merge', name: 'Merge PDFs', icon: '📑', path: '/tools/merge', tag: 'Multi-document Combine' },
+      { id: 'split', name: 'Extract & Split PDF', icon: '✂️', path: '/tools/extract', tag: 'Page Ranges • Split' },
+      { id: 'rotate', name: 'Rotate PDF', icon: '🔄', path: '/tools/rotate', tag: '0-Latency 90°/180°/270°' },
+      { id: 'delete', name: 'Delete Pages', icon: '🗑️', path: '/tools/delete', tag: 'Selective Page Removal' },
       { id: 'paginate', name: 'Add Page Numbers', icon: '🔢', path: '/paginate-editor', tag: '3x3 Matrix • Pattern Format' },
-      { id: 'word', name: 'PDF to Word (.docx)', icon: '📄', path: '/tools/word.html', tag: 'Native Flow Reconstruction' },
-      { id: 'ocr', name: 'OCR & Searchable PDF', icon: '🔍', path: '/tools/ocr.html', tag: 'Tesseract OCR Engine' },
-      { id: 'protect', name: 'Protect & Encrypt PDF', icon: '🔒', path: '/tools/protect.html', tag: 'AES-128 / AES-256' },
-      { id: 'unlock', name: 'Unlock / Decrypt PDF', icon: '🔓', path: '/tools/unlock.html', tag: 'Instant Password Decrypt' },
-      { id: 'pdf-maker', name: 'PDF Maker & AI Studio', icon: '✨', path: '/tools/pdf-maker.html', tag: 'Multi-LLM BYOK • Editor.js' },
-      { id: 'archive', name: 'PDF/A Archive Mode', icon: '🏛️', path: '/tools/archive.html', tag: 'ISO 19005 Compliance' }
+      { id: 'word', name: 'PDF to Word (.docx)', icon: '📄', path: '/tools/word', tag: 'Native Flow Reconstruction' },
+      { id: 'ocr', name: 'OCR & Searchable PDF', icon: '🔍', path: '/tools/ocr', tag: 'Tesseract OCR Engine' },
+      { id: 'protect', name: 'Protect & Encrypt PDF', icon: '🔒', path: '/tools/protect', tag: 'AES-128 / AES-256' },
+      { id: 'unlock', name: 'Unlock / Decrypt PDF', icon: '🔓', path: '/tools/unlock', tag: 'Instant Password Decrypt' },
+      { id: 'pdf-maker', name: 'PDF Maker & AI Studio', icon: '✨', path: '/tools/pdf-maker', tag: 'Multi-LLM BYOK • Editor.js' },
+      { id: 'archive', name: 'PDF/A Archive Mode', icon: '🏛️', path: '/tools/archive', tag: 'ISO 19005 Compliance' }
     ];
 
     this.isOpen = false;

@@ -4,8 +4,37 @@
  */
 
 (function () {
-  // Ensure the API domain dynamically matches the current browser location
-  const currentOrigin = window.location.origin;
+  // Production API domain
+  const API_DOMAIN = 'https://vibify.tech';
+
+  // Ensure window.fetch has a writable setter to prevent "Cannot set property fetch of #<Window> which has only a getter"
+  try {
+    if (typeof window !== 'undefined' && window.fetch) {
+      const origFetch = window.fetch.bind(window);
+      let currentFetch = origFetch;
+      try {
+        Object.defineProperty(window, 'fetch', {
+          get() {
+            return currentFetch;
+          },
+          set(newFetch) {
+            currentFetch = newFetch;
+          },
+          configurable: true,
+          enumerable: true,
+        });
+      } catch (e) {
+        try {
+          Object.defineProperty(window, 'fetch', {
+            value: origFetch,
+            writable: true,
+            configurable: true,
+            enumerable: true,
+          });
+        } catch (err) {}
+      }
+    }
+  } catch (err) {}
 
   // Initialize SuperTokens Web JS SDK once bundles are loaded
   function initSuperTokens() {
@@ -17,17 +46,12 @@
     try {
       const recipes = [];
 
-      if (window.supertokensThirdPartyEmailPassword) {
-        recipes.push(window.supertokensThirdPartyEmailPassword.init());
-      } else {
-        if (window.supertokensEmailPassword) {
-          recipes.push(window.supertokensEmailPassword.init());
-        }
-        if (window.supertokensThirdParty) {
-          recipes.push(window.supertokensThirdParty.init());
-        }
+      if (window.supertokensEmailPassword) {
+        recipes.push(window.supertokensEmailPassword.init());
       }
-
+      if (window.supertokensThirdParty) {
+        recipes.push(window.supertokensThirdParty.init());
+      }
       if (window.supertokensPasswordless) {
         recipes.push(window.supertokensPasswordless.init());
       }
@@ -38,12 +62,12 @@
       window.supertokens.init({
         appInfo: {
           appName: 'PDF Precision Platform',
-          apiDomain: currentOrigin,
+          apiDomain: API_DOMAIN,
           apiBasePath: '/auth',
         },
         recipeList: recipes,
       });
-      console.log('[Auth] SuperTokens initialized with API Domain:', currentOrigin);
+      console.log('[Auth] SuperTokens initialized with API Domain:', API_DOMAIN);
       return true;
     } catch (err) {
       console.error('[Auth] SuperTokens init error:', err);
@@ -62,14 +86,14 @@
    * Helper to get EmailPassword SDK instance
    */
   function getEPRecipe() {
-    return window.supertokensEmailPassword || window.supertokensThirdPartyEmailPassword;
+    return window.supertokensEmailPassword;
   }
 
   /**
    * Helper to get ThirdParty SDK instance
    */
   function getTPRecipe() {
-    return window.supertokensThirdParty || window.supertokensThirdPartyEmailPassword;
+    return window.supertokensThirdParty;
   }
 
   /**
@@ -128,25 +152,48 @@
   }
 
   /**
-   * 2. Social OAuth Login (Google / GitHub)
-   * @param {'google'|'github'} provider
+   * Google OAuth Login
    */
-  async function handleSocialLogin(provider) {
-    const tp = getTPRecipe();
-    if (!tp) {
-      throw new Error('ThirdParty recipe not loaded.');
-    }
-
-    const authUrlResponse = await tp.getAuthorisationURLWithQueryParamsAndSetState({
-      thirdPartyId: provider.toLowerCase(),
-      frontendRedirectURI: `${window.location.origin}/auth.html`,
+  async function handleGoogleLogin() {
+    const authUrlResponse = await window.supertokensThirdParty.getAuthorisationURLWithQueryParamsAndSetState({
+      thirdPartyId: 'google',
+      frontendRedirectURI: 'https://vibify.tech/auth/callback/google',
     });
 
     if (authUrlResponse.status === 'OK') {
       window.location.assign(authUrlResponse.url);
     } else {
-      throw new Error(`Failed to initiate ${provider} social sign-in.`);
+      throw new Error('Failed to initiate Google sign-in.');
     }
+  }
+
+  /**
+   * GitHub OAuth Login
+   */
+  async function handleGithubLogin() {
+    const authUrlResponse = await window.supertokensThirdParty.getAuthorisationURLWithQueryParamsAndSetState({
+      thirdPartyId: 'github',
+      frontendRedirectURI: 'https://vibify.tech/auth/callback/github',
+    });
+
+    if (authUrlResponse.status === 'OK') {
+      window.location.assign(authUrlResponse.url);
+    } else {
+      throw new Error('Failed to initiate GitHub sign-in.');
+    }
+  }
+
+  /**
+   * 2. Social OAuth Login Helper
+   * @param {'google'|'github'} provider
+   */
+  async function handleSocialLogin(provider) {
+    if (provider === 'google') {
+      return handleGoogleLogin();
+    } else if (provider === 'github') {
+      return handleGithubLogin();
+    }
+    throw new Error(`Unsupported provider: ${provider}`);
   }
 
   /**
@@ -232,7 +279,7 @@
       window.location.reload();
     } catch (err) {
       console.error('[Auth] Sign out error:', err);
-      window.location.replace('/auth.html');
+      window.location.replace('/auth');
     }
   }
 
@@ -277,7 +324,7 @@
     if (isLoggedIn) {
       authLinks.forEach((el) => {
         el.textContent = 'Account';
-        el.setAttribute('href', '/auth.html#account');
+        el.setAttribute('href', '/auth#account');
       });
       userBadges.forEach((el) => {
         el.classList.remove('hidden');
@@ -290,7 +337,7 @@
     } else {
       authLinks.forEach((el) => {
         el.textContent = 'Sign In';
-        el.setAttribute('href', '/auth.html');
+        el.setAttribute('href', '/auth');
       });
       userBadges.forEach((el) => el.classList.add('hidden'));
       logoutBtns.forEach((el) => el.classList.add('hidden'));
@@ -300,6 +347,8 @@
   // Export functions to global window object
   window.handleEmailSignIn = handleEmailSignIn;
   window.handleSocialLogin = handleSocialLogin;
+  window.handleGoogleLogin = handleGoogleLogin;
+  window.handleGithubLogin = handleGithubLogin;
   window.handleMagicLink = handleMagicLink;
   window.handleConsumeOtpCode = handleConsumeOtpCode;
   window.handleOAuthCallback = handleOAuthCallback;
