@@ -62,6 +62,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 (function() {
+    if (window.gtag || document.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-27WV7GTMTH"]')) {
+        return;
+    }
     const script1 = document.createElement('script');
     script1.async = true;
     script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-27WV7GTMTH';

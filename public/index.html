@@ -4,16 +4,17 @@
   <meta charset="UTF-8">
   <script src="/js/iframe-polyfill.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vibify - Free Online PDF Tools &amp; Smart Workspace | vibify.tech</title>
-  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
   <!-- Primary SEO Meta Tags -->
-  <meta name="title" content="Vibify - Free Online PDF Tools &amp; Smart Workspace | vibify.tech">
-  <meta name="description" content="vibify.tech is the fast, 100% free &amp; private online PDF toolkit: Compress PDF, Merge PDFs, OCR text recognition, Convert PDF to Word (.docx), Add Text, Protect, Unlock, Rotate, and Edit PDFs instantly with zero file retention.">
-  <meta name="keywords" content="vibify, vibify.tech, free pdf tools, compress pdf, merge pdf, extract pdf pages, ocr pdf, pdf to word, add text to pdf, protect pdf, unlock pdf, rotate pdf, pdf editor online">
-  <meta name="author" content="Vibify Tech">
+  <title>Vibify — Free Online PDF Tools &amp; Document Workspace</title>
+  <meta name="title" content="Vibify — Free Online PDF Tools &amp; Document Workspace">
+  <meta name="description" content="Edit, merge, compress, sign, and convert PDFs instantly in your browser with Vibify. Fast, secure, client-side processing with zero file retention.">
+  <meta name="keywords" content="PDF tools, edit PDF, merge PDF, compress PDF, convert PDF, online PDF editor, free PDF utilities, Vibify, vibify.tech">
+  <meta name="author" content="Vibify">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical" href="https://vibify.tech/">
-  <meta name="theme-color" content="#8b5cf6">
+  <meta name="theme-color" content="#4f46e5">
 
   <!-- Favicons and App Icons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -26,9 +27,10 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://vibify.tech/">
-  <meta property="og:title" content="Vibify - Free Online PDF Tools &amp; Smart Workspace | vibify.tech">
-  <meta property="og:description" content="Fast, 100% free &amp; private online PDF toolkit. Compress, Merge, OCR, Convert to Word, Add Text, Protect, Unlock, and Edit PDFs instantly on vibify.tech.">
+  <meta property="og:title" content="Vibify — Free Online PDF Tools &amp; Document Workspace">
+  <meta property="og:description" content="Edit, merge, compress, sign, and convert PDFs instantly in your browser with Vibify. Fast, private, and secure document workflow.">
   <meta property="og:image" content="https://vibify.tech/vibify-og-image.png">
+  <meta property="og:image:alt" content="Vibify Online PDF Tools &amp; Smart Workspace">
   <meta property="og:site_name" content="Vibify">
   <meta property="og:locale" content="en_US">
 
@@ -36,9 +38,21 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@vibifytech">
   <meta name="twitter:url" content="https://vibify.tech/">
-  <meta name="twitter:title" content="Vibify - Free Online PDF Tools &amp; Smart Workspace | vibify.tech">
-  <meta name="twitter:description" content="Fast, 100% free &amp; private online PDF toolkit on vibify.tech. Compress, Merge, OCR, Convert to Word, Protect &amp; Edit PDFs instantly.">
+  <meta name="twitter:title" content="Vibify — Free Online PDF Tools &amp; Document Workspace">
+  <meta name="twitter:description" content="Edit, merge, compress, sign, and convert PDFs instantly in your browser with Vibify. Fast, private, and secure document workflow.">
   <meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
+
+  <!-- Google Analytics 4 (Google Tag) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-27WV7GTMTH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-27WV7GTMTH', {
+      anonymize_ip: true,
+      send_page_view: true
+    });
+  </script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -71,82 +85,92 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Vibify",
-    "url": "https://vibify.tech/",
-    "description": "Free online PDF utilities suite on vibify.tech: Compress PDFs, merge files, extract pages, run OCR text recognition, convert to Word, add draggable text, protect, unlock, rotate, delete pages, and edit documents.",
-    "applicationCategory": "UtilityApplication",
-    "operatingSystem": "All",
-    "image": "https://vibify.tech/vibify-og-image.png",
-    "browserRequirements": "Requires JavaScript. Requires HTML5.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0.00",
-      "priceCurrency": "USD"
-    },
-    "featureList": [
-      "Compress PDF to Target File Size",
-      "Merge PDFs Online",
-      "Extract PDF Pages",
-      "OCR Scanned PDF to Searchable Text",
-      "Add Text Over PDF",
-      "Convert PDF to Word (.docx)",
-      "Protect PDF with Password Encryption",
-      "Unlock Encrypted PDF",
-      "Rotate PDF Pages",
-      "Delete Specific PDF Pages",
-      "Archival PDF/A Conversion"
-    ]
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Vibify",
-    "url": "https://vibify.tech/",
-    "logo": "https://vibify.tech/vibify-logo-512.png",
-    "sameAs": ["https://vibify.tech"]
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
+    "@graph": [
       {
-        "@type": "Question",
-        "name": "What is Vibify Tech?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Vibify (vibify.tech) is a 100% free, fast, and secure online PDF productivity platform offering compress, merge, OCR, PDF to Word, text editing, and document security tools."
+        "@type": "WebApplication",
+        "@id": "https://vibify.tech/#webapp",
+        "name": "Vibify",
+        "url": "https://vibify.tech/",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript. Modern browser recommended.",
+        "description": "Fast, private online PDF editor and document workspace supporting target-size compression, merging, page numbering, OCR text recognition, and PDF conversion.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Compress PDF to Target File Size",
+          "Merge PDFs Online",
+          "Extract PDF Pages",
+          "OCR Scanned PDF to Searchable Text",
+          "Add Text Over PDF",
+          "Convert PDF to Word (.docx)",
+          "Protect PDF with Password Encryption",
+          "Unlock Encrypted PDF",
+          "Rotate PDF Pages",
+          "Delete Specific PDF Pages",
+          "Archival PDF/A Conversion"
+        ]
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://vibify.tech/#organization",
+        "name": "Vibify",
+        "url": "https://vibify.tech/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://vibify.tech/vibify-logo-512.png"
+        },
+        "sameAs": ["https://vibify.tech"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://vibify.tech/#website",
+        "url": "https://vibify.tech/",
+        "name": "Vibify",
+        "publisher": {
+          "@id": "https://vibify.tech/#organization"
         }
       },
       {
-        "@type": "Question",
-        "name": "How do I compress a PDF online on Vibify?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Navigate to the Compress PDF tool on vibify.tech, enter your target file size in MB, upload your PDF, and download your optimized document instantly."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Are my uploaded PDF documents secure on vibify.tech?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, absolutely. Vibify processes files securely with immediate server auto-cleanup after processing. Your files are never stored permanently or shared."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is Vibify completely free to use?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes! All PDF tools on vibify.tech are 100% free with no hidden fees, no credit card required, and zero watermarks."
-        }
+        "@type": "FAQPage",
+        "@id": "https://vibify.tech/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Vibify?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Vibify (vibify.tech) is a 100% free, fast, and secure online PDF productivity platform offering compress, merge, OCR, PDF to Word, text editing, and document security tools."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I compress a PDF online on Vibify?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Navigate to the Compress PDF tool on vibify.tech, enter your target file size in MB, upload your PDF, and download your optimized document instantly."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are my uploaded PDF documents secure on vibify.tech?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, absolutely. Vibify processes files securely with immediate server auto-cleanup after processing. Your files are never stored permanently or shared."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Vibify completely free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! All PDF tools on vibify.tech are 100% free with no hidden fees, no credit card required, and zero watermarks."
+            }
+          }
+        ]
       }
     ]
   }
