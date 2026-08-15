@@ -16,6 +16,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const auth = betterAuth({
+  baseURL: "https://vibify.tech",
     database: prismaAdapter(prisma, { provider: "postgresql" }),
     baseURL: process.env.BETTER_AUTH_URL || process.env.APP_URL || "https://vibify.tech",
     trustedOrigins: [
