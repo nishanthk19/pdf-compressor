@@ -2,12 +2,77 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 const { execSync, spawn } = require('child_process');
 const { GoogleGenAI, Type } = require('@google/genai');
 const pdfHelpers = require('./pdf-helpers');
 
+// SuperTokens Authentication Modules
+const supertokens = require('supertokens-node');
+const Session = require('supertokens-node/recipe/session');
+const EmailPassword = require('supertokens-node/recipe/emailpassword');
+const ThirdParty = require('supertokens-node/recipe/thirdparty');
+const Passwordless = require('supertokens-node/recipe/passwordless');
+const { middleware: supertokensMiddleware, errorHandler: supertokensErrorHandler } = require('supertokens-node/framework/express');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize SuperTokens Node SDK
+const SUPERTOKENS_CONNECTION_URI = process.env.SUPERTOKENS_CONNECTION_URI || 'http://supertokens:3567';
+const API_DOMAIN = process.env.API_DOMAIN || process.env.APP_URL || `http://localhost:${PORT}`;
+const WEBSITE_DOMAIN = process.env.WEBSITE_DOMAIN || process.env.APP_URL || `http://localhost:${PORT}`;
+
+supertokens.init({
+  framework: 'express',
+  supertokens: {
+    connectionURI: SUPERTOKENS_CONNECTION_URI,
+    apiKey: process.env.SUPERTOKENS_API_KEY,
+  },
+  appInfo: {
+    appName: 'PDF Precision Platform',
+    apiDomain: API_DOMAIN,
+    websiteDomain: WEBSITE_DOMAIN,
+    apiBasePath: '/auth',
+    websiteBasePath: '/auth.html',
+  },
+  recipeList: [
+    EmailPassword.init(),
+    ThirdParty.init({
+      signInAndUpFeature: {
+        providers: [
+          {
+            config: {
+              thirdPartyId: 'google',
+              clients: [
+                {
+                  clientId: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID_PLACEHOLDER',
+                  clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET_PLACEHOLDER',
+                },
+              ],
+            },
+          },
+          {
+            config: {
+              thirdPartyId: 'github',
+              clients: [
+                {
+                  clientId: process.env.GITHUB_CLIENT_ID || 'GITHUB_CLIENT_ID_PLACEHOLDER',
+                  clientSecret: process.env.GITHUB_CLIENT_SECRET || 'GITHUB_CLIENT_SECRET_PLACEHOLDER',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    }),
+    Passwordless.init({
+      flowType: 'USER_INPUT_CODE_AND_MAGIC_LINK',
+      contactMethod: 'EMAIL',
+    }),
+    Session.init(),
+  ],
+});
 
 // Storage directories
 const uploadDir = path.join(__dirname, 'uploads');
@@ -47,6 +112,14 @@ const upload = multer({
 });
 
 // Middleware
+app.use(
+  cors({
+    origin: true,
+    allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
+    credentials: true,
+  })
+);
+app.use(supertokensMiddleware());
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(publicDir));
@@ -1244,6 +1317,9 @@ app.post('/paginate', (req, res) => {
     }
   });
 });
+
+// SuperTokens Error Handler (AFTER PDF Routes)
+app.use(supertokensErrorHandler());
 
 // Global Error Handler
 app.use((err, req, res, next) => {

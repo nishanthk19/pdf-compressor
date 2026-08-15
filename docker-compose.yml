@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdf_precision_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SUPERTOKENS_CONNECTION_URI=http://supertokens:3567
+      - API_DOMAIN=http://localhost:3000
+      - WEBSITE_DOMAIN=http://localhost:3000
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+    depends_on:
+      supertokens:
+        condition: service_healthy
+
+  supertokens:
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:latest
+    container_name: supertokens_core
+    restart: unless-stopped
+    ports:
+      - "3567:3567"
+    environment:
+      - POSTGRESQL_CONNECTION_URI=postgresql://supertokens_user:supertokens_password@db:5432/supertokens
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3567/hello"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+
+  db:
+    image: postgres:15-alpine
+    container_name: supertokens_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=supertokens_user
+      - POSTGRES_PASSWORD=supertokens_password
+      - POSTGRES_DB=supertokens
+    volumes:
+      - supertokens_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supertokens_user -d supertokens"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  supertokens_db_data:
+    driver: local
