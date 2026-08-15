@@ -1,24 +1,17 @@
-FROM node:20-bullseye-slim
-
-# Install OS dependencies
-RUN apt-get update && apt-get install -y \
-    ghostscript \
-    python3 \
-    python3-pip \
-    ocrmypdf \
-    tesseract-ocr \
-    tesseract-ocr-eng \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
-RUN pip3 install PyMuPDF==1.23.26 pdf2docx
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+COPY prisma ./prisma/
+
+RUN npm install --production
+RUN npx prisma generate
 
 COPY . .
 
 EXPOSE 3000
-CMD ["npm", "start"]
+ENV PORT=3000
+ENV NODE_ENV=production
+
+CMD ["sh", "-c", "npx prisma db push && node server.js"]
