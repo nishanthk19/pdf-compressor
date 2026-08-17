@@ -25,6 +25,9 @@
   <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <!-- SEO & JSON-LD Structured Data Engine -->
+  <script src="/js/seo-metadata.js"></script>
 
   <style>
     .back-link {
@@ -91,16 +94,6 @@
             Specify comma-separated page numbers or ranges to remove.
           </small>
         </div>
-
-        <!-- Turbo Client Engine Callout -->
-        <div style="background: #f0fdfd; border: 1px solid rgba(9, 161, 161, 0.25); border-radius: 12px; padding: 12px; margin-top: 10px;">
-          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--color-teal);">
-            <span>⚡</span> TURBO CLIENT PRUNING
-          </div>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
-            Removes target pages directly in client memory with zero server round-trips.
-          </p>
-        </div>
       </form>
 
       <div class="sidebar-footer">
@@ -133,8 +126,6 @@
   </div>
 
   <script src="/js/workspace.js"></script>
-  <script src="/js/turbo-engine.js"></script>
-  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');
@@ -191,7 +182,7 @@
         if (window.VibifyProgressBar) {
           VibifyProgressBar.start({
             title: 'Deleting Pages',
-            subtitle: 'Turbo client engine pruning selected pages...',
+            subtitle: 'Pruning selected pages...',
             icon: '🗑️'
           });
         }
@@ -199,12 +190,27 @@
         submitBtn.disabled = true;
 
         try {
-          // Execute with VibifyTurboEngine
-          const result = await VibifyTurboEngine.deletePages(file, pagesToDelete, (pct, stage) => {
-            if (window.VibifyProgressBar) VibifyProgressBar.update(pct, stage);
+          const { PDFDocument } = window.PDFLib;
+          const bytes = await file.arrayBuffer();
+          const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+          const totalPages = pdfDoc.getPageCount();
+
+          const sorted = [...new Set(pagesToDelete)].sort((a, b) => b - a);
+          sorted.forEach((p) => {
+            const idx = p - 1;
+            if (idx >= 0 && idx < pdfDoc.getPageCount()) {
+              pdfDoc.removePage(idx);
+            }
           });
 
-          const downloadUrl = window.URL.createObjectURL(result.blob);
+          if (pdfDoc.getPageCount() === 0) {
+            throw new Error('Cannot delete all pages from document.');
+          }
+
+          const pdfBytes = await pdfDoc.save();
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+          const downloadUrl = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = downloadUrl;
           a.download = `${file.name.replace(/\.pdf$/i, '')}_deleted.pdf`;
@@ -216,11 +222,11 @@
           if (window.VibifyProgressBar) {
             VibifyProgressBar.complete({
               title: 'Pages Deleted Successfully!',
-              subtitle: `Pruned ${pagesToDelete.length} pages in ${result.durationMs}ms with zero server upload.`
+              subtitle: `Pruned ${pagesToDelete.length} pages.`
             });
           }
         } catch (err) {
-          console.warn('Turbo delete fallback to server:', err);
+          console.warn('Direct delete fallback to server:', err);
           const formData = new FormData(deleteForm);
           formData.set('pdf', file);
           const response = await fetch('/delete', { method: 'POST', body: formData });

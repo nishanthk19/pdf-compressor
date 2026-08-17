@@ -40,6 +40,9 @@
   <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <!-- SEO & JSON-LD Structured Data Engine -->
+  <script src="/js/seo-metadata.js"></script>
 
   <style>
     .back-link {
@@ -109,16 +112,6 @@
             <option value="even">Even Pages Only</option>
           </select>
         </div>
-
-        <!-- Turbo Mode Callout -->
-        <div style="background: #f0fdfd; border: 1px solid rgba(9, 161, 161, 0.25); border-radius: 12px; padding: 12px; margin-top: 10px;">
-          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--color-teal);">
-            <span>⚡</span> VITE-INSPIRED TURBO CLIENT ENGINE
-          </div>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
-            0-latency client execution enabled. Rotations execute directly in your browser with zero network transfer.
-          </p>
-        </div>
       </form>
 
       <div class="sidebar-footer">
@@ -151,8 +144,6 @@
   </div>
 
   <script src="/js/workspace.js"></script>
-  <script src="/js/turbo-engine.js"></script>
-  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');
@@ -175,7 +166,6 @@
 
       if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
 
-      // Turbo Client-Side Execution with fallback
       rotateForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const file = workspace.getSelectedFile();
@@ -190,7 +180,7 @@
         if (window.VibifyProgressBar) {
           VibifyProgressBar.start({
             title: 'Rotating PDF Document',
-            subtitle: 'Turbo client engine rotating document pages...',
+            subtitle: 'Rotating document pages...',
             icon: '🔄'
           });
         }
@@ -198,12 +188,27 @@
         submitBtn.disabled = true;
 
         try {
-          // Execute with VibifyTurboEngine (WASM/ESM Client-side)
-          const result = await VibifyTurboEngine.rotatePdf(file, angle, pageSelection, (pct, stage) => {
-            if (window.VibifyProgressBar) VibifyProgressBar.update(pct, stage);
+          const { PDFDocument, degrees } = window.PDFLib;
+          const bytes = await file.arrayBuffer();
+          const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+
+          const pages = pdfDoc.getPages();
+          pages.forEach((page, idx) => {
+            const pageNum = idx + 1;
+            let shouldRotate = true;
+            if (pageSelection === 'odd') shouldRotate = pageNum % 2 !== 0;
+            if (pageSelection === 'even') shouldRotate = pageNum % 2 === 0;
+
+            if (shouldRotate) {
+              const currentRot = page.getRotation().angle;
+              page.setRotation(degrees((currentRot + angle) % 360));
+            }
           });
 
-          const downloadUrl = window.URL.createObjectURL(result.blob);
+          const pdfBytes = await pdfDoc.save();
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+          const downloadUrl = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = downloadUrl;
           a.download = `${file.name.replace(/\.pdf$/i, '')}_rotated.pdf`;
@@ -215,12 +220,11 @@
           if (window.VibifyProgressBar) {
             VibifyProgressBar.complete({
               title: 'PDF Rotated Successfully!',
-              subtitle: `Processed in ${result.durationMs}ms using ${result.engine}.`
+              subtitle: 'Your rotated document downloaded automatically.'
             });
           }
         } catch (err) {
-          console.warn('Client-side rotation fallback to server:', err);
-          // Fallback to server POST
+          console.warn('Rotation fallback to server:', err);
           const formData = new FormData(rotateForm);
           formData.set('pdf', file);
           const response = await fetch('/rotate', { method: 'POST', body: formData });

@@ -25,6 +25,9 @@
   <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/workspace.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <!-- SEO & JSON-LD Structured Data Engine -->
+  <script src="/js/seo-metadata.js"></script>
 
   <style>
     .back-link {
@@ -86,16 +89,6 @@
           <label for="endPage" class="form-label">End Page</label>
           <input type="number" id="endPage" name="endPage" min="1" value="1" class="form-control" required />
         </div>
-
-        <!-- Turbo Client Engine Callout -->
-        <div style="background: #f0fdfd; border: 1px solid rgba(9, 161, 161, 0.25); border-radius: 12px; padding: 12px; margin-top: 10px;">
-          <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--color-teal);">
-            <span>⚡</span> TURBO INSTANT EXTRACTION
-          </div>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
-            Isolates specified pages in client memory at 60 FPS with zero latency and zero data transfer.
-          </p>
-        </div>
       </form>
 
       <div class="sidebar-footer">
@@ -128,8 +121,6 @@
   </div>
 
   <script src="/js/workspace.js"></script>
-  <script src="/js/turbo-engine.js"></script>
-  <script src="/js/futuristic-hud.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = document.getElementById('submitBtn');
@@ -186,7 +177,7 @@
         if (window.VibifyProgressBar) {
           VibifyProgressBar.start({
             title: 'Extracting Pages',
-            subtitle: 'Turbo client engine isolating page range...',
+            subtitle: 'Isolating page range...',
             icon: '✂️'
           });
         }
@@ -194,12 +185,26 @@
         submitBtn.disabled = true;
 
         try {
-          // Execute with VibifyTurboEngine
-          const result = await VibifyTurboEngine.extractPages(file, pagesToExtract, (pct, stage) => {
-            if (window.VibifyProgressBar) VibifyProgressBar.update(pct, stage);
-          });
+          const { PDFDocument } = window.PDFLib;
+          const bytes = await file.arrayBuffer();
+          const srcDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+          const newDoc = await PDFDocument.create();
 
-          const downloadUrl = window.URL.createObjectURL(result.blob);
+          const indicesToCopy = pagesToExtract
+            .map((p) => p - 1)
+            .filter((idx) => idx >= 0 && idx < srcDoc.getPageCount());
+
+          if (indicesToCopy.length === 0) {
+            throw new Error('No valid pages in range to extract.');
+          }
+
+          const copiedPages = await newDoc.copyPages(srcDoc, indicesToCopy);
+          copiedPages.forEach((page) => newDoc.addPage(page));
+
+          const pdfBytes = await newDoc.save();
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+          const downloadUrl = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = downloadUrl;
           a.download = `${file.name.replace(/\.pdf$/i, '')}_extracted_${start}-${end}.pdf`;
@@ -211,11 +216,11 @@
           if (window.VibifyProgressBar) {
             VibifyProgressBar.complete({
               title: 'Pages Extracted Successfully!',
-              subtitle: `Extracted ${pagesToExtract.length} pages in ${result.durationMs}ms with zero server upload.`
+              subtitle: `Extracted ${pagesToExtract.length} pages.`
             });
           }
         } catch (err) {
-          console.warn('Turbo extract fallback to server:', err);
+          console.warn('Extract fallback to server:', err);
           const formData = new FormData(extractForm);
           formData.set('pdf', file);
           const response = await fetch('/extract', { method: 'POST', body: formData });

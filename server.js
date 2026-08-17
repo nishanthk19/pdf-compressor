@@ -114,6 +114,11 @@ app.get("/admin", (req, res) => {
     res.sendFile(path.join(publicDir, "admin.html"));
 });
 
+// Explicit Add-Text Alias
+app.get(["/add-text", "/tools/add-text"], (req, res) => {
+    res.sendFile(path.join(publicDir, "tools", "add-text.html"));
+});
+
 // Fallback for tools and HTML pages
 app.get("/tools/:tool", (req, res, next) => {
     const toolName = req.params.tool;
@@ -133,6 +138,12 @@ app.get("*", (req, res) => {
     const htmlFile = path.join(publicDir, `${req.path}.html`);
     if (fs.existsSync(htmlFile)) {
         return res.sendFile(htmlFile);
+    }
+    // Also check tools directory for direct names like /compress, /merge, /ocr, etc.
+    const cleanPath = req.path.replace(/^\//, "").replace(/\/$/, "");
+    const toolFile = path.join(publicDir, "tools", `${cleanPath}.html`);
+    if (fs.existsSync(toolFile)) {
+        return res.sendFile(toolFile);
     }
     res.sendFile(path.join(publicDir, "index.html"));
 });

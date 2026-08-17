@@ -38,6 +38,8 @@
   <meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
   
   <script src="/js/iframe-polyfill.js"></script>
+  <!-- SEO & JSON-LD Structured Data Engine -->
+  <script src="/js/seo-metadata.js"></script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -58,6 +60,10 @@
   <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@editorjs/raw@2.5.0"></script>
   <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@1.6.0"></script>
   <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@editorjs/underline@1.1.0"></script>
+  <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@editorjs/embed@2.5.3"></script>
+  <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@editorjs/link@2.5.0"></script>
+  <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@editorjs/attaches@1.3.0"></script>
+  <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@editorjs/personality@2.0.0"></script>
 
   <!-- html2pdf.js CDN -->
   <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -83,9 +89,76 @@
     .ce-inline-toolbar, .ce-popover {
       z-index: 100 !important;
     }
+    /* Custom tool styles */
+    .cdx-custom-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    .cdx-custom-card:hover {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+    }
+    .cdx-input-clean {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 6px 10px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .cdx-input-clean:focus {
+      background: #ffffff;
+      border-color: #09a1a1;
+      box-shadow: 0 0 0 2px rgba(9, 161, 161, 0.15);
+    }
+    .image-block--with-border img {
+      border: 2px solid #cbd5e1;
+    }
+    .image-block--with-background {
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: 12px;
+    }
+    .image-block--stretched img {
+      width: 100%;
+    }
     /* Dynamic Theme Accent CSS Variable Target */
     :root {
       --accent-color: #1e293b;
+    }
+
+    /* High-Resolution Print Styles */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      header, .bg-slate-800, #paperMetricsBar, .quick-insert-btn, #toastContainer, #canvasBadge, [data-block], #openAiDraftModalHeaderBtn, #exportPdfBtn, #saveDocumentBtn, #importJsonBtn, #exportJsonBtn, #exportMarkdownBtn, #clearBtn, #hideHeaderBtn, #hideFooterBtn, .ai-modal, .ce-toolbar, .ce-inline-toolbar {
+        display: none !important;
+      }
+      #paperSheet {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        min-height: auto !important;
+      }
+      #headerSection, #bodySection, #footerSection {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      input {
+        border: none !important;
+        outline: none !important;
+      }
     }
   </style>
 </head>
@@ -117,13 +190,43 @@
 
       <!-- Quick Actions -->
       <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button id="saveDocumentBtn" type="button" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl shadow-md transition-all cursor-pointer" title="Save Document (Ctrl+S)">
+          <svg width="14" height="14" class="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span class="hidden xs:inline">Save</span>
+        </button>
+
+        <button id="printDocumentBtn" type="button" class="hidden sm:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-2.5 sm:px-3 py-2 rounded-xl transition-colors cursor-pointer" title="Print / Vector PDF (Ctrl+P)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Print</span>
+        </button>
+
         <button id="openAiDraftModalHeaderBtn" type="button" class="inline-flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-lg shadow-teal-500/20 transition-all cursor-pointer">
           <span class="animate-pulse">✨</span>
           <span class="hidden xs:inline">AI Studio</span>
           <span class="hidden sm:inline">(BYOK)</span>
         </button>
 
-        <button id="clearBtn" type="button" class="hidden lg:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-3 py-2 rounded-lg transition-colors cursor-pointer" title="Clear Canvas">
+        <button id="importJsonBtn" type="button" class="hidden md:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-2.5 sm:px-3 py-2 rounded-lg transition-colors cursor-pointer" title="Import Editor.js JSON">
+          📥 Import
+        </button>
+
+        <button id="exportJsonBtn" type="button" class="hidden md:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-2.5 sm:px-3 py-2 rounded-lg transition-colors cursor-pointer" title="Export Editor.js JSON">
+          📦 JSON
+        </button>
+
+        <button id="exportMarkdownBtn" type="button" class="hidden lg:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-2.5 sm:px-3 py-2 rounded-lg transition-colors cursor-pointer" title="Export as Markdown">
+          📑 MD
+        </button>
+
+        <button id="clearBtn" type="button" class="hidden lg:inline-flex items-center gap-1.5 bg-slate-800 hover:bg-rose-900/60 hover:text-rose-300 text-slate-300 font-bold text-xs px-2.5 sm:px-3 py-2 rounded-lg transition-colors cursor-pointer" title="Clear Canvas">
           🗑️ Clear
         </button>
 
@@ -160,6 +263,9 @@
           </button>
           <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1 cursor-pointer text-xs" data-template="invoice">
             <span>🧾</span> Invoice
+          </button>
+          <button type="button" class="template-btn bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center gap-1 cursor-pointer text-xs" data-template="documentation">
+            <span>📚</span> Tech Docs
           </button>
         </div>
       </div>
@@ -211,6 +317,7 @@
             <option value="#30525c" class="bg-slate-900 text-white">Garnet Slate</option>
             <option value="#1d4ed8" class="bg-slate-900 text-white">Royal Blue</option>
             <option value="#047857" class="bg-slate-900 text-white">Emerald</option>
+            <option value="#7c3aed" class="bg-slate-900 text-white">Violet</option>
           </select>
         </div>
       </div>
@@ -221,8 +328,8 @@
   <!-- Main Gray Workspace Canvas -->
   <main class="flex-grow py-4 sm:py-8 px-2 sm:px-6 lg:px-8 flex flex-col items-center w-full">
     
-    <!-- Premium Quick Block Insertion Bar -->
-    <div class="w-full max-w-4xl mb-4 sm:mb-6 bg-white/95 backdrop-blur rounded-2xl p-2.5 sm:p-3 border border-slate-300/80 shadow-md flex items-center justify-start sm:justify-between gap-2 overflow-x-auto text-xs font-bold text-slate-700">
+    <!-- Premium Quick Block Insertion Bar (Full Editor.js Toolkit) -->
+    <div class="w-full max-w-5xl mb-4 sm:mb-6 bg-white/95 backdrop-blur rounded-2xl p-2.5 sm:p-3 border border-slate-300/80 shadow-md flex items-center justify-start gap-2 overflow-x-auto text-xs font-bold text-slate-700">
       <span class="text-slate-400 font-black uppercase tracking-wider text-[10px] shrink-0 pl-1 flex items-center gap-1">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-teal-500">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -233,7 +340,7 @@
 
       <div class="flex items-center gap-1.5 shrink-0">
         <!-- Heading -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="header" title="Add Heading (H1-H6)">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="header" title="Add Heading (H1-H6)">
           <svg class="w-3.5 h-3.5 text-teal-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M4 12h16M4 6v12M20 6v12"/>
           </svg>
@@ -241,7 +348,7 @@
         </button>
 
         <!-- Paragraph -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="paragraph" title="Add Paragraph text">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="paragraph" title="Add Paragraph text">
           <svg class="w-3.5 h-3.5 text-teal-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="21" y1="6" x2="3" y2="6"/><line x1="15" y1="12" x2="3" y2="12"/><line x1="17" y1="18" x2="3" y2="18"/>
           </svg>
@@ -249,7 +356,7 @@
         </button>
 
         <!-- List -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="list" title="Add Bullet or Numbered List">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="list" title="Add Bullet or Numbered List">
           <svg class="w-3.5 h-3.5 text-teal-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
             <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
@@ -258,7 +365,7 @@
         </button>
 
         <!-- Checklist -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="checklist" title="Add Interactive Checklist">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="checklist" title="Add Interactive Checklist">
           <svg class="w-3.5 h-3.5 text-teal-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="9 11 12 14 22 4"/>
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -267,7 +374,7 @@
         </button>
 
         <!-- Table -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="table" title="Add Table Data">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="table" title="Add Table Data">
           <svg class="w-3.5 h-3.5 text-teal-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
           </svg>
@@ -275,15 +382,15 @@
         </button>
 
         <!-- Quote -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="quote" title="Add Blockquote">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="quote" title="Add Blockquote">
           <svg class="w-3.5 h-3.5 text-teal-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h3c0 4-2 6-4 6zM15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h3c0 4-2 6-4 6z"/>
           </svg>
           <span>Quote</span>
         </button>
 
-        <!-- Callout -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="warning" title="Add Callout Note">
+        <!-- Callout / Warning -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="warning" title="Add Callout Note">
           <svg class="w-3.5 h-3.5 text-amber-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
@@ -291,23 +398,68 @@
         </button>
 
         <!-- Code -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="code" title="Add Code Snippet">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="code" title="Add Code Snippet">
           <svg class="w-3.5 h-3.5 text-indigo-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
           </svg>
           <span>Code</span>
         </button>
 
-        <!-- Image -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="image" title="Add Image URL">
+        <!-- Image (Upload & URL) -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="image" title="Add Image (Upload or URL)">
           <svg class="w-3.5 h-3.5 text-emerald-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
           </svg>
           <span>Image</span>
         </button>
 
+        <!-- Embed (Video / Social) -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="embed" title="Add Video / Social Embed">
+          <svg class="w-3.5 h-3.5 text-rose-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+          <span>Embed</span>
+        </button>
+
+        <!-- Link Bookmark -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="linkTool" title="Add Rich Link Bookmark Card">
+          <svg class="w-3.5 h-3.5 text-blue-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          <span>Bookmark</span>
+        </button>
+
+        <!-- File Attachment -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="attaches" title="Add File Download Card">
+          <svg class="w-3.5 h-3.5 text-amber-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+          </svg>
+          <span>Attach</span>
+        </button>
+
+        <!-- Personality / Profile Card -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="personality" title="Add Team Member / Author Profile Card">
+          <svg class="w-3.5 h-3.5 text-purple-600 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profile</span>
+        </button>
+
+        <!-- Math / Formula -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="math" title="Add Math Formula (LaTeX)">
+          <span class="font-mono font-black text-xs text-teal-600 group-hover:text-white transition-colors">∑x</span>
+          <span>Math</span>
+        </button>
+
+        <!-- Raw HTML -->
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="raw" title="Add Raw HTML Block">
+          <span class="font-mono font-bold text-xs text-slate-600 group-hover:text-white transition-colors">&lt;/&gt;</span>
+          <span>HTML</span>
+        </button>
+
         <!-- Divider -->
-        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="delimiter" title="Add Horizontal Divider">
+        <button type="button" class="quick-insert-btn group bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-slate-200 hover:border-teal-600 shadow-sm cursor-pointer" data-block="delimiter" title="Add Horizontal Divider">
           <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="3" y1="12" x2="21" y2="12"/>
           </svg>
@@ -422,7 +574,617 @@
         }, 3000);
       }
 
-      // 1. SAFELY RESOLVE ALL EDITOR.JS TOOLS FROM WINDOW GLOBALS
+      // ==========================================
+      // 1. ADVANCED EDITOR.JS CUSTOM TOOLS SUITE
+      // ==========================================
+
+      // Custom Image Tool supporting both Local File Upload (Base64) and Remote URLs + Tunes
+      class CustomImageTool {
+        static get toolbox() {
+          return {
+            title: 'Image',
+            icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+          };
+        }
+
+        constructor({ data, config, api, readOnly }) {
+          this.api = api;
+          this.readOnly = readOnly;
+          this.data = {
+            url: data.url || '',
+            caption: data.caption || '',
+            withBorder: data.withBorder !== undefined ? data.withBorder : false,
+            withBackground: data.withBackground !== undefined ? data.withBackground : false,
+            stretched: data.stretched !== undefined ? data.stretched : false
+          };
+          this.wrapper = null;
+        }
+
+        render() {
+          this.wrapper = document.createElement('div');
+          this.wrapper.classList.add('cdx-custom-card', 'my-3');
+
+          this._updateWrapperClasses();
+
+          if (this.data.url) {
+            this._renderImagePreview();
+          } else {
+            this._renderUploadUI();
+          }
+
+          return this.wrapper;
+        }
+
+        _updateWrapperClasses() {
+          if (!this.wrapper) return;
+          this.wrapper.classList.toggle('image-block--with-border', this.data.withBorder);
+          this.wrapper.classList.toggle('image-block--with-background', this.data.withBackground);
+          this.wrapper.classList.toggle('image-block--stretched', this.data.stretched);
+        }
+
+        _renderUploadUI() {
+          this.wrapper.innerHTML = `
+            <div class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-xl bg-white transition-all text-center cursor-pointer image-drop-zone">
+              <input type="file" accept="image/*" class="hidden image-file-input" />
+              <div class="w-12 h-12 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mb-2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <p class="text-xs font-bold text-slate-700 mb-1">Click to upload image or drag & drop</p>
+              <p class="text-[11px] text-slate-400 mb-3">PNG, JPG, WebP, SVG up to 10MB</p>
+              <div class="flex items-center gap-2 w-full max-w-sm" onclick="event.stopPropagation();">
+                <input type="text" placeholder="Or paste image URL..." class="image-url-input flex-grow text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                <button type="button" class="btn-load-url bg-slate-800 hover:bg-teal-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer">Load</button>
+              </div>
+            </div>
+          `;
+
+          const dropZone = this.wrapper.querySelector('.image-drop-zone');
+          const fileInput = this.wrapper.querySelector('.image-file-input');
+          const urlInput = this.wrapper.querySelector('.image-url-input');
+          const loadBtn = this.wrapper.querySelector('.btn-load-url');
+
+          dropZone.addEventListener('click', () => fileInput.click());
+
+          fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (evt) => {
+                this.data.url = evt.target.result;
+                this._renderImagePreview();
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+
+          loadBtn.addEventListener('click', () => {
+            const val = (urlInput.value || '').trim();
+            if (val) {
+              this.data.url = val;
+              this._renderImagePreview();
+            }
+          });
+
+          urlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              loadBtn.click();
+            }
+          });
+        }
+
+        _renderImagePreview() {
+          this.wrapper.innerHTML = `
+            <div class="relative group">
+              <div class="flex justify-center overflow-hidden rounded-lg">
+                <img src="${this.data.url}" alt="Document Image" class="max-h-96 object-contain rounded-lg transition-all" />
+              </div>
+              <div class="mt-2">
+                <input type="text" value="${this.data.caption || ''}" placeholder="Enter image caption..." class="image-caption-input w-full text-center text-xs text-slate-500 font-medium italic border-b border-transparent focus:border-slate-300 focus:outline-none bg-transparent py-1" />
+              </div>
+              <button type="button" class="btn-remove-image absolute top-2 right-2 bg-slate-900/80 hover:bg-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg backdrop-blur opacity-0 group-hover:opacity-100 transition-all cursor-pointer">Replace</button>
+            </div>
+          `;
+
+          const captionInput = this.wrapper.querySelector('.image-caption-input');
+          captionInput.addEventListener('input', (e) => {
+            this.data.caption = e.target.value;
+          });
+
+          const removeBtn = this.wrapper.querySelector('.btn-remove-image');
+          removeBtn.addEventListener('click', () => {
+            this.data.url = '';
+            this._renderUploadUI();
+          });
+        }
+
+        renderSettings() {
+          const tunes = [
+            { name: 'withBorder', icon: '🔲', title: 'With Border' },
+            { name: 'withBackground', icon: '🎨', title: 'With Background' },
+            { name: 'stretched', icon: '↔️', title: 'Stretch Full Width' }
+          ];
+
+          const container = document.createElement('div');
+          container.classList.add('flex', 'gap-1', 'p-1');
+
+          tunes.forEach(tune => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.classList.add('px-2', 'py-1', 'text-xs', 'rounded', 'font-medium', 'border', 'cursor-pointer', 'transition-all');
+            if (this.data[tune.name]) {
+              btn.classList.add('bg-teal-500', 'text-white', 'border-teal-500');
+            } else {
+              btn.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+            }
+            btn.innerHTML = `${tune.icon} ${tune.title}`;
+
+            btn.addEventListener('click', () => {
+              this.data[tune.name] = !this.data[tune.name];
+              btn.classList.toggle('bg-teal-500', this.data[tune.name]);
+              btn.classList.toggle('text-white', this.data[tune.name]);
+              btn.classList.toggle('border-teal-500', this.data[tune.name]);
+              btn.classList.toggle('bg-slate-100', !this.data[tune.name]);
+              btn.classList.toggle('text-slate-600', !this.data[tune.name]);
+              btn.classList.toggle('border-slate-200', !this.data[tune.name]);
+              this._updateWrapperClasses();
+            });
+
+            container.appendChild(btn);
+          });
+
+          return container;
+        }
+
+        save() {
+          return this.data;
+        }
+      }
+
+      // Custom Embed Tool (YouTube, Vimeo, CodePen, Twitter, Gist, Twitch, Spotify, Figma)
+      class CustomEmbedTool {
+        static get toolbox() {
+          return {
+            title: 'Embed',
+            icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>'
+          };
+        }
+
+        constructor({ data, config, api }) {
+          this.api = api;
+          this.data = {
+            service: data.service || 'generic',
+            source: data.source || '',
+            embed: data.embed || '',
+            width: data.width || 560,
+            height: data.height || 315,
+            caption: data.caption || ''
+          };
+          this.wrapper = null;
+        }
+
+        render() {
+          this.wrapper = document.createElement('div');
+          this.wrapper.classList.add('cdx-custom-card', 'my-3');
+
+          if (this.data.embed || this.data.source) {
+            this._renderEmbed();
+          } else {
+            this._renderInput();
+          }
+
+          return this.wrapper;
+        }
+
+        _renderInput() {
+          this.wrapper.innerHTML = `
+            <div class="p-4 bg-white rounded-xl border border-slate-200">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-rose-500 font-black">▶</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Embed Video or Widget</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mb-2">Paste a YouTube, Vimeo, CodePen, Twitter, Spotify or Gist link:</p>
+              <div class="flex gap-2">
+                <input type="text" placeholder="https://www.youtube.com/watch?v=..." class="embed-input flex-grow text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-400" />
+                <button type="button" class="btn-embed-save bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer">Embed</button>
+              </div>
+            </div>
+          `;
+
+          const input = this.wrapper.querySelector('.embed-input');
+          const btn = this.wrapper.querySelector('.btn-embed-save');
+
+          btn.addEventListener('click', () => {
+            const url = (input.value || '').trim();
+            if (url) {
+              this._processUrl(url);
+              this._renderEmbed();
+            }
+          });
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              btn.click();
+            }
+          });
+        }
+
+        _processUrl(url) {
+          this.data.source = url;
+          // YouTube handler
+          const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+          if (ytMatch) {
+            this.data.service = 'youtube';
+            this.data.embed = `https://www.youtube.com/embed/${ytMatch[1]}`;
+            return;
+          }
+          // Vimeo handler
+          const vimMatch = url.match(/vimeo\.com\/(?:video\/|)(\d+)/);
+          if (vimMatch) {
+            this.data.service = 'vimeo';
+            this.data.embed = `https://player.vimeo.com/video/${vimMatch[1]}`;
+            return;
+          }
+          // Spotify
+          if (url.includes('spotify.com')) {
+            this.data.service = 'spotify';
+            this.data.embed = url.replace('spotify.com/', 'spotify.com/embed/');
+            return;
+          }
+          // Default
+          this.data.service = 'generic';
+          this.data.embed = url;
+        }
+
+        _renderEmbed() {
+          this.wrapper.innerHTML = `
+            <div class="relative group p-2 bg-slate-900 rounded-xl overflow-hidden shadow-lg">
+              <div class="aspect-video w-full rounded-lg overflow-hidden bg-black flex items-center justify-center">
+                <iframe src="${this.data.embed}" class="w-full h-full border-0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+              </div>
+              <div class="mt-2 px-1">
+                <input type="text" value="${this.data.caption || ''}" placeholder="Enter video caption..." class="embed-caption-input w-full text-center text-xs text-slate-300 font-medium italic border-b border-transparent focus:border-slate-600 focus:outline-none bg-transparent py-1" />
+              </div>
+              <button type="button" class="btn-change-embed absolute top-3 right-3 bg-slate-800/90 hover:bg-rose-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg backdrop-blur opacity-0 group-hover:opacity-100 transition-all cursor-pointer">Change URL</button>
+            </div>
+          `;
+
+          const captionInput = this.wrapper.querySelector('.embed-caption-input');
+          captionInput.addEventListener('input', (e) => {
+            this.data.caption = e.target.value;
+          });
+
+          const changeBtn = this.wrapper.querySelector('.btn-change-embed');
+          changeBtn.addEventListener('click', () => {
+            this.data.embed = '';
+            this.data.source = '';
+            this._renderInput();
+          });
+        }
+
+        save() {
+          return this.data;
+        }
+      }
+
+      // Custom Link / Bookmark Tool
+      class CustomLinkTool {
+        static get toolbox() {
+          return {
+            title: 'Link Card',
+            icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
+          };
+        }
+
+        constructor({ data, config, api }) {
+          this.data = {
+            link: data.link || '',
+            meta: {
+              title: (data.meta && data.meta.title) || data.title || '',
+              description: (data.meta && data.meta.description) || data.description || '',
+              image: (data.meta && data.meta.image) || data.image || ''
+            }
+          };
+          this.wrapper = null;
+        }
+
+        render() {
+          this.wrapper = document.createElement('div');
+          this.wrapper.classList.add('my-3');
+
+          if (this.data.link) {
+            this._renderCard();
+          } else {
+            this._renderInput();
+          }
+
+          return this.wrapper;
+        }
+
+        _renderInput() {
+          this.wrapper.innerHTML = `
+            <div class="p-4 bg-white rounded-xl border border-slate-200">
+              <div class="flex items-center gap-2 mb-2 text-blue-600 font-bold text-xs">
+                <span>🔗</span> Bookmark Link
+              </div>
+              <div class="flex gap-2">
+                <input type="text" placeholder="Paste URL (e.g. https://example.com)..." class="link-url-input flex-grow text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <button type="button" class="btn-save-link bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer">Add</button>
+              </div>
+            </div>
+          `;
+
+          const input = this.wrapper.querySelector('.link-url-input');
+          const btn = this.wrapper.querySelector('.btn-save-link');
+
+          btn.addEventListener('click', () => {
+            const url = (input.value || '').trim();
+            if (url) {
+              this.data.link = url;
+              try {
+                const parsed = new URL(url.startsWith('http') ? url : 'https://' + url);
+                this.data.meta.title = this.data.meta.title || parsed.hostname;
+                this.data.meta.description = this.data.meta.description || `Read more at ${parsed.hostname}`;
+              } catch (e) {
+                this.data.meta.title = url;
+              }
+              this._renderCard();
+            }
+          });
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              btn.click();
+            }
+          });
+        }
+
+        _renderCard() {
+          this.wrapper.innerHTML = `
+            <div class="p-3.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-between gap-3 group transition-all">
+              <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-black shrink-0 text-sm">
+                  🔗
+                </div>
+                <div class="overflow-hidden">
+                  <input type="text" value="${this.data.meta.title || this.data.link}" class="link-title-input text-xs font-bold text-slate-800 bg-transparent focus:bg-white border-b border-transparent focus:border-blue-400 focus:outline-none w-full" placeholder="Link Title..." />
+                  <input type="text" value="${this.data.meta.description || ''}" class="link-desc-input text-[11px] text-slate-500 bg-transparent focus:bg-white border-b border-transparent focus:border-blue-400 focus:outline-none w-full" placeholder="Description..." />
+                  <a href="${this.data.link}" target="_blank" class="text-[10px] text-blue-500 hover:underline block truncate">${this.data.link}</a>
+                </div>
+              </div>
+              <button type="button" class="btn-edit-link text-slate-400 hover:text-rose-500 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shrink-0">Edit</button>
+            </div>
+          `;
+
+          const titleInput = this.wrapper.querySelector('.link-title-input');
+          const descInput = this.wrapper.querySelector('.link-desc-input');
+          const editBtn = this.wrapper.querySelector('.btn-edit-link');
+
+          titleInput.addEventListener('input', (e) => { this.data.meta.title = e.target.value; });
+          descInput.addEventListener('input', (e) => { this.data.meta.description = e.target.value; });
+
+          editBtn.addEventListener('click', () => {
+            this._renderInput();
+          });
+        }
+
+        save() {
+          return this.data;
+        }
+      }
+
+      // Custom Attaches / File Attachment Tool
+      class CustomAttachesTool {
+        static get toolbox() {
+          return {
+            title: 'Attachment',
+            icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>'
+          };
+        }
+
+        constructor({ data, config, api }) {
+          this.data = {
+            title: data.title || '',
+            size: data.size || '1.2 MB',
+            extension: data.extension || 'PDF',
+            url: data.url || ''
+          };
+          this.wrapper = null;
+        }
+
+        render() {
+          this.wrapper = document.createElement('div');
+          this.wrapper.classList.add('cdx-custom-card', 'my-3');
+
+          this.wrapper.innerHTML = `
+            <div class="flex items-center justify-between gap-3 p-3 bg-white rounded-xl border border-slate-200">
+              <div class="flex items-center gap-3 overflow-hidden flex-grow">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center font-bold text-xs shrink-0">
+                  <span class="file-ext-display">${this.data.extension}</span>
+                </div>
+                <div class="flex-grow">
+                  <input type="text" value="${this.data.title || 'Attached Document.pdf'}" class="attach-title-input text-xs font-bold text-slate-800 bg-transparent focus:bg-white border-b border-transparent focus:border-amber-400 focus:outline-none w-full" placeholder="File name..." />
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <input type="text" value="${this.data.size}" class="attach-size-input text-[11px] text-slate-400 font-medium bg-transparent focus:bg-white border-b border-transparent focus:border-amber-400 focus:outline-none w-20" placeholder="Size..." />
+                    <input type="text" value="${this.data.url}" class="attach-url-input text-[11px] text-slate-400 bg-transparent focus:bg-white border-b border-transparent focus:border-amber-400 focus:outline-none flex-grow" placeholder="Download link (optional)..." />
+                  </div>
+                </div>
+              </div>
+              <div class="shrink-0 text-slate-400">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </div>
+            </div>
+          `;
+
+          const titleInp = this.wrapper.querySelector('.attach-title-input');
+          const sizeInp = this.wrapper.querySelector('.attach-size-input');
+          const urlInp = this.wrapper.querySelector('.attach-url-input');
+
+          titleInp.addEventListener('input', (e) => {
+            this.data.title = e.target.value;
+            const ext = e.target.value.split('.').pop();
+            if (ext && ext.length <= 4) {
+              this.data.extension = ext.toUpperCase();
+              this.wrapper.querySelector('.file-ext-display').textContent = this.data.extension;
+            }
+          });
+          sizeInp.addEventListener('input', (e) => { this.data.size = e.target.value; });
+          urlInp.addEventListener('input', (e) => { this.data.url = e.target.value; });
+
+          return this.wrapper;
+        }
+
+        save() {
+          return this.data;
+        }
+      }
+
+      // Custom Personality / Author Profile Tool
+      class CustomPersonalityTool {
+        static get toolbox() {
+          return {
+            title: 'Profile Card',
+            icon: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'
+          };
+        }
+
+        constructor({ data, config, api }) {
+          this.data = {
+            name: data.name || '',
+            description: data.description || '',
+            link: data.link || '',
+            photo: data.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
+          };
+          this.wrapper = null;
+        }
+
+        render() {
+          this.wrapper = document.createElement('div');
+          this.wrapper.classList.add('cdx-custom-card', 'my-3');
+
+          this.wrapper.innerHTML = `
+            <div class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-200">
+              <div class="relative group shrink-0">
+                <img src="${this.data.photo}" class="w-16 h-16 rounded-full object-cover border-2 border-teal-500 shadow-md personality-avatar" />
+                <input type="file" accept="image/*" class="hidden personality-file-input" />
+                <button type="button" class="btn-change-avatar absolute inset-0 bg-black/50 text-white text-[10px] font-bold rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">Change</button>
+              </div>
+              <div class="flex-grow">
+                <input type="text" value="${this.data.name || 'Author / Signee Name'}" class="personality-name-input text-sm font-black text-slate-800 bg-transparent focus:bg-white border-b border-transparent focus:border-teal-500 focus:outline-none w-full" placeholder="Person's Name..." />
+                <input type="text" value="${this.data.description || 'Title, Role or Credentials'}" class="personality-desc-input text-xs text-slate-500 font-medium bg-transparent focus:bg-white border-b border-transparent focus:border-teal-500 focus:outline-none w-full mt-0.5" placeholder="Role / Bio..." />
+                <input type="text" value="${this.data.link || ''}" class="personality-link-input text-[11px] text-teal-600 bg-transparent focus:bg-white border-b border-transparent focus:border-teal-500 focus:outline-none w-full mt-0.5" placeholder="Contact or Social link (optional)..." />
+              </div>
+            </div>
+          `;
+
+          const fileInput = this.wrapper.querySelector('.personality-file-input');
+          const avatarBtn = this.wrapper.querySelector('.btn-change-avatar');
+          const avatarImg = this.wrapper.querySelector('.personality-avatar');
+
+          avatarBtn.addEventListener('click', () => fileInput.click());
+          fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (evt) => {
+                this.data.photo = evt.target.result;
+                avatarImg.src = this.data.photo;
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+
+          this.wrapper.querySelector('.personality-name-input').addEventListener('input', (e) => { this.data.name = e.target.value; });
+          this.wrapper.querySelector('.personality-desc-input').addEventListener('input', (e) => { this.data.description = e.target.value; });
+          this.wrapper.querySelector('.personality-link-input').addEventListener('input', (e) => { this.data.link = e.target.value; });
+
+          return this.wrapper;
+        }
+
+        save() {
+          return this.data;
+        }
+      }
+
+      // Custom Math / LaTeX Formula Tool
+      class CustomMathTool {
+        static get toolbox() {
+          return {
+            title: 'Math Formula',
+            icon: '<span style="font-family: monospace; font-weight: bold; font-size: 14px;">∑x</span>'
+          };
+        }
+
+        constructor({ data, config, api }) {
+          this.data = {
+            text: data.text || 'E = mc^2'
+          };
+          this.wrapper = null;
+        }
+
+        render() {
+          this.wrapper = document.createElement('div');
+          this.wrapper.classList.add('my-3', 'p-3', 'bg-slate-900', 'text-teal-300', 'rounded-xl', 'border', 'border-slate-800');
+
+          this.wrapper.innerHTML = `
+            <div class="flex items-center justify-between mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <span>📐 Mathematical Formula (LaTeX)</span>
+            </div>
+            <textarea class="math-input w-full bg-slate-950 text-teal-300 font-mono text-xs sm:text-sm p-2 rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-teal-400 resize-none" rows="2">${this.data.text}</textarea>
+          `;
+
+          const txt = this.wrapper.querySelector('.math-input');
+          txt.addEventListener('input', (e) => {
+            this.data.text = e.target.value;
+          });
+
+          return this.wrapper;
+        }
+
+        save() {
+          return this.data;
+        }
+      }
+
+      // Custom Inline Strikethrough Tool
+      class CustomStrikethrough {
+        static get isInline() { return true; }
+        static get sanitize() { return { s: {} }; }
+
+        constructor({ api }) {
+          this.api = api;
+          this.button = null;
+          this.tag = 'S';
+        }
+
+        render() {
+          this.button = document.createElement('button');
+          this.button.type = 'button';
+          this.button.innerHTML = '<span style="text-decoration: line-through; font-weight: bold;">S</span>';
+          this.button.classList.add(this.api.styles.inlineToolButton);
+          return this.button;
+        }
+
+        surround(range) {
+          if (!range) return;
+          const termWrapper = this.api.selection.findParentTag(this.tag);
+          if (termWrapper) {
+            this.api.selection.expandToTag(termWrapper);
+            document.execCommand('strikeThrough');
+          } else {
+            document.execCommand('strikeThrough');
+          }
+        }
+
+        checkState() {
+          const termWrapper = this.api.selection.findParentTag(this.tag);
+          this.button.classList.toggle(this.api.styles.inlineToolButtonActive, !!termWrapper);
+        }
+      }
+
+      // 2. SAFELY RESOLVE ALL EDITOR.JS TOOLS FROM WINDOW GLOBALS & CUSTOM CLASSES
       const HeaderTool = window.Header || window.EditorjsHeader || (typeof Header !== 'undefined' ? Header : null);
       const ListTool = window.EditorjsList || window.List || window.EditorJSList || (typeof List !== 'undefined' ? List : null);
       const ChecklistTool = window.Checklist || window.EditorjsChecklist || (typeof Checklist !== 'undefined' ? Checklist : null);
@@ -434,102 +1196,93 @@
       const DelimiterTool = window.Delimiter || window.EditorjsDelimiter || (typeof Delimiter !== 'undefined' ? Delimiter : null);
       const WarningTool = window.Warning || window.EditorjsWarning || (typeof Warning !== 'undefined' ? Warning : null);
       const RawTool = window.RawTool || window.Raw || window.EditorjsRaw || (typeof RawTool !== 'undefined' ? RawTool : null);
-      const SimpleImageTool = window.SimpleImage || window.EditorjsSimpleImage || (typeof SimpleImage !== 'undefined' ? SimpleImage : null);
       const UnderlineTool = window.Underline || window.EditorjsUnderline || (typeof Underline !== 'undefined' ? Underline : null);
 
       // Build Tools Configuration Object
-      const toolsConfig = {};
-
-      if (HeaderTool) {
-        toolsConfig.header = {
+      const toolsConfig = {
+        // Core Block Tools
+        header: {
           class: HeaderTool,
-          inlineToolbar: ['link', 'bold', 'italic', 'underline', 'marker'],
+          inlineToolbar: true,
           config: {
             placeholder: 'Enter heading text...',
             levels: [1, 2, 3, 4, 5, 6],
             defaultLevel: 2
           }
-        };
-      }
-
-      if (ListTool) {
-        toolsConfig.list = {
+        },
+        list: {
           class: ListTool,
           inlineToolbar: true,
           config: { defaultStyle: 'unordered' }
-        };
-      }
-
-      if (ChecklistTool) {
-        toolsConfig.checklist = {
+        },
+        checklist: {
           class: ChecklistTool,
           inlineToolbar: true
-        };
-      }
-
-      if (QuoteTool) {
-        toolsConfig.quote = {
+        },
+        table: {
+          class: TableTool,
+          inlineToolbar: true,
+          config: { rows: 3, cols: 3 }
+        },
+        quote: {
           class: QuoteTool,
           inlineToolbar: true,
           config: {
             quotePlaceholder: 'Enter a blockquote...',
             captionPlaceholder: 'Author or source'
           }
-        };
-      }
-
-      if (TableTool) {
-        toolsConfig.table = {
-          class: TableTool,
-          inlineToolbar: true,
-          config: { rows: 3, cols: 3 }
-        };
-      }
-
-      if (CodeTool) {
-        toolsConfig.code = {
-          class: CodeTool,
-          config: { placeholder: 'Enter code snippet...' }
-        };
-      }
-
-      if (InlineCodeTool) {
-        toolsConfig.inlineCode = { class: InlineCodeTool };
-      }
-
-      if (MarkerTool) {
-        toolsConfig.marker = { class: MarkerTool };
-      }
-
-      if (DelimiterTool) {
-        toolsConfig.delimiter = { class: DelimiterTool };
-      }
-
-      if (WarningTool) {
-        toolsConfig.warning = {
+        },
+        warning: {
           class: WarningTool,
           inlineToolbar: true,
           config: {
-            titlePlaceholder: 'Warning Title',
+            titlePlaceholder: 'Callout Title',
             messagePlaceholder: 'Message text...'
           }
-        };
-      }
-
-      if (RawTool) {
-        toolsConfig.raw = { class: RawTool };
-      }
-
-      if (SimpleImageTool) {
-        toolsConfig.image = {
-          class: SimpleImageTool,
-          config: { placeholder: 'Paste image URL...' }
-        };
-      }
-
-      if (UnderlineTool) {
-        toolsConfig.underline = { class: UnderlineTool };
-      }
+        },
+        code: {
+          class: CodeTool,
+          config: { placeholder: 'Enter code snippet...' }
+        },
+        delimiter: {
+          class: DelimiterTool
+        },
+        raw: {
+          class: RawTool
+        },
+        // Rich Media & Custom Tools
+        image: {
+          class: CustomImageTool
+        },
+        embed: {
+          class: CustomEmbedTool
+        },
+        linkTool: {
+          class: CustomLinkTool
+        },
+        attaches: {
+          class: CustomAttachesTool
+        },
+        personality: {
+          class: CustomPersonalityTool
+        },
+        math: {
+          class: CustomMathTool
+        },
+        // Inline Formatting Tools
+        inlineCode: {
+          class: InlineCodeTool
+        },
+        marker: {
+          class: MarkerTool
+        },
+        underline: {
+          class: UnderlineTool
+        },
+        strikethrough: {
+          class: CustomStrikethrough
+        }
+      };
 
       // Predefined Document Templates Data
       const TEMPLATES = {
@@ -557,10 +1310,10 @@
               type: 'checklist',
               data: {
                 items: [
-                  { text: 'Integrate Editor.js multi-block content creation suite', checked: true },
-                  { text: 'Support tables, quotes, checklists, code snippets, and callouts', checked: true },
-                  { text: 'Implement html2pdf.js high-resolution vector PDF rendering', checked: true },
-                  { text: 'Add custom paper sizes, orientations, and accent color themes', checked: true }
+                  { text: 'Integrate full Editor.js multi-block content creation suite', checked: true },
+                  { text: 'Support tables, quotes, checklists, code snippets, callouts & LaTeX math', checked: true },
+                  { text: 'Support local image uploads, rich bookmark cards & embeds', checked: true },
+                  { text: 'Implement html2pdf.js high-resolution vector PDF rendering', checked: true }
                 ]
               }
             },
@@ -635,6 +1388,19 @@
             { type: 'quote', data: { text: 'Total Due: $2,880.00 USD', caption: 'Payment terms: Net 14 days' } },
             { type: 'warning', data: { title: 'Payment Details', message: 'Please send wire transfers to Account #9982-1102-331.' } }
           ]
+        },
+        documentation: {
+          name: 'Tech Documentation',
+          header: { title: 'API REFERENCE SPECIFICATION', subtitle: 'v2.4.0 • Technical Manual' },
+          footer: { left: 'Confidential Developer Manual', right: 'Page 1 of 1' },
+          blocks: [
+            { type: 'header', data: { text: 'Vibify Core PDF Engine API', level: 1 } },
+            { type: 'paragraph', data: { text: 'The Core Engine provides client-side, zero-server document composition, styling manipulation, and high-DPI rasterization.' } },
+            { type: 'header', data: { text: 'Authentication & Initialization', level: 2 } },
+            { type: 'code', data: { code: 'const engine = new PDFEngine({\n  dpi: 300,\n  format: "a4",\n  orientation: "portrait"\n});\nawait engine.init();' } },
+            { type: 'math', data: { text: '\\text{DPI} = \\sqrt{w^2 + h^2} / \\text{diagonal}' } },
+            { type: 'personality', data: { name: 'Dr. Sarah Lin', description: 'Lead Systems Architect, Core Team', link: 'https://github.com', photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150' } }
+          ]
         }
       };
 
@@ -706,18 +1472,60 @@
         });
       }
 
-      // 2. INITIALIZE EDITOR.JS
+      // 2. DOCUMENT PERSISTENCE & INITIALIZATION
+      let initialData = TEMPLATES.proposal;
+      let initialSettings = null;
+      let initialHeader = null;
+      let initialFooter = null;
+
+      try {
+        const savedDraftRaw = localStorage.getItem('vibify_pdf_maker_draft') || localStorage.getItem('vibify_pdf_maker_saved_doc');
+        if (savedDraftRaw) {
+          const parsed = JSON.parse(savedDraftRaw);
+          const editorData = parsed.editorData || (parsed.blocks ? parsed : null);
+          if (editorData && Array.isArray(editorData.blocks) && editorData.blocks.length > 0) {
+            initialData = editorData;
+            initialSettings = parsed.settings || null;
+            initialHeader = parsed.header || null;
+            initialFooter = parsed.footer || null;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not read saved draft from storage:', e);
+      }
+
+      if (initialHeader) {
+        if (initialHeader.title !== undefined && document.getElementById('headerTitleInput')) document.getElementById('headerTitleInput').value = initialHeader.title;
+        if (initialHeader.subtitle !== undefined && document.getElementById('headerSubtitleInput')) document.getElementById('headerSubtitleInput').value = initialHeader.subtitle;
+        if (initialHeader.enabled !== undefined) isHeaderEnabled = initialHeader.enabled;
+      }
+      if (initialFooter) {
+        if (initialFooter.left !== undefined && document.getElementById('footerLeftInput')) document.getElementById('footerLeftInput').value = initialFooter.left;
+        if (initialFooter.right !== undefined && document.getElementById('footerRightInput')) document.getElementById('footerRightInput').value = initialFooter.right;
+        if (initialFooter.enabled !== undefined) isFooterEnabled = initialFooter.enabled;
+      }
+      if (initialSettings) {
+        if (initialSettings.size && document.getElementById('paperSizeSelect')) document.getElementById('paperSizeSelect').value = initialSettings.size;
+        if (initialSettings.orientation && document.getElementById('orientationSelect')) document.getElementById('orientationSelect').value = initialSettings.orientation;
+        if (initialSettings.font && document.getElementById('fontSelect')) document.getElementById('fontSelect').value = initialSettings.font;
+        if (initialSettings.accent && document.getElementById('accentColorSelect')) document.getElementById('accentColorSelect').value = initialSettings.accent;
+      }
+
+      syncSectionVisibility();
+
+      // 3. INITIALIZE EDITOR.JS
       let editor = new EditorJS({
         holder: 'editorjs',
         placeholder: 'Click here or press "/" to start creating blocks...',
         tools: toolsConfig,
-        data: TEMPLATES.proposal,
+        data: initialData,
         onChange: () => {
           updateMetrics();
+          scheduleAutoSave();
         }
       });
 
-      // 3. METRICS UPDATE COUNTER
+      // 4. METRICS UPDATE COUNTER
       async function updateMetrics() {
         try {
           const data = await editor.save();
@@ -745,6 +1553,106 @@
       }
 
       setTimeout(updateMetrics, 1000);
+
+      // 5. DOCUMENT SAVE & AUTO-SAVE ENGINE
+      let isSaving = false;
+      async function saveDocument(isManual = false) {
+        if (isSaving) return;
+        isSaving = true;
+
+        const badge = document.getElementById('saveStatusBadge');
+        if (badge) {
+          badge.className = "hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> ${isManual ? 'Saving...' : 'Auto-saving...'}`;
+        }
+
+        try {
+          await editor.isReady;
+          const data = await editor.save();
+          const docState = {
+            version: '1.0.0',
+            generator: 'Vibify PDF Maker',
+            lastSaved: new Date().toISOString(),
+            header: {
+              enabled: isHeaderEnabled,
+              title: document.getElementById('headerTitleInput')?.value || '',
+              subtitle: document.getElementById('headerSubtitleInput')?.value || ''
+            },
+            footer: {
+              enabled: isFooterEnabled,
+              left: document.getElementById('footerLeftInput')?.value || '',
+              right: document.getElementById('footerRightInput')?.value || ''
+            },
+            settings: {
+              size: document.getElementById('paperSizeSelect')?.value || 'letter',
+              orientation: document.getElementById('orientationSelect')?.value || 'portrait',
+              font: document.getElementById('fontSelect')?.value || 'sans',
+              accent: document.getElementById('accentColorSelect')?.value || '#1e293b'
+            },
+            editorData: data
+          };
+
+          const serialized = JSON.stringify(docState);
+          localStorage.setItem('vibify_pdf_maker_draft', serialized);
+          if (isManual) {
+            localStorage.setItem('vibify_pdf_maker_saved_doc', serialized);
+          }
+
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          if (badge) {
+            badge.className = "hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${isManual ? 'Saved' : 'Auto-Saved'} (${timeStr})`;
+          }
+
+          if (isManual) {
+            showToast('Document saved successfully!');
+          }
+        } catch (err) {
+          console.error('Save error:', err);
+          if (badge) {
+            badge.className = "hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30";
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Save Failed`;
+          }
+          if (isManual) {
+            showToast('Failed to save document: ' + err.message, 'error');
+          }
+        } finally {
+          isSaving = false;
+        }
+      }
+
+      // Debounced auto-save handler
+      let autoSaveTimer = null;
+      function scheduleAutoSave() {
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+          saveDocument(false);
+        }, 1200);
+      }
+
+      // Manual Save Button Listener
+      const saveDocBtn = document.getElementById('saveDocumentBtn');
+      if (saveDocBtn) {
+        saveDocBtn.addEventListener('click', () => {
+          saveDocument(true);
+        });
+      }
+
+      // Keyboard Shortcut: Ctrl+S / Cmd+S to Save
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          saveDocument(true);
+        }
+      });
+
+      // Attach input change auto-save listeners to header and footer fields
+      ['headerTitleInput', 'headerSubtitleInput', 'footerLeftInput', 'footerRightInput'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', scheduleAutoSave);
+        }
+      });
 
       // 4. LIVE CANVAS STYLING UPDATER
       function updateCanvasStyles() {
@@ -895,8 +1803,14 @@
             else if (blockType === 'table') initialData = { content: [['Header 1', 'Header 2'], ['Cell 1', 'Cell 2']] };
             else if (blockType === 'quote') initialData = { text: 'Quote text here...', caption: 'Author' };
             else if (blockType === 'warning') initialData = { title: 'Attention', message: 'Warning callout message...' };
-            else if (blockType === 'code') initialData = { code: '// Your code here\nconsole.log("Hello PDF");' };
+            else if (blockType === 'code') initialData = { code: '// Your code snippet\nconsole.log("Hello PDF");' };
             else if (blockType === 'image') initialData = { url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800', caption: 'Sample document illustration' };
+            else if (blockType === 'embed') initialData = { service: 'youtube', source: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', embed: 'https://www.youtube.com/embed/dQw4w9WgXcQ', caption: 'Sample embedded video' };
+            else if (blockType === 'linkTool') initialData = { link: 'https://github.com', meta: { title: 'GitHub', description: 'Development platform and code repository' } };
+            else if (blockType === 'attaches') initialData = { title: 'Project_Specification.pdf', size: '2.4 MB', extension: 'PDF', url: '' };
+            else if (blockType === 'personality') initialData = { name: 'Alex Johnson', description: 'Lead Solutions Architect', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', link: '' };
+            else if (blockType === 'math') initialData = { text: 'f(x) = \\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}' };
+            else if (blockType === 'raw') initialData = { html: '<div class="p-3 bg-teal-50 text-teal-800 rounded-lg text-xs font-mono">Custom HTML Element Block</div>' };
             else if (blockType === 'delimiter') initialData = {};
 
             await editor.blocks.insert(blockType, initialData);
@@ -921,71 +1835,319 @@
         }
       });
 
-      // 8. COMPREHENSIVE BLOCK-TO-HTML PARSER WITH HEADER AND FOOTER SUPPORT
-      function parseBlocksToHTML(blocks, accentColor, fontFamily, headerData, footerData) {
-        let fontCss = "font-family: system-ui, -apple-system, sans-serif;";
-        if (fontFamily === 'serif') fontCss = "font-family: Georgia, 'Times New Roman', serif;";
-        if (fontFamily === 'mono') fontCss = "font-family: 'Courier New', Courier, monospace;";
+      // 8. IMPORT / EXPORT JSON & MARKDOWN HANDLERS
+      const exportJsonBtn = document.getElementById('exportJsonBtn');
+      if (exportJsonBtn) {
+        exportJsonBtn.addEventListener('click', async () => {
+          try {
+            await editor.isReady;
+            const data = await editor.save();
+            const documentPackage = {
+              version: '1.0.0',
+              generator: 'Vibify PDF Maker',
+              timestamp: new Date().toISOString(),
+              header: {
+                enabled: isHeaderEnabled,
+                title: document.getElementById('headerTitleInput')?.value || '',
+                subtitle: document.getElementById('headerSubtitleInput')?.value || ''
+              },
+              footer: {
+                enabled: isFooterEnabled,
+                left: document.getElementById('footerLeftInput')?.value || '',
+                right: document.getElementById('footerRightInput')?.value || ''
+              },
+              settings: {
+                size: document.getElementById('paperSizeSelect')?.value || 'letter',
+                orientation: document.getElementById('orientationSelect')?.value || 'portrait',
+                font: document.getElementById('fontSelect')?.value || 'sans',
+                accent: document.getElementById('accentColorSelect')?.value || '#0f766e'
+              },
+              editorData: data
+            };
 
-        let html = `<div style="${fontCss} color: #1e293b; line-height: 1.6; display: flex; flex-direction: column; justify-content: space-between; min-height: 100%;">`;
+            const jsonStr = JSON.stringify(documentPackage, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `document_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Exported Editor.js JSON!');
+          } catch (err) {
+            console.error('Export JSON error:', err);
+            showToast('Failed to export JSON', 'error');
+          }
+        });
+      }
+
+      // Export to Markdown
+      const exportMarkdownBtn = document.getElementById('exportMarkdownBtn');
+      if (exportMarkdownBtn) {
+        exportMarkdownBtn.addEventListener('click', async () => {
+          try {
+            await editor.isReady;
+            const data = await editor.save();
+            const blocks = data.blocks || [];
+            let md = '';
+
+            const hTitle = document.getElementById('headerTitleInput')?.value;
+            const hSub = document.getElementById('headerSubtitleInput')?.value;
+            if (isHeaderEnabled && (hTitle || hSub)) {
+              md += `> **${hTitle || ''}**  \n> *${hSub || ''}*\n\n---\n\n`;
+            }
+
+            blocks.forEach(block => {
+              switch (block.type) {
+                case 'header': {
+                  const level = '#'.repeat(block.data.level || 2);
+                  md += `${level} ${block.data.text}\n\n`;
+                  break;
+                }
+                case 'paragraph': {
+                  md += `${block.data.text}\n\n`;
+                  break;
+                }
+                case 'list': {
+                  const isOrdered = block.data.style === 'ordered';
+                  const items = block.data.items || [];
+                  items.forEach((it, idx) => {
+                    const txt = typeof it === 'string' ? it : (it.content || '');
+                    md += isOrdered ? `${idx + 1}. ${txt}\n` : `- ${txt}\n`;
+                  });
+                  md += '\n';
+                  break;
+                }
+                case 'checklist': {
+                  const items = block.data.items || [];
+                  items.forEach(it => {
+                    md += `- [${it.checked ? 'x' : ' '}] ${it.text || ''}\n`;
+                  });
+                  md += '\n';
+                  break;
+                }
+                case 'quote': {
+                  md += `> ${block.data.text}\n> — *${block.data.caption || 'Anonymous'}*\n\n`;
+                  break;
+                }
+                case 'warning': {
+                  md += `> ⚠️ **${block.data.title || 'Note'}**  \n> ${block.data.message || ''}\n\n`;
+                  break;
+                }
+                case 'code': {
+                  md += `\`\`\`\n${block.data.code || ''}\n\`\`\`\n\n`;
+                  break;
+                }
+                case 'delimiter': {
+                  md += `---\n\n`;
+                  break;
+                }
+                case 'image': {
+                  md += `![${block.data.caption || 'Image'}](${block.data.url || ''})\n*${block.data.caption || ''}*\n\n`;
+                  break;
+                }
+                case 'math': {
+                  md += `$$\n${block.data.text || ''}\n$$\n\n`;
+                  break;
+                }
+                case 'linkTool': {
+                  md += `[${block.data.meta?.title || block.data.link}](${block.data.link})\n\n`;
+                  break;
+                }
+                case 'personality': {
+                  md += `**${block.data.name || ''}** (${block.data.description || ''})\n\n`;
+                  break;
+                }
+                case 'attaches': {
+                  md += `📎 [${block.data.title || 'File Attachment'}](${block.data.url || '#'}) (${block.data.size || ''})\n\n`;
+                  break;
+                }
+                case 'table': {
+                  const rows = block.data.content || [];
+                  if (rows.length > 0) {
+                    md += `| ${rows[0].join(' | ')} |\n`;
+                    md += `| ${rows[0].map(() => '---').join(' | ')} |\n`;
+                    for (let r = 1; r < rows.length; r++) {
+                      md += `| ${rows[r].join(' | ')} |\n`;
+                    }
+                    md += '\n';
+                  }
+                  break;
+                }
+                default: {
+                  if (block.data && block.data.text) md += `${block.data.text}\n\n`;
+                }
+              }
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `document_${Date.now()}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Exported Markdown (.md)!');
+          } catch (err) {
+            console.error('Export Markdown error:', err);
+            showToast('Failed to export Markdown', 'error');
+          }
+        });
+      }
+
+      // Import JSON Trigger & File Handler
+      const importJsonBtn = document.getElementById('importJsonBtn');
+      if (importJsonBtn) {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json,application/json';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        importJsonBtn.addEventListener('click', () => {
+          fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          try {
+            const text = await file.text();
+            const parsed = JSON.parse(text);
+            
+            // Check if document package or raw Editor.js data
+            const editorData = parsed.editorData || (parsed.blocks ? parsed : null);
+            if (!editorData || !Array.isArray(editorData.blocks)) {
+              throw new Error('Invalid Editor.js JSON schema.');
+            }
+
+            if (parsed.header) {
+              if (document.getElementById('headerTitleInput')) document.getElementById('headerTitleInput').value = parsed.header.title || '';
+              if (document.getElementById('headerSubtitleInput')) document.getElementById('headerSubtitleInput').value = parsed.header.subtitle || '';
+              isHeaderEnabled = parsed.header.enabled !== false;
+            }
+
+            if (parsed.footer) {
+              if (document.getElementById('footerLeftInput')) document.getElementById('footerLeftInput').value = parsed.footer.left || '';
+              if (document.getElementById('footerRightInput')) document.getElementById('footerRightInput').value = parsed.footer.right || '';
+              isFooterEnabled = parsed.footer.enabled !== false;
+            }
+
+            if (parsed.settings) {
+              if (parsed.settings.size && document.getElementById('paperSizeSelect')) document.getElementById('paperSizeSelect').value = parsed.settings.size;
+              if (parsed.settings.orientation && document.getElementById('orientationSelect')) document.getElementById('orientationSelect').value = parsed.settings.orientation;
+              if (parsed.settings.font && document.getElementById('fontSelect')) document.getElementById('fontSelect').value = parsed.settings.font;
+              if (parsed.settings.accent && document.getElementById('accentColorSelect')) document.getElementById('accentColorSelect').value = parsed.settings.accent;
+              updateCanvasStyles();
+            }
+
+            syncSectionVisibility();
+
+            await editor.isReady;
+            await editor.render(editorData);
+            updateMetrics();
+            showToast('JSON Document Imported Successfully!');
+          } catch (err) {
+            console.error('Import error:', err);
+            showToast('Failed to import JSON: ' + err.message, 'error');
+          } finally {
+            fileInput.value = '';
+          }
+        });
+      }
+
+      // 9. COMPREHENSIVE BLOCK-TO-HTML PARSER FOR HIGH-RESOLUTION PDF (ROCK-SOLID LAYOUT)
+      function parseBlocksToHTML(blocks, accentColor, fontFamily, headerData, footerData) {
+        let fontCss = "font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;";
+        if (fontFamily === 'serif') fontCss = "font-family: Georgia, Cambria, 'Times New Roman', Times, serif;";
+        if (fontFamily === 'mono') fontCss = "font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;";
+
+        function escapeText(str) {
+          if (!str) return '';
+          return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+
+        let html = `<div style="${fontCss} width: 100%; box-sizing: border-box; color: #1e293b; background-color: #ffffff; line-height: 1.65;">`;
 
         // 1. RENDER HEADER SECTION
-        if (headerData && headerData.enabled) {
+        if (headerData && headerData.enabled && (headerData.title || headerData.subtitle)) {
           html += `
-            <div style="border-bottom: 2.5px solid ${accentColor}; padding-bottom: 10px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; ${fontCss}">
-              <div style="font-size: 14px; font-weight: 800; color: ${accentColor}; text-transform: uppercase; letter-spacing: 0.05em;">${headerData.title || ''}</div>
-              <div style="font-size: 11px; color: #64748b; font-weight: 600; text-align: right;">${headerData.subtitle || ''}</div>
+            <div style="border-bottom: 2.5px solid ${accentColor}; padding-bottom: 12px; margin-bottom: 24px; display: table; width: 100%; box-sizing: border-box; ${fontCss}">
+              <div style="display: table-cell; vertical-align: bottom; font-size: 14px; font-weight: 800; color: ${accentColor}; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.3;">
+                ${escapeText(headerData.title || '')}
+              </div>
+              <div style="display: table-cell; vertical-align: bottom; text-align: right; font-size: 11px; color: #64748b; font-weight: 600; line-height: 1.3; white-space: nowrap; padding-left: 12px;">
+                ${escapeText(headerData.subtitle || '')}
+              </div>
             </div>
           `;
         }
 
         // 2. RENDER BODY CONTENT SECTION
-        html += `<div style="flex-grow: 1;">`;
+        html += `<div style="width: 100%; box-sizing: border-box; min-height: 200px;">`;
 
         if (!blocks || !Array.isArray(blocks) || blocks.length === 0) {
-          html += '<p style="color: #94a3b8; font-style: italic;">Empty Document</p>';
+          html += '<p style="color: #94a3b8; font-style: italic; font-size: 14px;">(No document content created yet)</p>';
         } else {
-
           blocks.forEach(block => {
+            if (!block || !block.data) return;
+
             switch (block.type) {
               case 'header': {
                 const level = block.data.level || 2;
                 const text = block.data.text || '';
-                const fontSizeMap = { 1: '28px', 2: '22px', 3: '18px', 4: '16px', 5: '14px', 6: '13px' };
-                const fSize = fontSizeMap[level] || '20px';
-                html += `<h${level} style="${fontCss} font-size: ${fSize}; font-weight: bold; margin-top: 1.4em; margin-bottom: 0.5em; color: ${accentColor}; border-bottom: ${level <= 2 ? '2px solid ' + accentColor + '20' : 'none'}; padding-bottom: ${level <= 2 ? '4px' : '0'};">${text}</h${level}>`;
+                const fontSizeMap = { 1: '26px', 2: '20px', 3: '17px', 4: '15px', 5: '14px', 6: '13px' };
+                const fSize = fontSizeMap[level] || '18px';
+                const borderBottom = level <= 2 ? `border-bottom: 1.5px solid ${accentColor}25; padding-bottom: 4px;` : '';
+                html += `<h${level} style="${fontCss} font-size: ${fSize}; font-weight: 800; margin-top: 1.2em; margin-bottom: 0.4em; color: ${accentColor}; ${borderBottom} line-height: 1.3;">${text}</h${level}>`;
                 break;
               }
 
               case 'paragraph': {
                 const text = block.data.text || '';
-                html += `<p style="${fontCss} font-size: 14px; margin-bottom: 1em; color: #334155;">${text}</p>`;
+                html += `<p style="${fontCss} font-size: 13.5px; line-height: 1.65; margin: 0 0 0.9em 0; color: #334155;">${text}</p>`;
                 break;
               }
 
               case 'list': {
-                const tag = block.data.style === 'ordered' ? 'ol' : 'ul';
+                const isOrdered = block.data.style === 'ordered';
+                const tag = isOrdered ? 'ol' : 'ul';
+                const listStyle = isOrdered ? 'list-style-type: decimal;' : 'list-style-type: disc;';
                 const items = block.data.items || [];
                 const itemsHtml = items.map(item => {
-                  const itemTxt = typeof item === 'string' ? item : (item.content || '');
-                  return `<li style="margin-bottom: 0.4em;">${itemTxt}</li>`;
+                  const itemTxt = typeof item === 'string' ? item : (item.content || item.text || '');
+                  return `<li style="margin-bottom: 0.35em; font-size: 13.5px; color: #334155;">${itemTxt}</li>`;
                 }).join('');
-                html += `<${tag} style="${fontCss} font-size: 14px; margin-bottom: 1em; padding-left: 1.6em; color: #334155;">${itemsHtml}</${tag}>`;
+                html += `<${tag} style="${fontCss} ${listStyle} margin: 0.6em 0 1em 0; padding-left: 1.8em; color: #334155;">${itemsHtml}</${tag}>`;
                 break;
               }
 
               case 'checklist': {
                 const items = block.data.items || [];
                 const listHtml = items.map(item => {
-                  const isChecked = item.checked;
-                  const checkSymbol = isChecked ? '☑' : '☐';
-                  const strikeStyle = isChecked ? 'text-decoration: line-through; opacity: 0.7;' : '';
-                  return `<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5em; font-size: 14px; color: #334155; ${strikeStyle}">
-                    <span style="font-size: 16px; color: ${isChecked ? accentColor : '#94a3b8'};">${checkSymbol}</span>
-                    <span>${item.text || ''}</span>
-                  </div>`;
+                  const isChecked = Boolean(item.checked);
+                  const checkMark = isChecked ? '✓' : '';
+                  const checkBg = isChecked ? `background-color: ${accentColor}; border-color: ${accentColor}; color: #ffffff;` : 'background-color: #ffffff; border-color: #94a3b8; color: transparent;';
+                  const strikeStyle = isChecked ? 'text-decoration: line-through; color: #94a3b8;' : 'color: #334155;';
+                  return `
+                    <div style="display: table; width: 100%; margin-bottom: 0.45em; font-size: 13.5px; ${strikeStyle}">
+                      <div style="display: table-cell; vertical-align: top; width: 22px;">
+                        <span style="display: inline-block; width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid; text-align: center; line-height: 14px; font-size: 10px; font-weight: bold; ${checkBg}">${checkMark}</span>
+                      </div>
+                      <div style="display: table-cell; vertical-align: middle;">${item.text || ''}</div>
+                    </div>
+                  `;
                 }).join('');
-                html += `<div style="margin-bottom: 1em; padding: 4px 0;">${listHtml}</div>`;
+                html += `<div style="margin: 0.6em 0 1em 0;">${listHtml}</div>`;
                 break;
               }
 
@@ -997,81 +2159,147 @@
                   row.forEach(cell => {
                     const isHeader = rIdx === 0 && block.data.withHeadings;
                     const tag = isHeader ? 'th' : 'td';
-                    const bg = isHeader ? `background-color: ${accentColor}10; font-weight: bold; color: ${accentColor};` : 'background-color: #ffffff;';
-                    cellsHtml += `<${tag} style="border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 13px; text-align: left; ${bg}">${cell}</${tag}>`;
+                    const bg = isHeader ? `background-color: ${accentColor}12; font-weight: 700; color: ${accentColor};` : 'background-color: #ffffff; color: #334155;';
+                    cellsHtml += `<${tag} style="border: 1px solid #cbd5e1; padding: 7px 10px; font-size: 12.5px; text-align: left; vertical-align: top; ${bg}">${cell}</${tag}>`;
                   });
                   rowsHtml += `<tr>${cellsHtml}</tr>`;
                 });
-                html += `<table style="width: 100%; border-collapse: collapse; margin-bottom: 1.2em; ${fontCss}">${rowsHtml}</table>`;
+                html += `<table style="width: 100%; border-collapse: collapse; margin: 1em 0; ${fontCss}">${rowsHtml}</table>`;
                 break;
               }
 
               case 'quote': {
                 const text = block.data.text || '';
                 const caption = block.data.caption || '';
-                html += `<blockquote style="border-left: 4px solid ${accentColor}; background-color: #f8fafc; padding: 12px 16px; margin: 1.2em 0; border-radius: 0 8px 8px 0; ${fontCss}">
-                  <p style="font-style: italic; font-size: 14px; margin: 0; color: #334155;">"${text}"</p>
-                  ${caption ? `<cite style="display: block; margin-top: 6px; font-size: 12px; font-weight: bold; color: #64748b;">— ${caption}</cite>` : ''}
+                html += `<blockquote style="border-left: 4px solid ${accentColor}; background-color: #f8fafc; padding: 10px 14px; margin: 1em 0; border-radius: 0 6px 6px 0; ${fontCss}">
+                  <p style="font-style: italic; font-size: 13.5px; margin: 0; color: #334155; line-height: 1.5;">"${text}"</p>
+                  ${caption ? `<cite style="display: block; margin-top: 5px; font-size: 11.5px; font-weight: 700; color: #64748b;">— ${caption}</cite>` : ''}
                 </blockquote>`;
                 break;
               }
 
               case 'warning': {
-                const title = block.data.title || 'Note';
+                const title = block.data.title || 'Important Notice';
                 const message = block.data.message || '';
-                html += `<div style="background-color: #fffbeb; border: 1px solid #fcd34d; border-left: 5px solid #f59e0b; padding: 12px 16px; border-radius: 6px; margin-bottom: 1.2em; ${fontCss}">
-                  <div style="font-weight: bold; font-size: 14px; color: #b45309; margin-bottom: 4px;">⚠️ ${title}</div>
-                  <div style="font-size: 13px; color: #78350f;">${message}</div>
+                html += `<div style="background-color: #fffbeb; border: 1px solid #fcd34d; border-left: 4.5px solid #f59e0b; padding: 10px 14px; border-radius: 6px; margin: 1em 0; ${fontCss}">
+                  <div style="font-weight: 700; font-size: 13px; color: #b45309; margin-bottom: 2px;">⚠️ ${title}</div>
+                  <div style="font-size: 12.5px; color: #78350f; line-height: 1.5;">${message}</div>
                 </div>`;
                 break;
               }
 
               case 'code': {
                 const codeTxt = block.data.code || '';
-                html += `<pre style="background-color: #0f172a; color: #f8fafc; padding: 14px 18px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 12px; overflow-x: auto; margin-bottom: 1.2em; white-space: pre-wrap;"><code>${codeTxt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                html += `<pre style="background-color: #0f172a; color: #f8fafc; padding: 12px 14px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 11.5px; line-height: 1.45; overflow-x: auto; margin: 1em 0; white-space: pre-wrap; word-break: break-word;"><code>${codeTxt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
                 break;
               }
 
               case 'delimiter': {
-                html += `<hr style="border: none; border-top: 2px dashed #cbd5e1; margin: 2em 0;" />`;
+                html += `<hr style="border: none; border-top: 1.5px dashed #cbd5e1; margin: 1.8em 0;" />`;
                 break;
               }
 
               case 'image': {
                 const url = block.data.url || '';
                 const caption = block.data.caption || '';
+                const withBorder = block.data.withBorder ? 'border: 1.5px solid #cbd5e1;' : '';
+                const withBg = block.data.withBackground ? 'background-color: #f8fafc; padding: 8px;' : '';
+                const widthStyle = block.data.stretched ? 'width: 100%;' : 'max-width: 80%;';
                 if (url) {
-                  html += `<figure style="margin: 1.5em 0; text-align: center;">
-                    <img src="${url}" alt="${caption}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" />
-                    ${caption ? `<figcaption style="font-size: 12px; color: #64748b; margin-top: 6px;">${caption}</figcaption>` : ''}
-                  </figure>`;
+                  html += `<div style="margin: 1.2em 0; text-align: center; ${withBg}">
+                    <img src="${url}" alt="${caption}" style="${widthStyle} height: auto; border-radius: 6px; display: inline-block; ${withBorder}" crossOrigin="anonymous" />
+                    ${caption ? `<div style="font-size: 11.5px; color: #64748b; margin-top: 5px; font-style: italic;">${caption}</div>` : ''}
+                  </div>`;
                 }
                 break;
               }
 
+              case 'embed': {
+                const source = block.data.source || block.data.embed || '';
+                const caption = block.data.caption || '';
+                html += `<div style="margin: 1.2em 0; padding: 12px; background-color: #0f172a; border-radius: 8px; color: #ffffff; text-align: center; font-size: 12px;">
+                  <div style="font-weight: 700; color: #38bdf8; margin-bottom: 2px;">▶ Media Link (${block.data.service || 'Video'})</div>
+                  <div style="color: #93c5fd; word-break: break-all; font-size: 11px;">${source}</div>
+                  ${caption ? `<div style="font-size: 10.5px; color: #94a3b8; font-style: italic; margin-top: 4px;">${caption}</div>` : ''}
+                </div>`;
+                break;
+              }
+
+              case 'linkTool': {
+                const link = block.data.link || '';
+                const title = block.data.meta?.title || block.data.title || link;
+                const desc = block.data.meta?.description || block.data.description || '';
+                html += `<div style="margin: 1em 0; padding: 10px 14px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; display: table; width: 100%; box-sizing: border-box;">
+                  <div style="display: table-cell; vertical-align: middle; width: 30px; font-size: 16px;">🔗</div>
+                  <div style="display: table-cell; vertical-align: middle;">
+                    <div style="font-size: 12.5px; font-weight: 700; color: #1e293b;">${title}</div>
+                    ${desc ? `<div style="font-size: 11.5px; color: #64748b;">${desc}</div>` : ''}
+                    <div style="font-size: 10.5px; color: #2563eb; word-break: break-all;">${link}</div>
+                  </div>
+                </div>`;
+                break;
+              }
+
+              case 'attaches': {
+                const title = block.data.title || 'Document Attachment';
+                const size = block.data.size || '';
+                const ext = block.data.extension || 'FILE';
+                html += `<div style="margin: 1em 0; padding: 10px 14px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; display: table; width: 100%; box-sizing: border-box;">
+                  <div style="display: table-cell; vertical-align: middle; width: 44px;">
+                    <span style="background-color: #fef3c7; color: #d97706; padding: 4px 6px; border-radius: 4px; font-weight: 800; font-size: 10px; display: inline-block;">${ext}</span>
+                  </div>
+                  <div style="display: table-cell; vertical-align: middle;">
+                    <div style="font-size: 12.5px; font-weight: 700; color: #1e293b;">${title}</div>
+                    ${size ? `<div style="font-size: 11px; color: #94a3b8;">${size}</div>` : ''}
+                  </div>
+                </div>`;
+                break;
+              }
+
+              case 'personality': {
+                const name = block.data.name || 'Author';
+                const desc = block.data.description || '';
+                const photo = block.data.photo || '';
+                html += `<div style="margin: 1.2em 0; padding: 12px 14px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; display: table; width: 100%; box-sizing: border-box;">
+                  ${photo ? `<div style="display: table-cell; vertical-align: middle; width: 50px; padding-right: 12px;"><img src="${photo}" alt="${name}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid ${accentColor};" crossOrigin="anonymous" /></div>` : ''}
+                  <div style="display: table-cell; vertical-align: middle;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #0f172a;">${name}</div>
+                    <div style="font-size: 11.5px; color: #64748b;">${desc}</div>
+                  </div>
+                </div>`;
+                break;
+              }
+
+              case 'math': {
+                const formula = block.data.text || '';
+                html += `<div style="margin: 1.2em 0; padding: 10px 14px; background-color: #0f172a; border-radius: 8px; text-align: center; color: #5eead4; font-family: monospace; font-size: 13px; border-left: 4px solid #14b8a6;">
+                  <code>${formula}</code>
+                </div>`;
+                break;
+              }
+
               case 'raw': {
-                html += `<div style="margin-bottom: 1em;">${block.data.html || ''}</div>`;
+                html += `<div style="margin: 0.8em 0;">${block.data.html || ''}</div>`;
                 break;
               }
 
               default: {
                 if (block.data && block.data.text) {
-                  html += `<p style="${fontCss} font-size: 14px; margin-bottom: 1em; color: #334155;">${block.data.text}</p>`;
+                  html += `<p style="${fontCss} font-size: 13.5px; line-height: 1.65; margin: 0 0 0.9em 0; color: #334155;">${block.data.text}</p>`;
                 }
               }
             }
           });
-
         }
 
         html += `</div>`;
 
         // 3. RENDER FOOTER SECTION
-        if (footerData && footerData.enabled) {
+        if (footerData && footerData.enabled && (footerData.left || footerData.right)) {
           html += `
-            <div style="border-top: 1.5px solid ${accentColor}40; padding-top: 10px; margin-top: 32px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; ${fontCss}">
-              <div>${footerData.left || ''}</div>
-              <div style="font-weight: 600;">${footerData.right || ''}</div>
+            <div style="border-top: 1.5px solid #cbd5e1; padding-top: 12px; margin-top: 32px; display: table; width: 100%; box-sizing: border-box; font-size: 11px; color: #64748b; ${fontCss}">
+              <div style="display: table-cell; vertical-align: middle; line-height: 1.3;">${escapeText(footerData.left || '')}</div>
+              <div style="display: table-cell; vertical-align: middle; text-align: right; font-weight: 600; line-height: 1.3; white-space: nowrap; padding-left: 12px;">${escapeText(footerData.right || '')}</div>
             </div>
           `;
         }
@@ -1080,78 +2308,190 @@
         return html;
       }
 
-      // 9. EXPORT TO PDF HANDLER
+      // Helper to preload and sanitize images to avoid html2canvas canvas tainting
+      async function prepareImagesForCanvas(container) {
+        const images = container.querySelectorAll('img');
+        if (images.length === 0) return;
+
+        const promises = Array.from(images).map(img => {
+          return new Promise((resolve) => {
+            if (img.complete && img.naturalHeight !== 0) {
+              resolve();
+              return;
+            }
+            img.onload = () => resolve();
+            img.onerror = () => {
+              // Gracefully handle images that fail CORS or loading
+              img.style.display = 'none';
+              resolve();
+            };
+            // Fallback timeout so generation is never hung
+            setTimeout(resolve, 1500);
+          });
+        });
+
+        await Promise.all(promises);
+      }
+
+      // 10. EXPORT TO PDF HANDLER (100% RELIABLE & NEVER BLANK)
       const exportBtn = document.getElementById('exportPdfBtn');
-      exportBtn.addEventListener('click', async () => {
-        try {
-          exportBtn.disabled = true;
-          exportBtn.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Building PDF...
-          `;
+      if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+          let progressOverlay = null;
+          let printContainer = null;
 
-          const outputData = await editor.save();
-          const pSize = document.getElementById('paperSizeSelect').value || 'letter';
-          const pOrient = document.getElementById('orientationSelect').value || 'portrait';
-          const pFont = document.getElementById('fontSelect').value || 'sans';
-          const pAccent = document.getElementById('accentColorSelect').value || '#1e293b';
+          try {
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = `
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Generating PDF...
+            `;
 
-          const headerData = {
-            enabled: isHeaderEnabled,
-            title: document.getElementById('headerTitleInput')?.value || '',
-            subtitle: document.getElementById('headerSubtitleInput')?.value || ''
-          };
+            // 1. Show user progress overlay modal
+            progressOverlay = document.createElement('div');
+            progressOverlay.id = 'pdfExportProgressOverlay';
+            progressOverlay.className = 'fixed inset-0 z-[999999] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 select-none';
+            progressOverlay.innerHTML = `
+              <div class="bg-slate-900 border border-teal-500/40 rounded-2xl p-6 sm:p-8 shadow-2xl max-w-sm w-full text-center flex flex-col items-center gap-3 text-white animate-fade-in">
+                <div class="w-14 h-14 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-2xl animate-bounce">
+                  📄
+                </div>
+                <div class="font-black text-lg text-slate-100">Generating PDF...</div>
+                <div class="text-xs text-slate-400">Rendering high-resolution vector layout & typography</div>
+                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-2">
+                  <div class="bg-gradient-to-r from-teal-400 via-indigo-500 to-teal-400 h-full w-full animate-pulse"></div>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(progressOverlay);
 
-          const footerData = {
-            enabled: isFooterEnabled,
-            left: document.getElementById('footerLeftInput')?.value || '',
-            right: document.getElementById('footerRightInput')?.value || ''
-          };
+            // 2. Fetch latest editor state
+            await editor.isReady;
+            const outputData = await editor.save();
+            const pSize = document.getElementById('paperSizeSelect')?.value || 'letter';
+            const pOrient = document.getElementById('orientationSelect')?.value || 'portrait';
+            const pFont = document.getElementById('fontSelect')?.value || 'sans';
+            const pAccent = document.getElementById('accentColorSelect')?.value || '#1e293b';
 
-          const parsedHTML = parseBlocksToHTML(outputData.blocks || [], pAccent, pFont, headerData, footerData);
+            const headerData = {
+              enabled: isHeaderEnabled,
+              title: document.getElementById('headerTitleInput')?.value || '',
+              subtitle: document.getElementById('headerSubtitleInput')?.value || ''
+            };
 
-          // Create temporary off-screen container for rendering
-          const wrapper = document.createElement('div');
-          wrapper.style.position = 'absolute';
-          wrapper.style.left = '-9999px';
-          wrapper.style.top = '-9999px';
-          wrapper.style.width = pOrient === 'landscape' ? '950px' : '750px';
-          wrapper.style.padding = '40px';
-          wrapper.style.backgroundColor = '#ffffff';
-          wrapper.innerHTML = parsedHTML;
+            const footerData = {
+              enabled: isFooterEnabled,
+              left: document.getElementById('footerLeftInput')?.value || '',
+              right: document.getElementById('footerRightInput')?.value || ''
+            };
 
-          document.body.appendChild(wrapper);
+            // 3. Parse clean document markup
+            const parsedHTML = parseBlocksToHTML(outputData.blocks || [], pAccent, pFont, headerData, footerData);
 
-          // Configure html2pdf options
-          const opt = {
-            margin: 0.5,
-            filename: 'created_document.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF: { unit: 'in', format: pSize, orientation: pOrient }
-          };
+            // 4. Create isolated, pure-white print container positioned at valid visible layer
+            const targetWidth = pOrient === 'landscape' ? 1080 : 800;
+            printContainer = document.createElement('div');
+            printContainer.id = 'pdfRenderEngineContainer';
+            printContainer.style.cssText = `
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: ${targetWidth}px;
+              min-height: ${pOrient === 'landscape' ? '600px' : '900px'};
+              padding: 36px 40px;
+              background-color: #ffffff;
+              color: #1e293b;
+              box-sizing: border-box;
+              z-index: 999998;
+              opacity: 1;
+              visibility: visible;
+              overflow: visible;
+            `;
+            printContainer.innerHTML = parsedHTML;
+            document.body.appendChild(printContainer);
 
-          await html2pdf().from(wrapper).set(opt).save();
+            // 5. Preload and sanitize images
+            await prepareImagesForCanvas(printContainer);
 
-          document.body.removeChild(wrapper);
-          showToast('PDF Exported Successfully!');
-        } catch (err) {
-          console.error('PDF generation error:', err);
-          showToast('Failed to generate PDF: ' + err.message, 'error');
-        } finally {
-          exportBtn.disabled = false;
-          exportBtn.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Export to PDF
-          `;
-        }
+            // Allow layout engine a short breather to compute bounding boxes
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            const rawTitle = (headerData.title || 'Document').replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 35) || 'Document';
+            const filename = `${rawTitle}_${Date.now()}.pdf`;
+
+            // 6. html2pdf options (configured specifically to eliminate blank pages)
+            const opt = {
+              margin: [0.4, 0.4, 0.4, 0.4],
+              filename: filename,
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: '#ffffff',
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: targetWidth,
+                logging: false
+              },
+              jsPDF: {
+                unit: 'in',
+                format: pSize === 'legal' ? 'legal' : (pSize === 'a4' ? 'a4' : 'letter'),
+                orientation: pOrient || 'portrait'
+              },
+              pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            await html2pdf().from(printContainer).set(opt).save();
+
+            showToast('PDF Document Exported & Downloaded!');
+            saveDocument(false);
+          } catch (err) {
+            console.error('PDF export error:', err);
+            showToast('PDF generation encountered an error: ' + err.message, 'error');
+          } finally {
+            if (printContainer && printContainer.parentNode) {
+              printContainer.parentNode.removeChild(printContainer);
+            }
+            if (progressOverlay && progressOverlay.parentNode) {
+              progressOverlay.parentNode.removeChild(progressOverlay);
+            }
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = `
+              <svg width="14" height="14" class="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Export</span>
+              <span class="hidden sm:inline">to PDF</span>
+            `;
+          }
+        });
+      }
+
+      // 11. BROWSER NATIVE PRINT / VECTOR PDF HANDLER
+      const printBtn = document.getElementById('printDocumentBtn');
+      if (printBtn) {
+        printBtn.addEventListener('click', () => {
+          // Pre-sync input attributes so print stylesheet renders current values
+          ['headerTitleInput', 'headerSubtitleInput', 'footerLeftInput', 'footerRightInput'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute('value', el.value);
+          });
+          window.print();
+        });
+      }
+
+      // Sync attributes before any print trigger (e.g., Ctrl+P)
+      window.addEventListener('beforeprint', () => {
+        ['headerTitleInput', 'headerSubtitleInput', 'footerLeftInput', 'footerRightInput'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.setAttribute('value', el.value);
+        });
       });
 
       // ==========================================
@@ -1615,7 +2955,6 @@
 
     </div>
   </div>
-  <script src="/js/futuristic-hud.js"></script>
 </body>
 </html>
 
