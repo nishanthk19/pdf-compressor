@@ -28,27 +28,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="/css/tailwind.css">
 </head>
 <body class="h-full flex flex-col font-sans text-slate-900 antialiased">
   
@@ -56,7 +36,7 @@
   <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-brand-500/20">
+        <div class="w-9 h-9 rounded-xl bg-auth-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-auth-500/20">
           V
         </div>
         <span class="text-lg font-bold tracking-tight text-slate-900">Vibify</span>
@@ -74,7 +54,7 @@
     <!-- User Profile Header Card -->
     <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
       <div class="flex items-center gap-4">
-        <div id="user-avatar" class="w-16 h-16 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-2xl font-black">
+        <div id="user-avatar" class="w-16 h-16 rounded-2xl bg-auth-100 text-auth-700 flex items-center justify-center text-2xl font-black">
           U
         </div>
         <div>
@@ -87,7 +67,7 @@
       </div>
 
       <div class="flex items-center gap-3 w-full sm:w-auto">
-        <a href="/" class="flex-1 sm:flex-none text-center px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm">
+        <a href="/" class="flex-1 sm:flex-none text-center px-4 py-2.5 bg-auth-600 hover:bg-auth-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm">
           Use PDF Tools
         </a>
       </div>

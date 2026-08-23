@@ -1,4 +1,10 @@
 node_modules/
+.pnpm-store/
+work-tailwind.tgz
+work-tailwind.exe
+public/css/tailwind.css
+test-*.pdf
+test-*.docx
 build/
 dist/
 coverage/

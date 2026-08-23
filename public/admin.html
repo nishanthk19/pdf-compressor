@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Vibify Admin Dashboard</title>
     <meta name="robots" content="noindex, nofollow">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/tailwind.css">
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
     
@@ -72,7 +72,7 @@
                 const res = await fetch('/api/admin/data', { credentials: 'include' });
                 if (!res.ok) {
                     if (res.status === 401 || res.status === 403) {
-                        alert("Unauthorized. Please log in to your account first.");
+                        alert("Administrator access is required.");
                         window.location.href = '/login.html';
                         return;
                     }
