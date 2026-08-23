@@ -1,0 +1,111 @@
+/* Vibify Studio — shared visual shell for the advanced editors. */
+:root {
+  --studio-ink: #17152f;
+  --studio-ink-soft: #252047;
+  --studio-violet: #6d4aff;
+  --studio-violet-dark: #5637e8;
+  --studio-lilac: #eeeaff;
+  --studio-coral: #ff745c;
+  --studio-line: #ded9ef;
+}
+
+body {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
+  background: #f4f3f8 !important;
+}
+
+body > header,
+body > nav,
+.header-content {
+  background: linear-gradient(135deg, var(--studio-ink), var(--studio-ink-soft)) !important;
+  border-color: #37305f !important;
+  box-shadow: 0 12px 32px rgba(23, 21, 47, .18) !important;
+}
+
+body > header a,
+body > nav a,
+.header-content a {
+  text-decoration: none;
+}
+
+body > main,
+.main-container {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(109, 74, 255, .10), transparent 28rem),
+    radial-gradient(circle at 92% 22%, rgba(255, 116, 92, .08), transparent 24rem),
+    #f4f3f8 !important;
+}
+
+#emptyState,
+.toolbar-card,
+.stage-card,
+.editor-container,
+.settings-panel {
+  border-color: var(--studio-line) !important;
+  box-shadow: 0 18px 50px rgba(31, 27, 73, .10) !important;
+}
+
+#emptyState {
+  background: rgba(255, 255, 255, .94) !important;
+  border: 2px dashed #c6bcf6 !important;
+}
+
+#emptyState h2,
+#emptyState h3,
+#emptyState p {
+  color: var(--studio-ink) !important;
+}
+
+#emptyState p { color: #716d8e !important; }
+
+#exportPdfBtn,
+#savePdfBtn,
+#saveExportBtn,
+#saveDocumentBtn,
+#openAiDraftModalHeaderBtn,
+.primary-btn {
+  background: linear-gradient(135deg, var(--studio-violet), var(--studio-violet-dark)) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 10px 24px rgba(109, 74, 255, .25) !important;
+}
+
+#exportPdfBtn:hover,
+#savePdfBtn:hover,
+#saveExportBtn:hover,
+#saveDocumentBtn:hover,
+#openAiDraftModalHeaderBtn:hover,
+.primary-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.bg-teal-500,
+.bg-teal-600,
+.bg-indigo-500,
+.bg-indigo-600 { background-color: var(--studio-violet) !important; }
+
+.hover\:bg-teal-400:hover,
+.hover\:bg-teal-600:hover,
+.hover\:bg-indigo-500:hover,
+.hover\:bg-indigo-700:hover { background-color: var(--studio-violet-dark) !important; }
+
+.text-teal-300,
+.text-teal-400,
+.text-indigo-300,
+.text-indigo-400,
+.text-indigo-600 { color: #a997ff !important; }
+
+.border-teal-400,
+.border-teal-500,
+.border-indigo-500 { border-color: #8d74ff !important; }
+
+.focus\:ring-teal-500:focus,
+.focus\:ring-indigo-500:focus { --tw-ring-color: rgba(109, 74, 255, .45) !important; }
+
+@media (max-width: 767px) {
+  body > header,
+  body > nav { position: relative !important; }
+
+  .main-container { padding: 16px !important; }
+}

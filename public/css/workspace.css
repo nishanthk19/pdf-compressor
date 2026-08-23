@@ -724,4 +724,241 @@ body {
   }
 }
 
+/* ===========================================================================
+   Vibify Workspace 2026 — focused studio shell
+   ========================================================================== */
+:root {
+  --sidebar-width: 372px;
+  --color-seashell: #eeeaff;
+  --color-garnet: #201d42;
+  --color-iceblue: #e6e2f0;
+  --color-rose: #ff776a;
+  --color-teal: #6d4aff;
+  --color-steel: #716e8e;
+  --bg-main: #f7f6fb;
+  --bg-sidebar: #ffffff;
+  --border-color: #e6e2f0;
+  --primary-color: #201d42;
+  --primary-hover: #17152f;
+  --accent-teal: #6d4aff;
+  --accent-peach: #eeeaff;
+  --accent-rose: #ff776a;
+  --text-dark: #201d42;
+  --text-muted: #716e8e;
+  --radius-lg: 20px;
+  --radius-md: 13px;
+}
+
+body {
+  font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-main);
+}
+
+.workspace-container {
+  position: relative;
+  background: #f7f6fb;
+}
+
+.sidebar {
+  position: relative;
+  border-right: 1px solid var(--border-color);
+  box-shadow: 10px 0 40px rgba(32, 29, 66, .07);
+}
+
+.sidebar::before {
+  content: "PDF WORKSPACE";
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 2;
+  color: #9c96b4;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.sidebar-header {
+  padding: 24px 25px 22px;
+  border-bottom: 1px solid var(--border-color);
+  background: #fff;
+}
+
+.back-link {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  margin-bottom: 24px;
+  padding: 6px 10px 6px 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  color: var(--text-muted);
+  background: #fbfaff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.back-link img { height: 20px !important; max-width: 96px; }
+.back-link:hover { color: var(--color-teal); border-color: #cabfff; background: #f4f1ff; }
+.sidebar-header h2 { margin: 0; max-width: 280px; font-size: 22px; line-height: 1.15; letter-spacing: -.035em; }
+.sidebar-header p { margin-top: 8px; max-width: 305px; color: var(--text-muted); font-size: 11px; line-height: 1.6; }
+
+.sidebar-body {
+  gap: 18px;
+  padding: 22px 25px 28px;
+  background: #fff;
+}
+
+.sidebar-body::-webkit-scrollbar, .main-workspace::-webkit-scrollbar { width: 7px; }
+.sidebar-body::-webkit-scrollbar-thumb, .main-workspace::-webkit-scrollbar-thumb { border-radius: 99px; background: #d7d2e5; }
+
+.sidebar-footer {
+  padding: 17px 25px 21px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(12px);
+}
+
+.main-workspace {
+  position: relative;
+  justify-content: center;
+  padding: 48px;
+  background:
+    radial-gradient(circle at 80% 18%, rgba(109, 74, 255, .11), transparent 25%),
+    radial-gradient(circle at 12% 82%, rgba(255, 119, 106, .06), transparent 23%),
+    #f7f6fb;
+}
+
+.main-workspace::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .34;
+  background-image: radial-gradient(#bcb6d0 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(120deg, black, transparent 72%);
+}
+
+.dropzone-state {
+  position: relative;
+  z-index: 1;
+  max-width: 610px;
+  min-height: 430px;
+  padding: 66px 54px;
+  border: 2px dashed #c8bcff;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, .93);
+  box-shadow: 0 30px 80px rgba(53, 39, 111, .13);
+  backdrop-filter: blur(12px);
+}
+
+.dropzone-state::before {
+  content: "DROP ZONE";
+  position: absolute;
+  top: 21px;
+  left: 24px;
+  color: #9e97b8;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .15em;
+}
+
+.dropzone-state.dragover {
+  border-color: var(--color-teal);
+  background: #f5f2ff;
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 32px 82px rgba(109, 74, 255, .2);
+}
+
+.dropzone-icon {
+  width: 78px;
+  height: 78px;
+  margin-bottom: 24px;
+  border-radius: 23px;
+  color: #fff;
+  background: linear-gradient(145deg, #7e61ff, #5b37ee);
+  font-size: 31px;
+  box-shadow: 0 17px 35px rgba(109, 74, 255, .3);
+  transform: rotate(-4deg);
+}
+
+.dropzone-title { margin-bottom: 10px; font-size: 25px; letter-spacing: -.035em; }
+.dropzone-desc { max-width: 420px; margin-bottom: 28px; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+.btn-select-file {
+  min-height: 50px;
+  padding: 0 25px;
+  border-radius: 14px;
+  background: var(--color-teal);
+  font-size: 13px;
+  font-weight: 850;
+  box-shadow: 0 13px 25px rgba(109, 74, 255, .25);
+}
+.btn-select-file:hover { background: #5634eb; transform: translateY(-2px); }
+
+.form-group, .stats-card {
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: #fbfaff;
+}
+.form-label { color: #77728f; font-size: 9px; letter-spacing: .1em; }
+.form-control {
+  min-height: 44px;
+  border-color: #ded9eb;
+  border-radius: 12px;
+  color: var(--text-dark);
+  background: #fff;
+  font-size: 13px;
+}
+.form-control:focus { border-color: #a894ff; box-shadow: 0 0 0 4px rgba(109,74,255,.1); }
+
+.target-presets, .preset-grid { gap: 7px !important; }
+.preset-btn {
+  border-color: #ded9eb !important;
+  border-radius: 10px !important;
+  color: var(--text-muted) !important;
+  background: #fff !important;
+  font-weight: 800 !important;
+}
+.preset-btn:hover, .preset-btn.active { border-color: #a894ff !important; color: #5b37ee !important; background: #f0ecff !important; }
+
+.btn-primary-action {
+  min-height: 51px;
+  padding: 0 20px;
+  border-radius: 14px;
+  background: var(--color-teal);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  box-shadow: 0 13px 26px rgba(109, 74, 255, .25);
+}
+.btn-primary-action:hover { background: #5634eb; transform: translateY(-1px); }
+
+.preview-state { position: relative; z-index: 1; max-width: 1160px; }
+.preview-bar { padding: 14px 18px; border-color: var(--border-color); border-radius: 15px; box-shadow: 0 10px 30px rgba(32,29,66,.07); }
+.btn-change-file { min-height: 36px; border-color: var(--border-color) !important; border-radius: 10px !important; }
+.thumbnail-card { border-color: var(--border-color); border-radius: 18px; box-shadow: 0 9px 25px rgba(32,29,66,.07); }
+.thumbnail-card:hover { border-color: #c7bbff; box-shadow: 0 16px 35px rgba(64,45,139,.14); transform: translateY(-4px); }
+.position-grid-container { border-color: var(--border-color); background: #f8f6ff; }
+.grid-cell { border-color: var(--border-color); }
+.grid-cell:hover, .grid-cell.active { border-color: #8f76ff !important; color: #6542f5 !important; background: #eeeaff !important; box-shadow: 0 0 0 2px rgba(109,74,255,.14); }
+
+.vibify-progress-overlay { background: rgba(23,21,47,.76); }
+.vibify-progress-card { border-color: #e6e2f0; border-radius: 25px; box-shadow: 0 30px 90px rgba(23,21,47,.3); }
+.vibify-progress-icon, .vibify-progress-fill { background: linear-gradient(135deg, #7e61ff, #5b37ee, #ff776a); }
+.vibify-progress-title, .vibify-progress-percent { color: var(--text-dark); }
+.vibify-progress-stage { color: var(--color-teal); }
+
+@media (max-width: 860px) {
+  .sidebar::before { top: 18px; right: 16px; }
+  .sidebar-header { padding: 18px 16px !important; }
+  .back-link { margin-bottom: 17px; }
+  .sidebar-body { padding: 16px !important; }
+  .main-workspace { padding: 22px 14px 34px !important; }
+  .dropzone-state { min-height: 330px; padding: 52px 22px 34px !important; border-radius: 23px !important; }
+  .dropzone-icon { width: 64px !important; height: 64px !important; }
+  .dropzone-title { font-size: 21px !important; }
+}
+
 

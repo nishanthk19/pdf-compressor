@@ -1,767 +1,117 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <script src="/js/iframe-polyfill.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-  <!-- Primary SEO Meta Tags -->
   <title>Vibify — Free Online PDF Tools &amp; Document Workspace</title>
-  <meta name="title" content="Vibify — Free Online PDF Tools &amp; Document Workspace">
-  <meta name="description" content="Edit, merge, compress, sign, and convert PDFs instantly in your browser with Vibify. Fast, secure, client-side processing with zero file retention.">
-  <meta name="keywords" content="PDF tools, edit PDF, merge PDF, compress PDF, convert PDF, online PDF editor, free PDF utilities, Vibify, vibify.tech">
-  <meta name="author" content="Vibify">
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="description" content="Compress, merge, edit, convert, secure, and create PDFs in one fast online workspace. Vibify is free, private, and easy to use on any device.">
+  <meta name="keywords" content="PDF tools, edit PDF, merge PDF, compress PDF, convert PDF, online PDF editor, free PDF utilities, Vibify">
+  <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="https://vibify.tech/">
-  <meta name="theme-color" content="#4f46e5">
-
-  <!-- Favicons and App Icons -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#6d4aff">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://vibify.tech/">
-  <meta property="og:title" content="Vibify — Free Online PDF Tools &amp; Document Workspace">
-  <meta property="og:description" content="Edit, merge, compress, sign, and convert PDFs instantly in your browser with Vibify. Fast, private, and secure document workflow.">
+  <meta property="og:type" content="website"><meta property="og:url" content="https://vibify.tech/">
+  <meta property="og:title" content="Vibify — Every PDF tool in one workspace">
+  <meta property="og:description" content="Create, compress, organize, convert, and secure PDFs online.">
   <meta property="og:image" content="https://vibify.tech/vibify-og-image.png">
-  <meta property="og:image:alt" content="Vibify Online PDF Tools &amp; Smart Workspace">
-  <meta property="og:site_name" content="Vibify">
-  <meta property="og:locale" content="en_US">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@vibifytech">
-  <meta name="twitter:url" content="https://vibify.tech/">
-  <meta name="twitter:title" content="Vibify — Free Online PDF Tools &amp; Document Workspace">
-  <meta name="twitter:description" content="Edit, merge, compress, sign, and convert PDFs instantly in your browser with Vibify. Fast, private, and secure document workflow.">
-  <meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
-
-  <!-- Google Analytics 4 (Google Tag) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-27WV7GTMTH"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-27WV7GTMTH', {
-      anonymize_ip: true,
-      send_page_view: true
-    });
-  </script>
-
-  <link rel="stylesheet" href="/css/tailwind.css">
-
-  <!-- Structured Data / JSON-LD Schema -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebApplication",
-        "@id": "https://vibify.tech/#webapp",
-        "name": "Vibify",
-        "url": "https://vibify.tech/",
-        "applicationCategory": "UtilitiesApplication",
-        "operatingSystem": "All",
-        "browserRequirements": "Requires JavaScript. Modern browser recommended.",
-        "description": "Fast, private online PDF editor and document workspace supporting target-size compression, merging, page numbering, OCR text recognition, and PDF conversion.",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "featureList": [
-          "Compress PDF to Target File Size",
-          "Merge PDFs Online",
-          "Extract PDF Pages",
-          "OCR Scanned PDF to Searchable Text",
-          "Add Text Over PDF",
-          "Convert PDF to Word (.docx)",
-          "Protect PDF with Password Encryption",
-          "Unlock Encrypted PDF",
-          "Rotate PDF Pages",
-          "Delete Specific PDF Pages",
-          "Archival PDF/A Conversion"
-        ]
-      },
-      {
-        "@type": "Organization",
-        "@id": "https://vibify.tech/#organization",
-        "name": "Vibify",
-        "url": "https://vibify.tech/",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://vibify.tech/vibify-logo-512.png"
-        },
-        "sameAs": ["https://vibify.tech"]
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://vibify.tech/#website",
-        "url": "https://vibify.tech/",
-        "name": "Vibify",
-        "publisher": {
-          "@id": "https://vibify.tech/#organization"
-        }
-      },
-      {
-        "@type": "FAQPage",
-        "@id": "https://vibify.tech/#faq",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "What is Vibify?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Vibify (vibify.tech) is a 100% free, fast, and secure online PDF productivity platform offering compress, merge, OCR, PDF to Word, text editing, and document security tools."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "How do I compress a PDF online on Vibify?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Navigate to the Compress PDF tool on vibify.tech, enter your target file size in MB, upload your PDF, and download your optimized document instantly."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Are my uploaded PDF documents secure on vibify.tech?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes, absolutely. Vibify processes files securely with immediate server auto-cleanup after processing. Your files are never stored permanently or shared."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Is Vibify completely free to use?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes! All PDF tools on vibify.tech are 100% free with no hidden fees, no credit card required, and zero watermarks."
-            }
-          }
-        ]
-      }
-    ]
-  }
-  </script>
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://vibify.tech/vibify-og-image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tailwind.css"><link rel="stylesheet" href="/css/site.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Vibify","url":"https://vibify.tech/","applicationCategory":"UtilitiesApplication","operatingSystem":"All","description":"A free online PDF workspace for compression, merging, editing, OCR, conversion, security, page organization, and document creation.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-tealaccent selection:text-white flex flex-col min-h-screen">
-
-  <!-- Header & Navigation -->
-  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Brand Logo -->
-      <a href="/" class="flex items-center gap-3 group" title="Vibify Tech - Free Online PDF Tools">
-        <img src="/vibify-logo.svg" alt="Vibify.tech Logo" class="h-8 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform duration-200">
-        <span class="sr-only">vibify.tech</span>
-      </a>
-
-      <!-- Desktop Navigation Links -->
-      <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-steel">
-        <a href="#tools-section" class="hover:text-tealaccent transition-colors">Tools Directory</a>
-        <a href="#features-section" class="hover:text-tealaccent transition-colors">Features</a>
-        <a href="#how-it-works" class="hover:text-tealaccent transition-colors">How It Works</a>
-        <a href="#faq-section" class="hover:text-tealaccent transition-colors">FAQ</a>
-      </nav>
-
-      <!-- Action Button & Mobile Menu Toggle -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <div id="auth-nav-links" class="flex items-center">
-          <!-- Injected dynamically by /js/nav.js -->
-        </div>
-        <a href="#tools-section" class="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs font-extrabold text-white bg-tealaccent hover:bg-tealaccent/90 rounded-xl shadow-sm transition-all hover:shadow-tealaccent/20">
-          <span>All Tools</span>
-          <span class="hidden sm:inline">&nbsp;Directory</span>
-        </a>
-        
-        <!-- Mobile Menu Hamburger Button -->
-        <button type="button" id="mobileMenuBtn" class="md:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" aria-label="Toggle Navigation Menu">
-          <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-          <svg id="closeMenuIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
+<body class="vibify-site">
+  <div class="announcement"><span class="announcement-dot"></span> Free online PDF tools · No watermark · Automatic file cleanup</div>
+  <header class="site-header">
+    <div class="site-shell site-nav">
+      <a class="site-logo" href="/" aria-label="Vibify home"><img src="/vibify-logo.svg" alt="Vibify"></a>
+      <nav class="nav-links" aria-label="Primary"><a href="#tools">All tools</a><a href="#editors">PDF studios</a><a href="#why-vibify">Why Vibify</a><a href="#faq">FAQ</a></nav>
+      <div class="nav-actions"><div id="auth-nav-links"><a class="nav-signin" href="/login.html">Sign in</a></div><a class="nav-cta" href="#tools">Open a PDF tool</a><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open menu"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
     </div>
-
-    <!-- Mobile Navigation Drawer -->
-    <div id="mobileMenuDrawer" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
-      <a href="#tools-section" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">🗂️ Tools Directory</a>
-      <a href="#features-section" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">⚡ Features &amp; Privacy</a>
-      <a href="#how-it-works" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">💡 How It Works</a>
-      <a href="#faq-section" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-tealaccent transition-colors">❓ FAQ</a>
-    </div>
+    <nav class="mobile-menu" id="mobileMenu"><a href="#tools">All tools</a><a href="#editors">PDF studios</a><a href="#why-vibify">Why Vibify</a><a href="#faq">FAQ</a><a href="/login.html">Sign in</a></nav>
   </header>
 
-  <!-- Main Content Wrapper -->
-  <main class="flex-grow">
-
-    <!-- Hero Header -->
-    <section class="relative bg-gradient-to-b from-brand-50/80 via-slate-50 to-slate-50 pt-16 pb-12 overflow-hidden border-b border-iceblue/50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        
-        <!-- Badge -->
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-seashell/40 border border-seashell text-garnet text-xs font-extrabold mb-6 shadow-sm">
-          <span class="flex h-2 w-2 rounded-full bg-tealaccent animate-pulse"></span>
-          100% Free & Private Online PDF Toolkit
+  <main>
+    <section class="hero">
+      <div class="site-shell hero-grid">
+        <div class="hero-copy-block">
+          <span class="eyebrow"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="m12 3 1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z"/></svg>A smarter document workspace</span>
+          <h1>Every PDF job.<br><span>One calm workspace.</span></h1>
+          <p class="hero-copy">Compress, convert, organize, protect, and create polished PDFs without installing anything. Pick a tool and finish the job in a few focused steps.</p>
+          <div class="hero-actions"><a class="button-primary" href="#tools">Explore all tools <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="m9 18 6-6-6-6"/></svg></a><a class="button-secondary" href="/tools/pdf-maker">Create a new PDF <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg></a></div>
+          <div class="trust-row"><span>✓ No registration required</span><span>✓ Works on every device</span><span>✓ Files auto-delete</span></div>
         </div>
-
-        <!-- Headline -->
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-garnet tracking-tight max-w-4xl mx-auto leading-[1.15]">
-          Every PDF Tool You Need in <span class="text-tealaccent">One Workspace</span>
-        </h1>
-
-        <!-- Subheading -->
-        <p class="mt-4 text-base sm:text-lg text-steel max-w-2xl mx-auto leading-relaxed font-medium">
-          Fast, effortless PDF processing right in your browser. Select any tool below to launch its dedicated interactive workspace studio.
-        </p>
-
-        <!-- Trust Badges -->
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-bold text-steel uppercase tracking-wider">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-tealaccent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-            Zero File Retention
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-tealaccent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-            No Registration Required
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-tealaccent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-            Target Size Compression
-          </div>
+        <div class="launch-card">
+          <div class="launch-window"><div class="window-bar"><span class="window-dots"><i></i><i></i><i></i></span><span class="window-label">Vibify quick start</span></div><div class="launch-body">
+            <div class="drop-panel"><div><span class="upload-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 16V4m0 0L7 9m5-5 5 5M5 15v4h14v-4"/></svg></span><strong>What do you need to do?</strong><small>Choose a workflow, then add your PDF in its secure workspace.</small></div></div>
+            <div class="quick-launch"><a href="/tools/compress">↙ Compress PDF</a><a href="/tools/merge">⊕ Merge PDFs</a><a href="/editor">✎ Edit PDF</a></div>
+          </div></div>
         </div>
-
       </div>
     </section>
 
-    <!-- Multipage Tool Directory Grid Section -->
-    <section id="tools-section" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Flagship Featured Banner: Smart PDF Maker Studio -->
-      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 p-8 sm:p-10 lg:p-12 text-white shadow-2xl shadow-indigo-500/25 border border-white/20 mb-14">
-        <!-- Ambient background glows -->
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none"></div>
-        
-        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-          
-          <!-- Left Content Column -->
-          <div class="lg:col-span-7 flex flex-col items-start">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-white/15 text-white backdrop-blur-md border border-white/25 shadow-sm mb-5">
-              <span class="text-amber-300">⭐</span> Flagship Editor
-            </div>
-            
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.15]">
-              Smart PDF Maker Studio
-            </h2>
-            
-            <p class="mt-4 text-base sm:text-lg text-indigo-100 font-medium leading-relaxed max-w-xl">
-              Don't just edit—create. Use our lightning-fast, Notion-style block editor to type, format, and instantly export high-quality PDF documents directly in your browser. No software required.
-            </p>
-            
-            <div class="mt-8 flex flex-wrap items-center gap-4">
-              <a href="/tools/pdf-maker" class="inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-white text-indigo-700 font-black rounded-xl shadow-xl hover:bg-indigo-50 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all text-sm group">
-                <span>Launch PDF Maker Studio</span>
-                <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
-              </a>
-              <div class="flex items-center gap-2 text-xs font-bold text-indigo-200">
-                <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
-                <span>Zero Installation • Instant Browser Export</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Right Mockup / Visual Column -->
-          <div class="lg:col-span-5 hidden sm:block">
-            <div class="relative mx-auto max-w-sm lg:max-w-none">
-              <!-- Glass Card Mockup -->
-              <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-5 shadow-2xl space-y-3.5">
-                <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                  <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-rose-400/80 inline-block"></span>
-                    <span class="w-3 h-3 rounded-full bg-amber-400/80 inline-block"></span>
-                    <span class="w-3 h-3 rounded-full bg-emerald-400/80 inline-block"></span>
-                    <span class="text-[11px] font-bold text-white/80 ml-2">document_draft.pdf</span>
-                  </div>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white/20 text-white uppercase">Ready</span>
-                </div>
-                
-                <div class="space-y-2.5">
-                  <div class="h-5 w-2/3 bg-white/30 rounded-md"></div>
-                  <div class="h-3 w-full bg-white/20 rounded"></div>
-                  <div class="h-3 w-5/6 bg-white/20 rounded"></div>
-                  
-                  <div class="grid grid-cols-2 gap-2 pt-2">
-                    <div class="p-2.5 rounded-lg bg-white/10 border border-white/10">
-                      <div class="h-2.5 w-1/2 bg-amber-300/60 rounded mb-1.5"></div>
-                      <div class="h-2 w-full bg-white/20 rounded"></div>
-                    </div>
-                    <div class="p-2.5 rounded-lg bg-white/10 border border-white/10">
-                      <div class="h-2.5 w-1/2 bg-teal-300/60 rounded mb-1.5"></div>
-                      <div class="h-2 w-full bg-white/20 rounded"></div>
-                    </div>
-                  </div>
-                  
-                  <div class="h-3 w-4/5 bg-white/20 rounded"></div>
-                </div>
+    <div class="logo-strip"><div class="site-shell logo-strip-inner"><span>◈ Private by default</span><span>ϟ Fast processing</span><span>◷ Automatic cleanup</span><span>▣ No software install</span></div></div>
 
-                <div class="pt-2 flex items-center justify-between text-[11px] text-indigo-200">
-                  <span class="flex items-center gap-1.5 font-bold">✨ Block Editor + AI Drafting</span>
-                  <span class="font-extrabold text-white">60 FPS Render</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
+    <section class="section" id="tools"><div class="site-shell">
+      <div class="section-head"><div><p class="section-kicker">One platform, every workflow</p><h2 class="section-title">Find the right PDF tool in seconds</h2><p class="section-desc">Search by task or browse focused groups. Every card opens a dedicated workspace with the same simple flow.</p></div></div>
+      <div class="tool-controls">
+        <label class="tool-search"><span class="sr-only">Search tools</span><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="m21 21-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><input id="toolSearch" type="search" placeholder="Search compress, rotate, OCR, protect…"></label>
+        <div class="tool-tabs" role="tablist"><button class="tool-tab is-active" data-filter="all">All tools</button><button class="tool-tab" data-filter="popular">Popular</button><button class="tool-tab" data-filter="organize">Organize</button><button class="tool-tab" data-filter="convert">Convert</button><button class="tool-tab" data-filter="secure">Secure</button><button class="tool-tab" data-filter="create">Create &amp; edit</button></div>
       </div>
+      <div class="tools-grid" id="toolsGrid"></div>
+    </div></section>
 
-      <!-- Section Divider & Header for More Utilities -->
-      <div class="text-center max-w-2xl mx-auto mb-10 pt-2">
-        <h3 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">More PDF Utilities</h3>
-        <p class="text-sm text-steel mt-2">Choose a utility to open its dedicated 2-column workspace studio.</p>
-      </div>
+    <section class="section section-soft" id="editors"><div class="site-shell showcase">
+      <div class="showcase-copy"><p class="section-kicker">More than quick utilities</p><h2>Build documents in a real browser studio</h2><p>Start from a blank page or a polished template. Add structured content, format it visually, and export a high-quality PDF without leaving Vibify.</p><ul class="feature-list"><li><i>✓</i>Block-based editing and document templates</li><li><i>✓</i>Tables, images, code, callouts, and math</li><li><i>✓</i>Paper size, orientation, themes, and print preview</li></ul><a class="button-primary" href="/tools/pdf-maker">Launch PDF Maker</a></div>
+      <div class="studio-mockup" aria-hidden="true"><div class="studio-window"><div class="studio-toolbar"><span class="grow">Vibify Studio</span><span>B</span><span>I</span><span>+</span></div><div class="studio-canvas"><div class="studio-sidebar"><i></i><i></i><i></i><i></i><i></i></div><div class="paper"><strong></strong><i></i><i></i><i></i><i></i><i></i></div></div></div></div>
+    </div></section>
 
-      <!-- Tools Directory Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <section class="section" id="why-vibify"><div class="site-shell"><div class="section-head"><div><p class="section-kicker">Simple where it matters</p><h2 class="section-title">A focused workflow from upload to download</h2></div></div><div class="benefit-grid"><article class="benefit-card"><span class="benefit-num">01 · CHOOSE</span><h3>Start with the task</h3><p>Open the exact tool you need from a clear, searchable directory.</p></article><article class="benefit-card"><span class="benefit-num">02 · CUSTOMIZE</span><h3>See the important options</h3><p>Settings stay in one panel while your document preview remains visible.</p></article><article class="benefit-card"><span class="benefit-num">03 · FINISH</span><h3>Download and move on</h3><p>Get the result and let automatic cleanup remove temporary uploads.</p></article></div></div></section>
 
-        <!-- 1. Compress PDF -->
-        <a href="/tools/compress" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-brand-50 text-tealaccent flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-tealaccent group-hover:text-white transition-all">
-              🗜️
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Compress PDF</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Reduce file size to your exact target MB limit with real-time compression stats.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 2. Merge PDFs -->
-        <a href="/tools/merge" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-garnet group-hover:text-seashell transition-all">
-              🧩
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Merge PDFs</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Combine multiple PDF files into one seamless document with custom page ordering.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 3. Extract Pages -->
-        <a href="/tools/extract" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-seashell/40 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-seashell group-hover:text-garnet transition-all">
-              ✂️
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Extract Pages</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Separate a page range or single pages into a brand new standalone PDF file.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 4. OCR PDF -->
-        <a href="/tools/ocr" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
-              🔍
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">OCR PDF</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Convert scanned non-searchable PDF documents into fully searchable & selectable text.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 5. Box Precision Overlay Editor -->
-        <a href="/overlay-editor" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-brand-50 text-tealaccent flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-tealaccent group-hover:text-white transition-all">
-              📐
-            </div>
-            <div class="flex items-center gap-2">
-              <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Box Overlay Studio</h3>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-seashell text-garnet uppercase">PRO</span>
-            </div>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Interactive box overlay studio for precise header, footer, watermarks, and margin masking.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Launch Interactive Studio &rarr;
-          </div>
-        </a>
-
-        <!-- 6. Page Numbers Studio -->
-        <a href="/paginate-editor" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
-              🔢
-            </div>
-            <div class="flex items-center gap-2">
-              <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Page Numbers Studio</h3>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose/20 text-garnet uppercase">Interactive</span>
-            </div>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Full 2-column workspace with live PDF thumbnail position dots for perfect pagination placement.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Launch Interactive Studio &rarr;
-          </div>
-        </a>
-
-        <!-- 7. Convert PDF to Word -->
-        <a href="/tools/word" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-garnet group-hover:text-seashell transition-all">
-              📝
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">PDF to Word</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Convert your PDF files into editable Microsoft Word (.docx) documents effortlessly.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 8. Protect PDF -->
-        <a href="/tools/protect" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
-              🔒
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Protect PDF</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Encrypt your PDF document with a password to prevent unauthorized viewing and editing.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 9. Unlock PDF -->
-        <a href="/tools/unlock" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-brand-50 text-tealaccent flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-tealaccent group-hover:text-white transition-all">
-              🔓
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Unlock PDF</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Remove security passwords and restrictions from your protected PDF files.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 10. Rotate PDF -->
-        <a href="/tools/rotate" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-seashell/40 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-seashell group-hover:text-garnet transition-all">
-              🔄
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Rotate PDF</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Rotate your PDF pages by 90, 180, or 270 degrees to correct document orientation.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 11. Delete Pages -->
-        <a href="/tools/delete" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-rose group-hover:text-white transition-all">
-              🗑️
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Delete Pages</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Remove unwanted pages from your PDF file and save a clean streamlined output.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 12. Archival PDF/A -->
-        <a href="/tools/archive" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-garnet flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-garnet group-hover:text-seashell transition-all">
-              🏛️
-            </div>
-            <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Archival PDF/A</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Convert standard PDFs to ISO-compliant PDF/A format for long-term document archiving.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Open Workspace &rarr;
-          </div>
-        </a>
-
-        <!-- 13. Add Text Over PDF -->
-        <a href="/tools/add-text" class="group bg-white p-6 rounded-2xl border border-iceblue/80 shadow-sm hover:shadow-xl hover:border-tealaccent transition-all duration-200 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-              ✍️
-            </div>
-            <div class="flex items-center gap-2">
-              <h3 class="text-base font-extrabold text-garnet group-hover:text-tealaccent transition-colors">Add Text over PDF</h3>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">Draggable</span>
-            </div>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Place, move, and edit custom text boxes, stamps, and notes freely over any PDF page.</p>
-          </div>
-          <div class="mt-6 flex items-center text-xs font-bold text-tealaccent group-hover:translate-x-1 transition-transform">
-            Launch Interactive Studio &rarr;
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features-section" class="py-16 bg-white border-y border-iceblue/60">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">Why Choose PDF Precision</h2>
-          <p class="text-sm text-steel mt-2">Enterprise-grade document utilities optimized for performance and privacy.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          <div class="p-6 rounded-2xl bg-slate-50 border border-iceblue/60">
-            <div class="w-10 h-10 rounded-xl bg-garnet text-seashell flex items-center justify-center font-bold text-lg mb-4">
-              🛡️
-            </div>
-            <h3 class="text-base font-bold text-garnet">Immediate Auto-Cleanup</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">All uploaded files are automatically deleted from server disk space as soon as your task completes. Zero tracking or permanent storage.</p>
-          </div>
-
-          <div class="p-6 rounded-2xl bg-slate-50 border border-iceblue/60">
-            <div class="w-10 h-10 rounded-xl bg-tealaccent text-white flex items-center justify-center font-bold text-lg mb-4">
-              ⚡
-            </div>
-            <h3 class="text-base font-bold text-garnet">Target Size Architecture</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Compress PDFs to exact target MB file sizes with real-time reduction estimates and Ghostscript binary search optimization.</p>
-          </div>
-
-          <div class="p-6 rounded-2xl bg-slate-50 border border-iceblue/60">
-            <div class="w-10 h-10 rounded-xl bg-garnet text-seashell flex items-center justify-center font-bold text-lg mb-4">
-              ✨
-            </div>
-            <h3 class="text-base font-bold text-garnet">No Hidden Limits</h3>
-            <p class="text-xs text-steel mt-2 leading-relaxed">Completely free to use with no account registration, no watermarks added to documents, and high processing file limits.</p>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section id="how-it-works" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">How It Works</h2>
-        <p class="text-sm text-steel mt-2">3 simple steps to transform and optimize your PDF files.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-        
-        <div class="bg-white p-6 rounded-2xl border border-iceblue/60 shadow-sm text-center">
-          <div class="w-12 h-12 rounded-full bg-seashell/40 text-garnet font-extrabold text-lg flex items-center justify-center mx-auto mb-4 border border-seashell">
-            1
-          </div>
-          <h3 class="text-base font-bold text-garnet">Select Tool & File</h3>
-          <p class="text-xs text-steel mt-2 leading-relaxed">Choose a utility from our directory and drop your PDF into the interactive workspace area.</p>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-iceblue/60 shadow-sm text-center">
-          <div class="w-12 h-12 rounded-full bg-brand-50 text-tealaccent font-extrabold text-lg flex items-center justify-center mx-auto mb-4 border border-tealaccent/30">
-            2
-          </div>
-          <h3 class="text-base font-bold text-garnet">Customize Settings</h3>
-          <p class="text-xs text-steel mt-2 leading-relaxed">Configure target size, page numbers, or positions in the left sidebar while reviewing live thumbnails.</p>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-iceblue/60 shadow-sm text-center">
-          <div class="w-12 h-12 rounded-full bg-rose/20 text-garnet font-extrabold text-lg flex items-center justify-center mx-auto mb-4 border border-rose/30">
-            3
-          </div>
-          <h3 class="text-base font-bold text-garnet">Execute & Download</h3>
-          <p class="text-xs text-steel mt-2 leading-relaxed">Click the primary action button to process your file and save the output instantly to your computer.</p>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- FAQ Accordion Section -->
-    <section id="faq-section" class="py-16 bg-slate-100/70 border-t border-iceblue/60">
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="text-center mb-12">
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-garnet tracking-tight">Frequently Asked Questions</h2>
-          <p class="text-sm text-steel mt-2">Everything you need to know about PDF Precision.</p>
-        </div>
-
-        <div class="space-y-4" id="faq-accordion">
-          
-          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
-              <span>How do I compress a PDF to a specific target file size?</span>
-              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
-              Navigate to the Compress PDF tool from our directory, enter your desired target file size in MB (e.g., 2.0 MB), upload your PDF, and download your optimized document instantly.
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
-              <span>Are my uploaded PDF documents secure and private?</span>
-              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
-              Yes, absolutely. PDF Precision processes files on secure servers with immediate disk auto-cleanup as soon as processing completes. Your files are never stored permanently or shared.
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
-              <span>How do I convert a scanned PDF into searchable text?</span>
-              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
-              Click on the OCR PDF tool, upload your scanned PDF document, and click Run OCR. Our engine performs text recognition and adds an invisible, selectable text layer over your document.
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-iceblue/60 overflow-hidden shadow-sm">
-            <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between font-bold text-sm text-garnet hover:bg-slate-50 transition-colors">
-              <span>Is PDF Precision completely free to use?</span>
-              <svg class="faq-icon w-5 h-5 text-steel transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="faq-content hidden px-6 pb-4 text-xs text-steel leading-relaxed border-t border-slate-100 pt-3">
-              Yes! All tools on PDF Precision are 100% free with no hidden fees, no registration required, and zero watermarks.
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
+    <section class="section section-soft" id="faq"><div class="site-shell faq-grid"><div><p class="section-kicker">Questions, answered</p><h2>Everything you need to get started</h2><p>Vibify makes common PDF work straightforward on desktop and mobile.</p></div><div class="faq-list">
+      <article class="faq-item is-open"><button class="faq-question"><span>Are Vibify PDF tools free?</span><span>+</span></button><div class="faq-answer">Yes. The current tools are free and do not add a watermark.</div></article>
+      <article class="faq-item"><button class="faq-question"><span>What happens to my uploaded files?</span><span>+</span></button><div class="faq-answer">Files are processed temporarily and automatically removed after the operation completes.</div></article>
+      <article class="faq-item"><button class="faq-question"><span>Can I compress to a specific file size?</span><span>+</span></button><div class="faq-answer">Yes. Choose a target in megabytes in the Compress PDF workspace.</div></article>
+      <article class="faq-item"><button class="faq-question"><span>Do I need to install an application?</span><span>+</span></button><div class="faq-answer">No. Vibify works in a modern browser on desktop, tablet, and mobile.</div></article>
+    </div></div></section>
+    <section class="cta-band section-soft"><div class="site-shell"><div class="cta-box"><h2>Your next PDF task is probably a few clicks away.</h2><a class="button-primary" href="#tools">Choose a tool</a></div></div></section>
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-slate-900 text-slate-300 text-xs py-12 border-t border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-      
-      <!-- Column 1: Brand -->
-      <div class="md:col-span-2">
-        <div class="flex items-center gap-2 mb-3">
-          <img src="/vibify-logo-white.svg" alt="Vibify.tech Logo" class="h-8 w-auto">
-        </div>
-        <p class="text-slate-400 leading-relaxed max-w-sm">
-          High-performance online PDF tools &amp; smart document workspace. Fast, 100% free, private, and secure browser-based tools with zero file retention.
-        </p>
-      </div>
-
-      <!-- Column 2: Popular Tools -->
-      <div>
-        <h4 class="font-bold text-white uppercase tracking-wider text-[11px] mb-3">Popular PDF Utilities</h4>
-        <ul class="space-y-2">
-          <li><a href="/tools/compress" class="hover:text-teal-400 transition-colors">Compress PDF (Target Size)</a></li>
-          <li><a href="/tools/merge" class="hover:text-teal-400 transition-colors">Merge PDFs</a></li>
-          <li><a href="/tools/add-text" class="hover:text-teal-400 transition-colors">Add Text to PDF</a></li>
-          <li><a href="/tools/ocr" class="hover:text-teal-400 transition-colors">OCR Searchable PDF</a></li>
-          <li><a href="/tools/word" class="hover:text-teal-400 transition-colors">PDF to Word (.docx)</a></li>
-        </ul>
-      </div>
-
-      <!-- Column 3: Sitemap & Indexing -->
-      <div>
-        <h4 class="font-bold text-white uppercase tracking-wider text-[11px] mb-3">Index &amp; Legal</h4>
-        <ul class="space-y-2">
-          <li><a href="/sitemap.xml" class="hover:text-teal-400 transition-colors">Sitemap XML</a></li>
-          <li><a href="/robots.txt" class="hover:text-teal-400 transition-colors">Robots.txt</a></li>
-          <li><a href="#faq-section" class="hover:text-teal-400 transition-colors">Privacy &amp; Security</a></li>
-        </ul>
-      </div>
-
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
-      <p>&copy; 2026 Vibify (<a href="https://vibify.tech" class="text-teal-400 hover:underline">vibify.tech</a>). All rights reserved.</p>
-      <p class="text-slate-500">100% Free Online PDF Productivity Suite</p>
-    </div>
-  </footer>
-
-  <!-- Mobile Menu & Accordion Toggle Script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Mobile Menu Toggle
-      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-      const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
-      const hamburgerIcon = document.getElementById('hamburgerIcon');
-      const closeMenuIcon = document.getElementById('closeMenuIcon');
-      const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-
-      if (mobileMenuBtn && mobileMenuDrawer) {
-        mobileMenuBtn.addEventListener('click', () => {
-          const isOpen = !mobileMenuDrawer.classList.contains('hidden');
-          if (isOpen) {
-            mobileMenuDrawer.classList.add('hidden');
-            hamburgerIcon.classList.remove('hidden');
-            closeMenuIcon.classList.add('hidden');
-          } else {
-            mobileMenuDrawer.classList.remove('hidden');
-            hamburgerIcon.classList.add('hidden');
-            closeMenuIcon.classList.remove('hidden');
-          }
-        });
-
-        mobileNavLinks.forEach(link => {
-          link.addEventListener('click', () => {
-            mobileMenuDrawer.classList.add('hidden');
-            if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
-            if (closeMenuIcon) closeMenuIcon.classList.add('hidden');
-          });
-        });
-      }
-
-      // FAQ Accordions
-      const faqButtons = document.querySelectorAll('.faq-btn');
-      faqButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const content = btn.nextElementSibling;
-          const icon = btn.querySelector('.faq-icon');
-          
-          const isHidden = content.classList.contains('hidden');
-          
-          // Close all FAQ items
-          document.querySelectorAll('.faq-content').forEach(c => c.classList.add('hidden'));
-          document.querySelectorAll('.faq-icon').forEach(i => i.classList.remove('rotate-180'));
-          
-          if (isHidden) {
-            content.classList.remove('hidden');
-            icon.classList.add('rotate-180');
-          }
-        });
-      });
-    });
-  </script>
+  <footer class="site-footer"><div class="site-shell footer-main"><div class="footer-brand"><img src="/vibify-logo-white.svg" alt="Vibify"><p>Free online tools and focused studios for everyday PDF work. Built for speed, clarity, and privacy.</p></div><div class="footer-column"><h3>Popular tools</h3><a href="/tools/compress">Compress PDF</a><a href="/tools/merge">Merge PDFs</a><a href="/tools/ocr">OCR PDF</a><a href="/tools/word">PDF to Word</a></div><div class="footer-column"><h3>PDF studios</h3><a href="/tools/pdf-maker">PDF Maker</a><a href="/editor">Visual Editor</a><a href="/flow-editor">Flow Editor</a><a href="/overlay-editor">Overlay Studio</a></div><div class="footer-column"><h3>Vibify</h3><a href="#why-vibify">How it works</a><a href="#faq">FAQ</a><a href="/login.html">Sign in</a><a href="/sitemap.xml">Sitemap</a></div></div><div class="site-shell footer-bottom"><span>© 2026 Vibify. All rights reserved.</span><span>Free PDF productivity workspace · vibify.tech</span></div></footer>
 
   <script src="/js/nav.js"></script>
+  <script>
+    const icon = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 3h9l3 3v15H6zM9 11h6M9 15h6"/></svg>';
+    const tools = [
+      ['PDF Maker Studio','Build professional documents with blocks, templates, tables, and images.','/tools/pdf-maker','popular create',true],
+      ['Compress PDF','Reduce a PDF toward an exact target size with smart quality control.','/tools/compress','popular organize'],
+      ['Merge PDFs','Combine files in your preferred order into one clean document.','/tools/merge','popular organize'],
+      ['Visual PDF Editor','Whiteout, draw, annotate, and place text directly on PDF pages.','/editor','popular create'],
+      ['PDF to Word','Convert PDF content into an editable Microsoft Word document.','/tools/word','convert'],
+      ['OCR PDF','Make scanned pages searchable and selectable with text recognition.','/tools/ocr','popular convert'],
+      ['Extract Pages','Save selected pages or ranges as a separate PDF.','/tools/extract','organize'],
+      ['Delete Pages','Remove unwanted pages while preserving the rest of the document.','/tools/delete','organize'],
+      ['Rotate PDF','Correct page orientation by 90, 180, or 270 degrees.','/tools/rotate','organize'],
+      ['Page Numbers Studio','Place page numbers, headers, and footers with visual preview.','/paginate-editor','organize create'],
+      ['Add Text to PDF','Place movable text boxes, notes, and stamps over PDF pages.','/tools/add-text','create'],
+      ['Box Overlay Studio','Add precise overlays, fields, shapes, and masks to any page.','/overlay-editor','organize create'],
+      ['Protect PDF','Add password encryption to prevent unauthorized access.','/tools/protect','secure'],
+      ['Unlock PDF','Remove a known password and export an unrestricted PDF.','/tools/unlock','secure'],
+      ['Archive as PDF/A','Convert documents for compliant long-term preservation.','/tools/archive','secure convert'],
+      ['Flow Editor','Compose rich document layouts with smart pagination.','/flow-editor','create']
+    ];
+    const grid = document.getElementById('toolsGrid');
+    grid.innerHTML = tools.map((t,i) => `<a class="tool-card${t[4]?' featured':''}" href="${t[2]}" data-category="${t[3]}" data-search="${t.join(' ').toLowerCase()}" style="--card-accent:${['#eeeaff','#e8faf4','#fff0ee','#e8f3ff','#fff6dc'][i%5]}"><span class="tool-icon">${icon}</span><h3>${t[0]}</h3><p>${t[1]}</p><span class="tool-link">Open ${t[0].includes('Studio')||t[0].includes('Editor')?'studio':'tool'} →</span></a>`).join('');
+    const menuToggle=document.getElementById('menuToggle'),mobileMenu=document.getElementById('mobileMenu');
+    menuToggle.addEventListener('click',()=>mobileMenu.classList.toggle('is-open'));
+    mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mobileMenu.classList.remove('is-open')));
+    const tabs=[...document.querySelectorAll('.tool-tab')],cards=[...document.querySelectorAll('.tool-card')],search=document.getElementById('toolSearch'); let filter='all';
+    const apply=()=>cards.forEach(c=>c.hidden=!((filter==='all'||c.dataset.category.split(' ').includes(filter))&&(!search.value.trim()||c.dataset.search.includes(search.value.trim().toLowerCase()))));
+    tabs.forEach(t=>t.addEventListener('click',()=>{filter=t.dataset.filter;tabs.forEach(x=>x.classList.toggle('is-active',x===t));apply()})); search.addEventListener('input',apply);
+    document.querySelectorAll('.faq-question').forEach(b=>b.addEventListener('click',()=>{const item=b.closest('.faq-item');document.querySelectorAll('.faq-item').forEach(x=>x!==item&&x.classList.remove('is-open'));item.classList.toggle('is-open')}));
+  </script>
 </body>
 </html>

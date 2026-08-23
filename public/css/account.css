@@ -1,0 +1,87 @@
+/* Cohesive account/admin surfaces for the Vibify redesign. */
+:root {
+  --account-ink: #17152f;
+  --account-violet: #6d4aff;
+  --account-violet-dark: #5637e8;
+}
+
+html,
+body { background: #f4f3f8 !important; }
+
+body {
+  background-image:
+    radial-gradient(circle at 12% 12%, rgba(109, 74, 255, .13), transparent 26rem),
+    radial-gradient(circle at 88% 84%, rgba(255, 116, 92, .10), transparent 24rem) !important;
+}
+
+body > header,
+body > nav {
+  background: rgba(255, 255, 255, .92) !important;
+  border-color: #e4e0f1 !important;
+  color: var(--account-ink) !important;
+  backdrop-filter: blur(16px);
+}
+
+.bg-auth-600,
+.hover\:bg-auth-500:hover,
+.bg-indigo-600 { background-color: var(--account-violet) !important; }
+
+.text-auth-600,
+.text-auth-700,
+.text-indigo-400 { color: var(--account-violet) !important; }
+
+.bg-auth-100 { background-color: #eeeaff !important; }
+
+.focus\:border-auth-500:focus { border-color: var(--account-violet) !important; }
+
+.focus\:ring-auth-500\/20:focus { --tw-ring-color: rgba(109, 74, 255, .20) !important; }
+
+body > div > div.bg-white,
+main > div.bg-white,
+main > section,
+main .bg-gray-800 {
+  border-color: #e2ddec !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 50px rgba(31, 27, 73, .10) !important;
+}
+
+body.bg-gray-900 {
+  color: var(--account-ink) !important;
+}
+
+body.bg-gray-900 main .bg-gray-800,
+body.bg-gray-900 main section,
+body.bg-gray-900 main .bg-gray-900\/60 {
+  background: rgba(255, 255, 255, .94) !important;
+  color: var(--account-ink) !important;
+}
+
+body.bg-gray-900 .text-gray-100,
+body.bg-gray-900 .text-gray-200,
+body.bg-gray-900 .text-white { color: var(--account-ink) !important; }
+
+body.bg-gray-900 .text-gray-400,
+body.bg-gray-900 .text-gray-500 { color: #716d8e !important; }
+
+body.bg-gray-900 .border-gray-700,
+body.bg-gray-900 .divide-gray-700 > :not([hidden]) ~ :not([hidden]) { border-color: #e4e0f1 !important; }
+
+.nav-account,
+.nav-signin,
+.nav-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  border: 0;
+  border-radius: 999px;
+  padding: .65rem .9rem;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-account,
+.nav-signin { background: #eeeaff; color: var(--account-violet); }
+.nav-logout { background: transparent; color: #716d8e; }
+.nav-logout:hover { background: #fff0ed; color: #d94e38; }
