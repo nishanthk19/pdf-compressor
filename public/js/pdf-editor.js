@@ -1089,4 +1089,3 @@
 
   window.addEventListener('beforeunload', scheduleLocalSave);
 })();
-
