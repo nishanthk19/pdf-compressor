@@ -91,6 +91,109 @@
       font-weight: 600;
       color: var(--text-dark);
     }
+    .file-item-pill .file-pill-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .merge-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      margin-left: 6px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #eeeaff;
+      color: #6d4aff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .merge-queue {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      width: min(980px, 100%);
+      padding: 8px;
+    }
+    .merge-file-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 178px;
+      padding: 18px;
+      border: 1px solid #ddd8ed;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(31, 27, 73, 0.08);
+      cursor: grab;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+    .merge-file-card:hover {
+      transform: translateY(-2px);
+      border-color: #a995ff;
+      box-shadow: 0 18px 34px rgba(84, 55, 194, 0.14);
+    }
+    .merge-file-card.is-dragging { opacity: .45; cursor: grabbing; }
+    .merge-file-card.is-drag-target { border: 2px dashed #6d4aff; background: #f7f4ff; }
+    .merge-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .merge-order {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: #17152f;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .merge-drag-handle { color: #8a86a3; font-size: 18px; letter-spacing: -2px; }
+    .merge-pdf-icon { margin: 17px 0 13px; font-size: 36px; }
+    .merge-file-name { overflow: hidden; color: #201d42; font-size: 13px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+    .merge-file-size { margin-top: 4px; color: #817d97; font-size: 11px; }
+    .merge-card-actions { display: flex; gap: 7px; margin-top: auto; padding-top: 14px; }
+    .merge-card-actions button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 30px;
+      border: 1px solid #ded9ef;
+      border-radius: 9px;
+      background: #fff;
+      color: #625e79;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .merge-card-actions button:hover:not(:disabled) { border-color: #8f79ff; color: #6d4aff; }
+    .merge-card-actions button:disabled { cursor: not-allowed; opacity: .35; }
+    .merge-card-actions .remove-file { margin-left: auto; color: #d94e38; }
+    .merge-add-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 178px;
+      padding: 18px;
+      border: 2px dashed #c8bcf6;
+      border-radius: 18px;
+      background: rgba(255,255,255,.72);
+      color: #6d4aff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .merge-add-card:hover, .preview-state.dragover .merge-add-card { border-color: #6d4aff; background: #eeeaff; }
+    .merge-add-card span { display: block; margin-bottom: 8px; font-size: 30px; }
+    .merge-help { width: min(980px, 100%); margin: 0 auto 10px; color: #716d8e; font-size: 12px; text-align: center; }
+    .sidebar-add-button { width: 100%; margin-top: 12px; }
+    @media (max-width: 700px) {
+      .merge-queue { grid-template-columns: 1fr; }
+      .merge-file-card, .merge-add-card { min-height: 158px; }
+    }
   </style>
 </head>
 <body>
@@ -109,10 +212,11 @@
         <input type="file" id="fileInput" name="pdfs" accept="application/pdf" multiple style="display: none;" />
         
         <div class="form-group">
-          <label class="form-label">Selected Files to Combine</label>
+          <label class="form-label">Selected Files to Combine <span id="fileCount" class="merge-count">0</span></label>
           <div id="fileListContainer" class="file-list">
             <div style="font-size: 12px; color: var(--text-muted); font-style: italic;">No files selected yet.</div>
           </div>
+          <button type="button" class="btn-change-file sidebar-add-button" id="sidebarAddFilesBtn">+ Add more PDF files</button>
         </div>
       </form>
 
@@ -137,9 +241,10 @@
             <span>📄</span>
             <span class="file-name">Multiple Files Selected</span>
           </div>
-          <button type="button" class="btn-change-file" id="changeFileBtn">Add / Change Files</button>
+          <button type="button" class="btn-change-file" id="changeFileBtn">+ Add More Files</button>
         </div>
-        <div class="preview-grid"></div>
+        <p class="merge-help">Drag cards to set the merge order. On touch devices, use the arrow buttons.</p>
+        <div id="mergeQueue" class="merge-queue" aria-live="polite"></div>
       </div>
     </main>
   </div>
@@ -150,60 +255,194 @@
       const submitBtn = document.getElementById('submitBtn');
       const fileInput = document.getElementById('fileInput');
       const changeFileBtn = document.getElementById('changeFileBtn');
+      const sidebarAddFilesBtn = document.getElementById('sidebarAddFilesBtn');
       const fileListContainer = document.getElementById('fileListContainer');
+      const fileCount = document.getElementById('fileCount');
+      const dropzone = document.getElementById('dropzone');
+      const previewArea = document.getElementById('preview-area');
+      const mergeQueue = document.getElementById('mergeQueue');
       const mergeForm = document.getElementById('mergeForm');
 
-      let selectedFilesList = [];
+      let selectedFiles = [];
+      let draggedId = null;
+      let nextFileId = 1;
 
-      const workspace = new PDFWorkspaceManager({
-        dropzoneSelector: '#dropzone',
-        previewStateSelector: '#preview-area',
-        previewGridSelector: '.preview-grid',
-        fileInputSelector: '#fileInput',
-        fileSelectBtnSelector: '.btn-select-file',
-        fileNameDisplaySelector: '.file-name',
-        pageCountDisplaySelector: '.page-count',
-        onFileLoaded: () => {}
-      });
+      const escapeHtml = (value) => String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-          selectedFilesList = Array.from(e.target.files);
-          renderFileList();
-          submitBtn.disabled = selectedFilesList.length < 2;
-          workspace.showPreviewState();
+      const formatSize = (bytes) => bytes >= 1024 * 1024
+        ? `${(bytes / 1024 / 1024).toFixed(2)} MB`
+        : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+
+      function setWorkspaceState() {
+        const hasFiles = selectedFiles.length > 0;
+        dropzone.style.display = hasFiles ? 'none' : 'flex';
+        previewArea.classList.toggle('active', hasFiles);
+        submitBtn.disabled = selectedFiles.length < 2;
+        fileCount.textContent = selectedFiles.length;
+        const nameDisplay = previewArea.querySelector('.file-name');
+        if (nameDisplay) {
+          nameDisplay.textContent = `${selectedFiles.length} PDF${selectedFiles.length === 1 ? '' : 's'} selected`;
         }
-      });
+      }
+
+      function addFiles(fileList) {
+        const incoming = Array.from(fileList || []);
+        const valid = incoming.filter((file) => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+
+        if (valid.length !== incoming.length) {
+          alert('Only PDF files can be added to the merge queue.');
+        }
+
+        const availableSlots = Math.max(0, 20 - selectedFiles.length);
+        if (valid.length > availableSlots) {
+          alert('You can merge up to 20 PDF files at a time.');
+        }
+
+        valid.slice(0, availableSlots).forEach((file) => {
+          selectedFiles.push({ id: `merge-file-${nextFileId++}`, file });
+        });
+
+        fileInput.value = '';
+        renderFileList();
+      }
+
+      function moveFile(id, direction) {
+        const fromIndex = selectedFiles.findIndex((item) => item.id === id);
+        const toIndex = fromIndex + direction;
+        if (fromIndex < 0 || toIndex < 0 || toIndex >= selectedFiles.length) return;
+        const [item] = selectedFiles.splice(fromIndex, 1);
+        selectedFiles.splice(toIndex, 0, item);
+        renderFileList();
+      }
+
+      function removeFile(id) {
+        selectedFiles = selectedFiles.filter((item) => item.id !== id);
+        renderFileList();
+      }
 
       function renderFileList() {
-        if (selectedFilesList.length === 0) {
+        setWorkspaceState();
+
+        if (selectedFiles.length === 0) {
           fileListContainer.innerHTML = '<div style="font-size: 12px; color: var(--text-muted); font-style: italic;">No files selected yet.</div>';
+          mergeQueue.innerHTML = '';
           return;
         }
 
-        fileListContainer.innerHTML = '';
-        selectedFilesList.forEach((f, idx) => {
-          const pill = document.createElement('div');
-          pill.className = 'file-item-pill';
-          pill.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
-              <span style="font-size: 10px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: 800;">#${idx + 1}</span>
-              <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.name}</span>
+        fileListContainer.innerHTML = selectedFiles.map(({ id, file }, index) => `
+          <div class="file-item-pill">
+            <span style="font-size: 10px; background: #eeeaff; color: #6d4aff; padding: 2px 6px; border-radius: 4px; font-weight: 800;">#${index + 1}</span>
+            <span class="file-pill-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
+            <button type="button" class="remove-file" data-id="${id}" aria-label="Remove ${escapeHtml(file.name)}" style="border:0;background:none;color:#d94e38;font-size:16px;cursor:pointer;">×</button>
+          </div>
+        `).join('');
+
+        mergeQueue.innerHTML = selectedFiles.map(({ id, file }, index) => `
+          <article class="merge-file-card" draggable="true" data-id="${id}" aria-label="File ${index + 1}: ${escapeHtml(file.name)}">
+            <div class="merge-card-top">
+              <span class="merge-order">${index + 1}</span>
+              <span class="merge-drag-handle" aria-hidden="true">⠿</span>
             </div>
-            <span style="font-size: 11px; color: var(--text-muted);">${(f.size / 1024 / 1024).toFixed(2)} MB</span>
-          `;
-          fileListContainer.appendChild(pill);
-        });
+            <div class="merge-pdf-icon" aria-hidden="true">📄</div>
+            <div class="merge-file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+            <div class="merge-file-size">${formatSize(file.size)}</div>
+            <div class="merge-card-actions">
+              <button type="button" class="move-file-up" data-id="${id}" aria-label="Move ${escapeHtml(file.name)} earlier" ${index === 0 ? 'disabled' : ''}>↑</button>
+              <button type="button" class="move-file-down" data-id="${id}" aria-label="Move ${escapeHtml(file.name)} later" ${index === selectedFiles.length - 1 ? 'disabled' : ''}>↓</button>
+              <button type="button" class="remove-file" data-id="${id}" aria-label="Remove ${escapeHtml(file.name)}">×</button>
+            </div>
+          </article>
+        `).join('') + `
+          <button type="button" class="merge-add-card" id="queueAddFilesBtn">
+            <span aria-hidden="true">＋</span>
+            Add more PDFs
+          </button>
+        `;
       }
 
-      if (changeFileBtn) changeFileBtn.addEventListener('click', () => fileInput.click());
+      document.querySelector('.btn-select-file').addEventListener('click', () => fileInput.click());
+      changeFileBtn.addEventListener('click', () => fileInput.click());
+      sidebarAddFilesBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (event) => addFiles(event.target.files));
+
+      [dropzone, previewArea].forEach((target) => {
+        ['dragenter', 'dragover'].forEach((eventName) => target.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          if (!draggedId) target.classList.add('dragover');
+        }));
+        ['dragleave', 'drop'].forEach((eventName) => target.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          target.classList.remove('dragover');
+        }));
+        target.addEventListener('drop', (event) => {
+          if (!draggedId && event.dataTransfer?.files?.length) addFiles(event.dataTransfer.files);
+        });
+      });
+
+      document.addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        if (button.id === 'queueAddFilesBtn') fileInput.click();
+        if (button.classList.contains('remove-file')) removeFile(button.dataset.id);
+        if (button.classList.contains('move-file-up')) moveFile(button.dataset.id, -1);
+        if (button.classList.contains('move-file-down')) moveFile(button.dataset.id, 1);
+      });
+
+      mergeQueue.addEventListener('dragstart', (event) => {
+        const card = event.target.closest('.merge-file-card');
+        if (!card) return;
+        draggedId = card.dataset.id;
+        card.classList.add('is-dragging');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', draggedId);
+      });
+
+      mergeQueue.addEventListener('dragover', (event) => {
+        if (!draggedId) return;
+        event.preventDefault();
+        mergeQueue.querySelectorAll('.merge-file-card').forEach((card) => card.classList.remove('is-drag-target'));
+        const target = event.target.closest('.merge-file-card');
+        if (target && target.dataset.id !== draggedId) target.classList.add('is-drag-target');
+      });
+
+      mergeQueue.addEventListener('drop', (event) => {
+        if (!draggedId) return;
+        event.preventDefault();
+        const target = event.target.closest('.merge-file-card');
+        if (!target || target.dataset.id === draggedId) return;
+
+        const fromIndex = selectedFiles.findIndex((item) => item.id === draggedId);
+        const [moved] = selectedFiles.splice(fromIndex, 1);
+        let targetIndex = selectedFiles.findIndex((item) => item.id === target.dataset.id);
+        const rect = target.getBoundingClientRect();
+        const isSingleColumn = getComputedStyle(mergeQueue).gridTemplateColumns.split(' ').length === 1;
+        const placeAfter = isSingleColumn
+          ? event.clientY > rect.top + rect.height / 2
+          : event.clientX > rect.left + rect.width / 2;
+        if (placeAfter) targetIndex += 1;
+        selectedFiles.splice(targetIndex, 0, moved);
+        draggedId = null;
+        renderFileList();
+      });
+
+      mergeQueue.addEventListener('dragend', () => {
+        draggedId = null;
+        mergeQueue.querySelectorAll('.merge-file-card').forEach((card) => card.classList.remove('is-dragging', 'is-drag-target'));
+      });
 
       mergeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (selectedFilesList.length < 2) {
+        if (selectedFiles.length < 2) {
           alert('Please select at least 2 PDF files to combine.');
           return;
         }
+
+        const orderedFiles = selectedFiles.map((item) => item.file);
 
         if (window.VibifyProgressBar) {
           VibifyProgressBar.start({
@@ -219,8 +458,8 @@
           const { PDFDocument } = window.PDFLib;
           const mergedDoc = await PDFDocument.create();
 
-          for (let i = 0; i < selectedFilesList.length; i++) {
-            const file = selectedFilesList[i];
+          for (let i = 0; i < orderedFiles.length; i++) {
+            const file = orderedFiles[i];
             const bytes = await file.arrayBuffer();
             const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
             const copiedPages = await mergedDoc.copyPages(doc, doc.getPageIndices());
@@ -242,13 +481,13 @@
           if (window.VibifyProgressBar) {
             VibifyProgressBar.complete({
               title: 'PDFs Combined Successfully!',
-              subtitle: `Merged ${selectedFilesList.length} files.`
+              subtitle: `Merged ${orderedFiles.length} files in your chosen order.`
             });
           }
         } catch (err) {
           console.warn('Merge fallback to server:', err);
           const formData = new FormData();
-          selectedFilesList.forEach(f => formData.append('pdfs', f));
+          orderedFiles.forEach(f => formData.append('pdfs', f));
 
           const response = await fetch('/merge', { method: 'POST', body: formData });
           if (!response.ok) throw new Error('Server merge failed.');
@@ -268,9 +507,11 @@
             });
           }
         } finally {
-          submitBtn.disabled = false;
+          submitBtn.disabled = selectedFiles.length < 2;
         }
       });
+
+      renderFileList();
     });
   </script>
 </body>
