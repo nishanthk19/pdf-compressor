@@ -1,0 +1,12 @@
+node_modules
+node_modules.shared-link
+.npm-cache
+.pnpm-store
+.git
+.env
+.env.*
+.artifacts
+test-*.pdf
+test-*.docx
+work-tailwind.exe
+coverage

@@ -180,6 +180,7 @@
       transform: scale(1.15);
     }
   </style>
+  <link rel="stylesheet" href="/css/suite-theme.css">
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
 
@@ -554,7 +555,7 @@
         rawPdfArrayBuffer = await file.arrayBuffer();
 
         // Load document with PDF.js
-        const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(rawPdfArrayBuffer.slice(0)) });
+        const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(rawPdfArrayBuffer.slice(0)), isEvalSupported: false });
         pdfDocObject = await loadingTask.promise;
         totalPages = pdfDocObject.numPages;
 

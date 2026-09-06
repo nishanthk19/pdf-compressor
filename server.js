@@ -6,21 +6,20 @@ import os from "os";
 import crypto from "crypto";
 import multer from "multer";
 import { fileURLToPath } from "url";
-import { PrismaClient } from "@prisma/client";
 import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
-import { auth } from "./src/auth.js";
+import { auth, prisma } from "./src/auth.js";
+import { processingPool } from "./src/processing-pool.js";
 import { generateDraft } from "./src/ai-draft.js";
 import {
     archivePdf, compressPdf, convertToWord, deletePages, extractCoordinates,
     extractHtml, extractPages, mergePdfs, ocrPdf, paginatePdf, protectPdf,
     rotatePdf, unlockPdf,
-} from "./src/pdf-tools.js";
+} from "./src/processing-pool.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const prisma = new PrismaClient();
 const publicDir = path.join(__dirname, "public");
 const uploadDir = path.join(os.tmpdir(), "vibify-uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
@@ -31,7 +30,13 @@ const upload = multer({
 });
 
 // 1. Trust proxy (Required for Coolify / Traefik reverse proxy)
-app.set("trust proxy", true);
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
+app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    next();
+});
 
 // 2. Mount Better Auth Handler (MUST be mounted before express.json() / body parsers)
 app.all("/api/auth/*", toNodeHandler(auth));
@@ -41,7 +46,34 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
 
 // 4. Static frontend files (with clean HTML extensions fallback)
-app.use(express.static(publicDir, { extensions: ["html"] }));
+const utilityNames = ['merge','compress','word','extract','rotate','delete','ocr','protect','unlock','paginate','archive'];
+const utilityPages = utilityNames.flatMap(name => [`/tools/${name}`, `/tools/${name}.html`, `/${name}`, `/${name}.html`]);
+app.get(utilityPages, (_req, res) => res.sendFile(path.join(publicDir, 'tool.html')));
+app.use(express.static(publicDir, {
+    extensions: ["html"],
+    setHeaders: (res, file) => res.setHeader('Cache-Control', /\.(png|svg|ico|woff2)$/.test(file) ? 'public, max-age=3600, must-revalidate' : 'no-cache'),
+}));
+
+// Admit a bounded number of uploads before writing to disk or queuing CPU work.
+let activePdfRequests = 0;
+const processingPaths = new Set([...utilityNames.map(name => `/${name}`), '/extract-coords', '/extract-html']);
+app.use((req, res, next) => {
+    if (req.method !== 'POST' || !processingPaths.has(req.path)) return next();
+    res.setHeader('Cache-Control', 'no-store');
+    if (activePdfRequests >= 8) {
+        res.setHeader('Retry-After', '10');
+        return res.status(503).json({error: 'The server is busy processing documents. Please try again in a moment.'});
+    }
+    activePdfRequests++;
+    let released = false;
+    const release = () => { if (!released) { released = true; activePdfRequests--; } };
+    // Count work until the response finishes; a disconnected client is released
+    // after processing resolves rather than allowing unbounded abandoned jobs.
+    res.once('finish', release);
+    req.pdfRelease = release;
+    req.once('aborted', () => { if (!req.pdfStarted) release(); });
+    next();
+});
 
 // --- Admin Security Middleware ---
 const requireAdmin = async (req, res, next) => {
@@ -112,20 +144,23 @@ function sendProcessedFile(res, inputFiles, resultPath, downloadName) {
     };
     res.download(resultPath, downloadName, (error) => {
         cleanup();
+        res.req.pdfRelease?.();
         if (error && !res.headersSent) res.status(500).json({ error: "Unable to send the processed file." });
     });
 }
 
 function singlePdfRoute(handler, suffix, extension = ".pdf") {
     return [upload.single("pdf"), async (req, res) => {
+        req.pdfStarted = true;
         const resultPath = outputPath(extension);
         try {
             await assertPdf(req.file);
             await handler(req.file.path, resultPath, req.body, req);
             sendProcessedFile(res, req.file, resultPath, `${safeBaseName(req.file, suffix)}${extension}`);
         } catch (error) {
-            await Promise.allSettled([req.file?.path, resultPath].filter(Boolean).map((filePath) => fsPromises.unlink(filePath)));
-            res.status(400).json({ error: error.message || "PDF processing failed." });
+            await Promise.allSettled([req.file?.path, resultPath, `${resultPath}.candidate.pdf`].filter(Boolean).map((filePath) => fsPromises.unlink(filePath)));
+            req.pdfRelease?.();
+            res.status(error.status || 400).json({ error: error.message || "PDF processing failed." });
         }
     }];
 }
@@ -151,6 +186,7 @@ app.post("/api/ai/draft", async (req, res) => {
 });
 
 app.post("/merge", upload.array("pdfs", 20), async (req, res) => {
+    req.pdfStarted = true;
     const files = req.files || [];
     const resultPath = outputPath();
     try {
@@ -160,7 +196,8 @@ app.post("/merge", upload.array("pdfs", 20), async (req, res) => {
         sendProcessedFile(res, files, resultPath, "merged_document.pdf");
     } catch (error) {
         await Promise.allSettled([...files.map((file) => file.path), resultPath].map((filePath) => fsPromises.unlink(filePath)));
-        res.status(400).json({ error: error.message || "PDF merge failed." });
+        req.pdfRelease?.();
+        res.status(error.status || 400).json({ error: error.message || "PDF merge failed." });
     }
 });
 
@@ -176,6 +213,7 @@ app.post("/ocr", ...singlePdfRoute((input, output) => ocrPdf(input, output), "se
 app.post("/word", ...singlePdfRoute((input, output) => convertToWord(input, output), "converted", ".docx"));
 
 app.post("/extract-coords", upload.single("pdf"), async (req, res) => {
+    req.pdfStarted = true;
     try {
         await assertPdf(req.file);
         res.json(await extractCoordinates(req.file.path));
@@ -183,10 +221,12 @@ app.post("/extract-coords", upload.single("pdf"), async (req, res) => {
         res.status(400).json({ error: error.message });
     } finally {
         if (req.file?.path) await fsPromises.unlink(req.file.path).catch(() => {});
+        req.pdfRelease?.();
     }
 });
 
 app.post("/extract-html", upload.single("pdf"), async (req, res) => {
+    req.pdfStarted = true;
     try {
         await assertPdf(req.file);
         res.type("html").send(await extractHtml(req.file.path));
@@ -194,6 +234,7 @@ app.post("/extract-html", upload.single("pdf"), async (req, res) => {
         res.status(400).send(error.message);
     } finally {
         if (req.file?.path) await fsPromises.unlink(req.file.path).catch(() => {});
+        req.pdfRelease?.();
     }
 });
 
@@ -278,36 +319,27 @@ app.get(["/add-text", "/tools/add-text"], (req, res) => {
     res.sendFile(path.join(publicDir, "tools", "add-text.html"));
 });
 
-// Fallback for tools and HTML pages
-app.get("/tools/:tool", (req, res, next) => {
-    const toolName = req.params.tool;
-    const toolFilePath = path.join(publicDir, "tools", `${toolName}.html`);
-    if (fs.existsSync(toolFilePath)) {
-        return res.sendFile(toolFilePath);
-    }
-    next();
-});
+// Static middleware handles known pages. Unknown paths never resolve outside public.
+app.get('/pdf-maker', (_req, res) => res.redirect(302, '/tools/pdf-maker'));
+app.use((_req, res) => res.status(404).type('html').send('<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found · Vibify</title><link rel="stylesheet" href="/css/product.css"><main class="container hero-new"><h1>That page isn’t here.</h1><p>Let’s get you back to your documents.</p><a class="button" href="/">Explore PDF tools</a></main></html>'));
 
-// Fallback to index.html for SPA/dynamic routes
-app.get("*", (req, res) => {
-    const directFile = path.join(publicDir, req.path);
-    if (fs.existsSync(directFile) && fs.statSync(directFile).isFile()) {
-        return res.sendFile(directFile);
-    }
-    const htmlFile = path.join(publicDir, `${req.path}.html`);
-    if (fs.existsSync(htmlFile)) {
-        return res.sendFile(htmlFile);
-    }
-    // Also check tools directory for direct names like /compress, /merge, /ocr, etc.
-    const cleanPath = req.path.replace(/^\//, "").replace(/\/$/, "");
-    const toolFile = path.join(publicDir, "tools", `${cleanPath}.html`);
-    if (fs.existsSync(toolFile)) {
-        return res.sendFile(toolFile);
-    }
-    res.sendFile(path.join(publicDir, "index.html"));
+app.use((error, req, res, _next) => {
+    req.pdfRelease?.();
+    const files = req.files || (req.file ? [req.file] : []);
+    Promise.allSettled(files.map(file => fsPromises.unlink(file.path)));
+    if (res.headersSent) return;
+    const tooLarge = error.code === 'LIMIT_FILE_SIZE' || error.type === 'entity.too.large';
+    res.status(tooLarge ? 413 : 400).json({error: tooLarge ? 'Each PDF must be 100 MB or smaller.' : 'Unable to accept this upload. Check the file type and number of files.'});
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+server.requestTimeout = 12 * 60_000;
+async function shutdown() {
+    server.close(async () => { await processingPool.close(); await prisma.$disconnect(); process.exit(0); });
+    setTimeout(() => process.exit(1), 30_000).unref();
+}
+process.once('SIGTERM', shutdown);
+process.once('SIGINT', shutdown);

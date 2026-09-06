@@ -89,7 +89,7 @@ class PDFWorkspaceManager {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      this.pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      this.pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
 
       // Update Page Count Display
       const countElem = document.querySelector(this.pageCountDisplaySelector);

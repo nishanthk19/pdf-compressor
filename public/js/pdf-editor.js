@@ -9,7 +9,12 @@
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 
   const $ = (selector) => document.querySelector(selector);
+  $('#togglePagesBtn')?.addEventListener('click', () => {
+    const open = $('#editorShell').classList.toggle('pages-open');
+    $('#togglePagesBtn').setAttribute('aria-expanded', String(open));
+  });
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+  $$('.tool-btn[title], .sidebar-tab[title]').forEach(button => button.setAttribute('aria-label', button.title));
   const uid = () => `a_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const deepClone = (value) => JSON.parse(JSON.stringify(value));
@@ -151,7 +156,7 @@
     setBusy(true, 'Opening your PDF…', 'Reading pages and preparing the workspace.');
     try {
       const raw = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(raw.slice(0)) }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(raw.slice(0)), isEvalSupported: false }).promise;
       state.file = file;
       state.fileName = file.name;
       state.fileKey = `${file.name}:${file.size}:${file.lastModified}`;

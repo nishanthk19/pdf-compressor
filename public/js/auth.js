@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Google Social Sign-In Handler
+  if (new URLSearchParams(location.search).get('mode') === 'signup' && toggleBtn) toggleBtn.click();
   if (googleSignInBtn) {
     googleSignInBtn.addEventListener('click', async () => {
       clearAlerts();

@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/css/pdf-editor.css">
   <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="/css/suite-theme.css">
 </head>
 <body>
   <div class="editor-shell" id="editorShell">
@@ -26,12 +27,13 @@
         </div>
       </div>
       <div class="header-actions">
+        <button class="mobile-pages-toggle" id="togglePagesBtn" type="button" aria-controls="pagesPanel" aria-expanded="false">Pages</button>
         <button class="icon-btn" id="undoBtn" type="button" title="Undo (Ctrl+Z)" disabled aria-label="Undo">↶</button>
         <button class="icon-btn" id="redoBtn" type="button" title="Redo (Ctrl+Y)" disabled aria-label="Redo">↷</button>
         <span class="header-divider compact"></span>
         <button class="secondary-btn" id="printBtn" type="button" disabled><span>⌁</span> Print</button>
         <button class="primary-btn" id="downloadBtn" type="button" disabled><span>⇩</span> Export PDF</button>
-        <button class="avatar-btn" type="button" title="Your workspace" aria-label="Your workspace">V</button>
+        <a class="avatar-btn" href="/profile" title="Your account" aria-label="Your account">V</a>
       </div>
     </header>
 
@@ -108,8 +110,8 @@
           <div class="upload-card" id="uploadCard">
             <div class="upload-illustration" aria-hidden="true"><span>PDF</span><i></i><i></i><i></i></div>
             <p class="eyebrow">Vibify PDF Workspace</p>
-            <h1>Edit every detail of your PDF</h1>
-            <p>Add text, mark up, draw, sign, build fields, organize pages, redact sensitive content, and export a polished copy.</p>
+            <h1>Make your next draft a done deal.</h1>
+            <p>Annotate, add text and images, sign, fill fields, and arrange your pages. Open a document to get started.</p>
             <button class="upload-button" id="openPdfBtn" type="button">Open a PDF</button>
             <span class="upload-help">or drag and drop a PDF here · up to 100 MB</span>
             <input id="pdfFileInput" type="file" accept="application/pdf,.pdf" hidden>

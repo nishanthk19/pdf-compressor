@@ -374,6 +374,7 @@
         }
     </style>
   <link rel="stylesheet" href="/css/studio.css">
+  <link rel="stylesheet" href="/css/suite-theme.css">
 </head>
 <body>
 
@@ -557,7 +558,7 @@
 
                 // Load pdf.js Document object
                 const fileBuffer = await file.arrayBuffer();
-                pdfDocObject = await pdfjsLib.getDocument({ data: fileBuffer.slice(0) }).promise;
+                pdfDocObject = await pdfjsLib.getDocument({ data: fileBuffer.slice(0), isEvalSupported: false }).promise;
                 totalPages = pdfDocObject.numPages;
 
                 // Render first page

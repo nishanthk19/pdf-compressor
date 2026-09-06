@@ -10,15 +10,29 @@ function getPdfJs() {
     return pdfjsPromise;
 }
 
-export function runCommand(command, args) {
+const children = new Set();
+function killCommand(child) {
+    if (process.platform !== 'win32' && child.pid) {
+        try { process.kill(-child.pid, 'SIGKILL'); return; } catch {}
+    }
+    child.kill('SIGKILL');
+}
+export function stopCommands() { for (const child of children) killCommand(child); }
+export function runCommand(command, args, timeout = 180_000) {
     return new Promise((resolve, reject) => {
-        const child = spawn(command, args, { windowsHide: true });
+        const child = spawn(command, args, { windowsHide: true, detached: process.platform !== 'win32', stdio: ['ignore', 'ignore', 'pipe'] });
+        children.add(child);
+        let timedOut = false;
+        const timer = setTimeout(() => { timedOut = true; killCommand(child); }, timeout);
+        const cleanup = () => { clearTimeout(timer); children.delete(child); };
         let stderr = "";
-        child.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
-        child.on("error", reject);
+        child.stderr.on("data", (chunk) => { stderr = (stderr + chunk.toString()).slice(-8192); });
+        child.on("error", error => { cleanup(); reject(new Error(error.code === 'ENOENT' ? `${command} is unavailable on this server.` : 'Unable to start PDF processing.')); });
         child.on("close", (code) => {
-            if (code === 0) resolve();
-            else reject(new Error(stderr.trim() || `${command} exited with code ${code}`));
+            cleanup();
+            if (timedOut) reject(new Error('This document exceeded the processing time limit. Try a smaller PDF.'));
+            else if (code === 0) resolve();
+            else reject(new Error(/password|encrypted/i.test(stderr) ? 'This PDF requires a valid password.' : 'The document could not be processed. Check that it is a valid, supported PDF.'));
         });
     });
 }
@@ -115,13 +129,16 @@ async function extractTextPages(inputPath) {
     const pdfjs = await getPdfJs();
     const document = await pdfjs.getDocument({ data: new Uint8Array(await fs.readFile(inputPath)), useSystemFonts: true }).promise;
     const pages = [];
+    try {
     for (let number = 1; number <= document.numPages; number += 1) {
         const page = await document.getPage(number);
         const viewport = page.getViewport({ scale: 1 });
         const content = await page.getTextContent();
-        pages.push({ page, viewport, content });
+        pages.push({ viewport, content });
+        page.cleanup();
     }
     return pages;
+    } finally { await document.destroy(); }
 }
 
 export async function extractCoordinates(inputPath) {
@@ -161,7 +178,7 @@ export async function convertToWord(inputPath, outputPath) {
     await fs.writeFile(outputPath, await Packer.toBuffer(new Document({ sections: [{ children }] })));
 }
 
-export async function compressPdf(inputPath, outputPath, targetSizeMb) {
+export async function compressPdf(inputPath, outputPath, targetSizeMb, runner = runCommand) {
     const targetBytes = Number(targetSizeMb) * 1024 * 1024;
     if (!Number.isFinite(targetBytes) || targetBytes < 100 * 1024 || targetBytes > 50 * 1024 * 1024) throw new Error("Target size must be between 0.1 and 50 MB.");
     const originalSize = (await fs.stat(inputPath)).size;
@@ -172,15 +189,22 @@ export async function compressPdf(inputPath, outputPath, targetSizeMb) {
     let low = 36;
     let high = 180;
     let bestDpi = null;
-    for (let attempt = 0; attempt < 7; attempt += 1) {
+    const candidatePath = `${outputPath}.candidate.pdf`;
+    try {
+    for (let attempt = 0; attempt < 7 && low <= high; attempt += 1) {
         const dpi = Math.round((low + high) / 2);
-        await runCommand("gs", ["-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.4", "-dNOPAUSE", "-dQUIET", "-dBATCH", "-dDownsampleColorImages=true", `-dColorImageResolution=${dpi}`, "-dDownsampleGrayImages=true", `-dGrayImageResolution=${dpi}`, "-dDownsampleMonoImages=true", `-dMonoImageResolution=${Math.max(150, dpi * 2)}`, `-sOutputFile=${outputPath}`, inputPath]);
-        const size = (await fs.stat(outputPath)).size;
-        if (size <= targetBytes) { low = dpi + 1; bestDpi = dpi; }
+        await runner("gs", ["-dSAFER", "-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.4", "-dNOPAUSE", "-dQUIET", "-dBATCH", "-dDownsampleColorImages=true", `-dColorImageResolution=${dpi}`, "-dDownsampleGrayImages=true", `-dGrayImageResolution=${dpi}`, "-dDownsampleMonoImages=true", `-dMonoImageResolution=${Math.max(150, dpi * 2)}`, `-sOutputFile=${candidatePath}`, inputPath]);
+        const size = (await fs.stat(candidatePath)).size;
+        if (size <= targetBytes) {
+            low = dpi + 1; bestDpi = dpi;
+            await fs.copyFile(candidatePath, outputPath);
+            // Close enough to the requested limit: keep this usable output.
+            if (size >= targetBytes * 0.95) break;
+        }
         else high = dpi - 1;
     }
     if (bestDpi === null) throw new Error("The requested target is too small for this document without severe quality loss.");
-    await runCommand("gs", ["-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.4", "-dNOPAUSE", "-dQUIET", "-dBATCH", "-dDownsampleColorImages=true", `-dColorImageResolution=${bestDpi}`, "-dDownsampleGrayImages=true", `-dGrayImageResolution=${bestDpi}`, "-dDownsampleMonoImages=true", `-dMonoImageResolution=${Math.max(150, bestDpi * 2)}`, `-sOutputFile=${outputPath}`, inputPath]);
+    } finally { await fs.unlink(candidatePath).catch(() => {}); }
 }
 
 export const protectPdf = (inputPath, outputPath, password) => {
@@ -192,4 +216,4 @@ export const unlockPdf = (inputPath, outputPath, password) => runCommand("qpdf",
 
 export const archivePdf = (inputPath, outputPath) => runCommand("gs", ["-dPDFA=1", "-dBATCH", "-dNOPAUSE", "-sColorConversionStrategy=RGB", "-sDEVICE=pdfwrite", "-dPDFACompatibilityPolicy=1", `-sOutputFile=${outputPath}`, inputPath]);
 
-export const ocrPdf = (inputPath, outputPath) => runCommand("ocrmypdf", ["--skip-text", "--optimize", "1", inputPath, outputPath]);
+export const ocrPdf = (inputPath, outputPath) => runCommand("ocrmypdf", ["--skip-text", "--jobs", "1", "--optimize", "1", inputPath, outputPath]);

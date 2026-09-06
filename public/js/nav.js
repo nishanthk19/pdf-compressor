@@ -1,6 +1,9 @@
-document.addEventListener('DOMContentLoaded', async () => {
+let navLoading = false;
+async function renderAuthNav() {
   const authNavContainer = document.getElementById('auth-nav-links');
   if (!authNavContainer) return;
+  if (navLoading) return;
+  navLoading = true;
 
   try {
     const res = await fetch('/api/auth/get-session', {
@@ -19,13 +22,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
-            <span>${userName}</span>
+            <span id="nav-user-name"></span>
           </a>
           <button id="nav-logout-btn" type="button" class="nav-logout">
             Logout
           </button>
         </div>
       `;
+      document.getElementById('nav-user-name').textContent = userName;
 
       const logoutBtn = document.getElementById('nav-logout-btn');
       if (logoutBtn) {
@@ -48,8 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Logged out state
       authNavContainer.innerHTML = `
         <a href="/login.html" class="nav-signin">
-          Sign In
-        </a>
+          Sign in
+        </a><a class="button small" href="/login?mode=signup">Create account</a>
       `;
     }
   } catch (err) {
@@ -60,7 +64,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       </a>
     `;
   }
-});
+  navLoading = false;
+}
+document.addEventListener('DOMContentLoaded', renderAuthNav);
+document.addEventListener('vibify:nav-ready', renderAuthNav);
 (function() {
     if (window.gtag || document.querySelector('script[src*="googletagmanager.com/gtag/js?id=G-27WV7GTMTH"]')) {
         return;

@@ -1,4 +1,7 @@
 node_modules/
+node_modules.shared-link/
+.npm-cache/
+.artifacts/
 .pnpm-store/
 work-tailwind.tgz
 work-tailwind.exe

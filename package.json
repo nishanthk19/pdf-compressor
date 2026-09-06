@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "test": "node --test tests/*.test.js",
     "build": "npm run build:css && prisma generate",
     "build:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o public/css/tailwind.css --minify",
     "check": "node --check server.js && node --check src/pdf-tools.js && node --check src/ai-draft.js && node --check src/auth.js",
@@ -22,6 +23,10 @@
     "nodemailer": "^9.0.5",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38"
+  },
+  "overrides": {
+    "qs": "6.16.0",
+    "@prisma/config": { "deepmerge-ts": "8.0.2" }
   },
   "devDependencies": {
     "prisma": "^6.3.1",
