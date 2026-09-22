@@ -1,6 +1,9 @@
 import fs from "fs/promises";
 import { spawn } from "child_process";
-import { Document, Packer, PageBreak, Paragraph, TextRun } from "docx";
+import path from "node:path";
+import os from "node:os";
+import { fileURLToPath } from "node:url";
+import { wordOptions } from "./word-options.js";
 import { PDFDocument, StandardFonts, degrees, rgb } from "pdf-lib";
 
 let pdfjsPromise;
@@ -32,7 +35,7 @@ export function runCommand(command, args, timeout = 180_000) {
             cleanup();
             if (timedOut) reject(new Error('This document exceeded the processing time limit. Try a smaller PDF.'));
             else if (code === 0) resolve();
-            else reject(new Error(/password|encrypted/i.test(stderr) ? 'This PDF requires a valid password.' : 'The document could not be processed. Check that it is a valid, supported PDF.'));
+            else reject(Object.assign(new Error(/password|encrypted/i.test(stderr) ? 'This PDF requires a valid password.' : 'The document could not be processed. Check that it is a valid, supported PDF.'), { converterCode: stderr.match(/VIBIFY_WORD_ERROR:([A-Z_]+)/)?.[1] }));
         });
     });
 }
@@ -167,15 +170,41 @@ export async function extractHtml(inputPath) {
     return pages.map(({ content }) => `<p>${escapeHtml(content.items.map((item) => item.str || "").join(" ").trim())}</p>`).join("<hr>");
 }
 
-export async function convertToWord(inputPath, outputPath) {
-    const pages = await extractTextPages(inputPath);
-    const children = [];
-    pages.forEach(({ content }, index) => {
-        const text = content.items.map((item) => item.str || "").join(" ").replace(/\s+/g, " ").trim();
-        children.push(new Paragraph({ children: [new TextRun(text || " ")] }));
-        if (index < pages.length - 1) children.push(new Paragraph({ children: [new PageBreak()] }));
-    });
-    await fs.writeFile(outputPath, await Packer.toBuffer(new Document({ sections: [{ children }] })));
+export async function convertToWord(inputPath, outputPath, options = {}, runner = runCommand) {
+    const { ocr, language, start, end } = wordOptions(options);
+    const work = await fs.mkdtemp(path.join(os.tmpdir(), "vibify-word-"));
+    const report = path.join(work, "report.json");
+    const errors = {
+        PASSWORD: "This PDF is password protected. Unlock it first, then convert it to Word.",
+        INVALID_PDF: "This PDF is damaged or unsupported. Try exporting a new copy.",
+        PAGE_RANGE: "The selected page range is outside this PDF.",
+        PAGE_LIMIT: "Convert up to 200 pages at a time. Choose a smaller page range.",
+        PAGE_SIZE: "This PDF contains an oversized page. Resize it before converting.",
+        OCR_LIMIT: "Convert up to 40 scanned pages at a time. Choose a smaller page range.",
+        OCR_REQUIRED: "This PDF contains scanned pages. Enable automatic OCR to convert them.",
+        OCR_UNAVAILABLE: "The selected OCR language is not installed on the server. Please contact support.",
+        OCR_FAILED: "Text recognition failed. Try a clearer scan or a smaller page range.",
+        NO_OCR_TEXT: "No text could be recognized on a scanned page. Check the OCR language and scan quality.",
+        NO_TEXT: "No editable text was found. Try OCR mode or a PDF containing text.",
+        DEPENDENCY: "The Word conversion engine is not installed on the server. Please contact support.",
+        OUTPUT_LIMIT: "The converted document is too large. Choose fewer pages.",
+        RESOURCE_LIMIT: "This document needs too much memory. Choose a smaller page range.",
+        FAILED: "This layout could not be converted safely. Try a smaller page range or OCR mode.",
+    };
+    try {
+        const args = [fileURLToPath(new URL("../convert.py", import.meta.url)), path.resolve(inputPath), path.resolve(outputPath), "--ocr", ocr, "--language", language, "--start", String(start), "--report", report];
+        if (end !== undefined) args.push("--end", String(end));
+        await runner(process.env.PDF_WORD_PYTHON || (process.platform === "win32" ? "python" : "python3"), args, 8 * 60_000);
+        const result = JSON.parse(await fs.readFile(report, "utf8"));
+        if (!Number.isInteger(result.pages) || result.pages < 1 || !Number.isInteger(result.ocrPages) || result.ocrPages < 0 || result.ocrPages > result.pages) throw new Error("Invalid conversion report.");
+        return result;
+    } catch (error) {
+        await fs.unlink(outputPath).catch(() => {});
+        if (errors[error.converterCode]) throw new Error(errors[error.converterCode]);
+        throw error;
+    } finally {
+        await fs.rm(work, { recursive: true, force: true });
+    }
 }
 
 export async function compressPdf(inputPath, outputPath, targetSizeMb, runner = runCommand) {

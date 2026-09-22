@@ -155,7 +155,11 @@ function singlePdfRoute(handler, suffix, extension = ".pdf") {
         const resultPath = outputPath(extension);
         try {
             await assertPdf(req.file);
-            await handler(req.file.path, resultPath, req.body, req);
+            const report = await handler(req.file.path, resultPath, req.body, req);
+            if (extension === ".docx" && report) {
+                res.setHeader("X-Vibify-Pages", String(report.pages));
+                res.setHeader("X-Vibify-OCR-Pages", String(report.ocrPages));
+            }
             sendProcessedFile(res, req.file, resultPath, `${safeBaseName(req.file, suffix)}${extension}`);
         } catch (error) {
             await Promise.allSettled([req.file?.path, resultPath, `${resultPath}.candidate.pdf`].filter(Boolean).map((filePath) => fsPromises.unlink(filePath)));
@@ -210,7 +214,7 @@ app.post("/protect", ...singlePdfRoute((input, output, body) => protectPdf(input
 app.post("/unlock", ...singlePdfRoute((input, output, body) => unlockPdf(input, output, body.password), "unlocked"));
 app.post("/archive", ...singlePdfRoute((input, output) => archivePdf(input, output), "archival"));
 app.post("/ocr", ...singlePdfRoute((input, output) => ocrPdf(input, output), "searchable"));
-app.post("/word", ...singlePdfRoute((input, output) => convertToWord(input, output), "converted", ".docx"));
+app.post("/word", ...singlePdfRoute((input, output, body) => convertToWord(input, output, body), "converted", ".docx"));
 
 app.post("/extract-coords", upload.single("pdf"), async (req, res) => {
     req.pdfStarted = true;

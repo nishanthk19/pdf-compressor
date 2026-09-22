@@ -15,6 +15,11 @@ document.head.append(canonical);
 const field = (label, name, markup, hint = "") =>
   `<label class="field">${label}${markup || `<input name="${name}" required>`}${hint ? `<small>${hint}</small>` : ""}</label>`;
 const settings = {
+  word:
+    field("Scanned pages", "ocr", '<select name="ocr"><option value="auto">Automatic OCR (recommended)</option><option value="off">Digital PDFs only (no OCR)</option><option value="force">OCR every selected page</option></select>', "Automatic mode recognizes scans while retaining native layout on digital pages.") +
+    field("OCR language", "language", '<select name="language"><option value="eng">English</option><option value="eng+hin">Hindi + English</option><option value="eng+tam">Tamil + English</option><option value="fra">French</option><option value="deu">German</option><option value="spa">Spanish</option><option value="por">Portuguese</option></select>', "Choose the language of scanned text. Digital text does not need an OCR language.") +
+    field("First page", "startPage", '<input name="startPage" type="number" min="1" value="1" required>') +
+    field("Last page", "endPage", '<input name="endPage" type="number" min="1" placeholder="Last page of PDF">', "Leave empty for the rest of the document. Up to 200 pages, including up to 40 OCR pages per conversion."),
   merge:
     '<p class="setting-note">Files are merged from top to bottom. Drag to arrange, or use the up and down buttons.</p>',
   compress: field(
@@ -73,6 +78,9 @@ const settings = {
 document.querySelector("#app").innerHTML =
   `${shell()}<main id="main" class="container"><section class="tool-top"><div class="breadcrumb"><a href="/#tools">All PDF tools</a><span>/</span><span>${tool.title}</span></div><div class="tool-title-row"><span class="tool-symbol ${tool.color}">${icon(tool.icon)}</span><div><h1>${tool.title}</h1><p>${tool.description}</p></div></div><div class="steps" aria-label="Workflow"><span class="current" id="step1"><b>1</b> Add files</span><span id="step2"><b>2</b> Customize</span><span id="step3"><b>3</b> Download</span></div></section><div class="status-message" id="error" role="alert" hidden></div><div class="tool-layout"><section class="upload-area" aria-label="Document selection"><input id="files" type="file" accept="application/pdf,.pdf" ${id === "merge" ? "multiple" : ""} hidden><div id="selection"><div class="drop-target" id="drop"><span class="tool-symbol ${tool.color}">${icon("add")}</span><h2>${id === "merge" ? "Bring your PDFs together" : "Your PDF goes here"}</h2><p>Drag and drop ${id === "merge" ? "your files" : "a file"}, or choose from your device.</p><button class="button" type="button" id="choose">Choose ${id === "merge" ? "PDF files" : "PDF file"} ↑</button><small>PDF only · Up to 100 MB per file${id === "merge" ? " · Maximum 20 files" : ""}</small></div><div id="selected" hidden><div class="file-toolbar"><strong id="fileCount"></strong><button class="button secondary small" id="addFiles" type="button">${id === "merge" ? "+ Add more files" : "Change file"}</button></div><div id="fileList"></div><p class="selection-hint">${id === "merge" ? "Drag files to change the order. You can also use the arrow buttons." : "Ready when you are. Check the settings, then process your PDF."}</p></div></div><div id="processing" class="progress-panel" hidden role="status" aria-live="polite"><div class="spinner"></div><h2 id="progressTitle">Uploading your PDF…</h2><p id="progressText">Keep this page open while we work.</p><progress id="progress" max="100" value="0" aria-label="Upload progress"></progress></div><div class="result-panel" id="result" hidden><div class="result-check" aria-hidden="true">✓</div><h2>Your document is ready.</h2><p id="resultSize"></p><div class="result-actions"><a id="download" class="button">Download ${id === "word" ? "Word document" : "PDF"} ↓</a><button class="button secondary" type="button" id="restart">Start again</button></div><p>Your download is ready in this tab until you leave or start again.</p></div></section><form class="settings-panel" id="settings"><h2>${id === "merge" ? "Merge settings" : "Make it yours"}</h2>${settings[id] || '<p class="setting-note">Add your PDF and we’ll handle the conversion.</p>'}${tool.note ? `<p class="setting-note">${tool.note}</p>` : ""}<button class="button wide" type="submit" id="submit" disabled>${tool.action} →</button><p class="privacy-note">Temporary uploads are removed after processing. Your original files stay on your device.</p></form></div><section class="tool-help"><div><h2>How to ${tool.title.toLowerCase()}</h2><p>Choose ${id === "merge" ? "two or more PDFs" : "your PDF"}, adjust the settings and select “${tool.action}”. When processing finishes, download your new document.</p></div><div><h2>Keep your work moving.</h2><p>Need another step? <a href="/#tools">Explore all tools</a> to organize, annotate or protect the result. For a scanned PDF, use OCR before converting it to Word.</p></div></section></main>${footer()}`;
 const $ = (s) => document.querySelector(s);
+if (id === "word") {
+  $(".tool-help > div:last-child p").textContent = "OCR runs automatically on scanned pages. Use a smaller page range for long documents. The result is editable, but complex layouts, handwriting, equations and scanned figures may need manual correction.";
+}
 let files = [],
   dragIndex = null,
   resultUrl = null,
@@ -217,6 +225,7 @@ $("#settings").addEventListener("submit", async (e) => {
   $("#selection").hidden = true;
   $("#processing").hidden = false;
   $("#progressTitle").textContent = "Uploading your PDF…";
+  $("#progressText").textContent = "Keep this page open while we work.";
   $("#progress").value = 0;
   const body = new FormData(e.target);
   files.forEach((f) => body.append(id === "merge" ? "pdfs" : "pdf", f));
@@ -232,7 +241,7 @@ $("#settings").addEventListener("submit", async (e) => {
     $("#progress").removeAttribute("value");
     $("#progressTitle").textContent = "Processing your document…";
     $("#progressText").textContent =
-      "Large files and scanned pages can take a few minutes.";
+      id === "word" ? "Analyzing layout and recognizing scanned text on our server. Large documents can take several minutes." : "Large files and scanned pages can take a few minutes.";
   };
   const fail = (message) => {
     busy = false;
@@ -257,9 +266,15 @@ $("#settings").addEventListener("submit", async (e) => {
     busy = false;
     resultUrl = URL.createObjectURL(xhr.response);
     $("#download").href = resultUrl;
-    $("#download").download = `vibify-${id}.${id === "word" ? "docx" : "pdf"}`;
+    $("#download").download = id === "word" ? `${files[0].name.replace(/\.pdf$/i, "")}.docx` : `vibify-${id}.pdf`;
     $("#resultSize").textContent =
       `${bytes(xhr.response.size)} · ${id === "word" ? "Word document" : "PDF document"}`;
+    if (id === "word") {
+      const pageCount = Number(xhr.getResponseHeader("X-Vibify-Pages"));
+      const ocrCount = Number(xhr.getResponseHeader("X-Vibify-OCR-Pages"));
+      if (pageCount > 0) $("#resultSize").textContent += ` · ${pageCount} source ${pageCount === 1 ? "page" : "pages"} converted`;
+      if (ocrCount > 0) $("#resultSize").textContent += ` · ${ocrCount} OCR ${ocrCount === 1 ? "page" : "pages"}. Proofread recognized text; scanned figures and tables may need rebuilding.`;
+    }
     $("#processing").hidden = true;
     $("#result").hidden = false;
     $("#settings").hidden = true;

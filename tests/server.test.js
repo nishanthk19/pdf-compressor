@@ -145,9 +145,24 @@ test("HTTP routes, uploads, worker results, auth boundary and overload response"
     response = await upload("compress", { targetSize: "2" });
     assert.equal(response.status, 200);
     assert.deepEqual(new Uint8Array(await response.arrayBuffer()), ab);
-    response = await upload("word");
-    assert.equal(response.status, 200);
-    assert.equal(new Uint8Array(await response.arrayBuffer())[0], 80);
+    response = await upload("word", { language: "../eng" });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).error, /supported OCR language/);
+    // Real layout/OCR conversion requires the pinned Python runtime; exercised
+    // by tests/word-conversion.py, not a ZIP-header check on blank source pages.
+    if (process.env.PDF_WORD_PYTHON) {
+      response = await upload("word");
+      assert.equal(response.status, 400);
+      assert.match((await response.json()).error, /No editable text/);
+      const textDoc = await PDFDocument.create();
+      textDoc.addPage().drawText("HTTP Word conversion test", { x: 50, y: 700 });
+      response = await upload("word", {}, [await textDoc.save()]);
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("X-Vibify-Pages"), "1");
+      assert.equal(response.headers.get("X-Vibify-OCR-Pages"), "0");
+      assert.match(response.headers.get("content-type"), /wordprocessingml/);
+      await response.arrayBuffer();
+    }
     response = await upload("extract-coords");
     assert.equal(response.status, 200);
     assert.equal((await response.json()).totalPages, 2);

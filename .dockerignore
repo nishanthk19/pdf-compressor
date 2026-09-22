@@ -10,3 +10,5 @@ test-*.pdf
 test-*.docx
 work-tailwind.exe
 coverage
+__pycache__
+*.pyc

@@ -34,9 +34,9 @@ export const tools = [
     group: "Convert",
     icon: "word",
     color: "blue",
-    description: "Extract PDF text into an editable Word document.",
+    description: "Convert PDFs to editable Word documents, with layout analysis and local OCR.",
     action: "Convert to Word",
-    note: "Text conversion preserves reading content, not the original page layout. Run OCR first for scanned documents.",
+    note: "Digital PDFs: reconstruct text, tables and images. Scans: recognize editable text; scanned figures and complex tables may not be preserved. Review formatting and OCR accuracy. All conversion stays on our server.",
   },
   {
     id: "extract",
@@ -172,5 +172,5 @@ export function shell() {
   return `<a class="skip-link" href="#main">Skip to content</a><header class="product-header"><a class="wordmark" href="/" aria-label="Vibify home"><span class="brand-mark">v</span>vibify<span class="brand-dot">.</span></a><nav aria-label="Main navigation"><a href="/#tools">All PDF tools</a><a href="/tools/compress">Compress</a><a href="/tools/merge">Merge</a><a href="/editor">Edit & sign</a></nav><div class="header-account" id="auth-nav-links"><a href="/login">Sign in</a><a class="button small" href="/login?mode=signup">Create account</a></div></header>`;
 }
 export function footer() {
-  return `<footer class="product-footer"><a class="wordmark" href="/">vibify.</a><p>A little less paperwork. A lot more done.</p><a href="/#tools">Explore tools</a><a href="/login">Your account</a><span>© ${new Date().getFullYear()} Vibify</span></footer>`;
+  return `<footer class="product-footer"><a class="wordmark" href="/">vibify.</a><p>A little less paperwork. A lot more done.</p><a href="/#tools">Explore tools</a><a href="/login">Your account</a><a href="https://github.com/nishanthk19/pdf-compressor">Source code</a><a href="https://github.com/nishanthk19/pdf-compressor/blob/main/LICENSE">AGPL-3.0 license</a><span>© ${new Date().getFullYear()} Vibify</span></footer>`;
 }
