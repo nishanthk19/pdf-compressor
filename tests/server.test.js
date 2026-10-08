@@ -180,7 +180,10 @@ test("HTTP routes, uploads, worker results, auth boundary and overload response"
     ]);
     assert.equal(response.status, 400);
     assert.match((await response.json()).error, /not a valid PDF/);
-    response = await upload("merge", {}, Array(21).fill(ab));
+    response = await upload("merge", {}, Array(100).fill(bb));
+    assert.equal(response.status, 200);
+    assert.equal((await PDFDocument.load(await response.arrayBuffer())).getPageCount(), 100);
+    response = await upload("merge", {}, Array(101).fill(bb));
     assert.equal(response.status, 400);
     assert.equal((await fetch(base + "/api/health")).status, 200);
   } finally {

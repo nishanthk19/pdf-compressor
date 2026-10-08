@@ -25,7 +25,7 @@ const uploadDir = path.join(os.tmpdir(), "vibify-uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 const upload = multer({
     dest: uploadDir,
-    limits: { fileSize: 100 * 1024 * 1024, files: 20 },
+    limits: { fileSize: 100 * 1024 * 1024, files: 100 },
     fileFilter: (_req, file, callback) => callback(null, file.mimetype === "application/pdf" || file.originalname.toLowerCase().endsWith(".pdf")),
 });
 
@@ -189,7 +189,7 @@ app.post("/api/ai/draft", async (req, res) => {
     }
 });
 
-app.post("/merge", upload.array("pdfs", 20), async (req, res) => {
+app.post("/merge", upload.array("pdfs", 100), async (req, res) => {
     req.pdfStarted = true;
     const files = req.files || [];
     const resultPath = outputPath();
