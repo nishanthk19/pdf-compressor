@@ -10,6 +10,8 @@ import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
 import { auth, prisma } from "./src/auth.js";
 import { processingPool } from "./src/processing-pool.js";
 import { generateDraft } from "./src/ai-draft.js";
+import { createLetterRouter } from "./src/letter-routes.js";
+import { startLetterJobs } from "./src/letter-jobs.js";
 import {
     archivePdf, compressPdf, convertToWord, deletePages, extractCoordinates,
     extractHtml, extractPages, mergePdfs, ocrPdf, paginatePdf, protectPdf,
@@ -20,6 +22,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+if (process.env.NODE_ENV === "production" && process.env.LETTER_STUDIO_ENABLED === "true" && !process.env.LETTER_STORAGE_DIR) {
+    throw new Error("Letter Studio requires LETTER_STORAGE_DIR on a private persistent volume.");
+}
 const publicDir = path.join(__dirname, "public");
 const uploadDir = path.join(os.tmpdir(), "vibify-uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
@@ -42,8 +47,17 @@ app.use((_req, res, next) => {
 app.all("/api/auth/*", toNodeHandler(auth));
 
 // 3. Body parsers
+app.use('/api/letters', express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
+
+app.use("/api/letters", createLetterRouter({ prisma, auth }));
+app.get("/tools/pdf-maker/legacy", (_req, res) => res.sendFile(path.join(publicDir, "tools/pdf-maker.html")));
+app.get(["/tools/pdf-maker", "/tools/pdf-maker.html", "/tools/letter-studio", "/letter-studio", "/letter-studio.html"], (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.sendFile(path.join(publicDir, process.env.LETTER_STUDIO_ENABLED === "true" ? "letter-studio.html" : "tools/pdf-maker.html"));
+});
+const stopLetterJobs = process.env.LETTER_STUDIO_ENABLED === "true" ? startLetterJobs(prisma) : () => {};
 
 // 4. Static frontend files (with clean HTML extensions fallback)
 const utilityNames = ['merge','compress','word','extract','rotate','delete','ocr','protect','unlock','paginate','archive'];
@@ -342,6 +356,7 @@ const server = app.listen(PORT, () => {
 });
 server.requestTimeout = 12 * 60_000;
 async function shutdown() {
+    stopLetterJobs();
     server.close(async () => { await processingPool.close(); await prisma.$disconnect(); process.exit(0); });
     setTimeout(() => process.exit(1), 30_000).unref();
 }

@@ -8,17 +8,19 @@ datasource db {
 }
 
 model User {
-  id            String          @id @default(cuid())
-  name          String
-  email         String          @unique
-  emailVerified Boolean         @default(false)
-  image         String?
-  role          String          @default("user")
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  logs          ProcessingLog[]
+  id             String                 @id @default(cuid())
+  name           String
+  email          String                 @unique
+  emailVerified  Boolean                @default(false)
+  image          String?
+  role           String                 @default("user")
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  sessions       Session[]
+  accounts       Account[]
+  logs           ProcessingLog[]
+  letters        LetterDocument[]
+  correspondence LetterCorrespondence[]
 
   @@map("user")
 }
@@ -77,4 +79,70 @@ model ProcessingLog {
   createdAt DateTime @default(now())
 
   @@map("processing_log")
+}
+
+model LetterDocument {
+  id             String                @id @default(cuid())
+  userId         String
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind           String                @default("document")
+  title          String
+  data           Json
+  revision       Int                   @default(1)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  revisions      LetterRevision[]
+  correspondence LetterCorrespondence?
+
+  @@index([userId, kind, updatedAt])
+  @@map("letter_document")
+}
+
+model LetterRevision {
+  id         String         @id @default(cuid())
+  documentId String
+  document   LetterDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  revision   Int
+  data       Json
+  createdAt  DateTime       @default(now())
+
+  @@unique([documentId, revision])
+  @@map("letter_revision")
+}
+
+model LetterCorrespondence {
+  id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentId String?         @unique
+  document   LetterDocument? @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  title      String
+  fileName   String?
+  filePath   String?
+  text       String          @default("")
+  metadata   Json            @default("{}")
+  included   Boolean         @default(true)
+  state      String          @default("pending")
+  error      String?
+  attempts   Int             @default(0)
+  lockedAt   DateTime?
+  generation Int             @default(1)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  chunks     LetterChunk[]
+
+  @@index([userId, included, state])
+  @@map("letter_correspondence")
+}
+
+model LetterChunk {
+  id               String               @id @default(cuid())
+  correspondenceId String
+  correspondence   LetterCorrespondence @relation(fields: [correspondenceId], references: [id], onDelete: Cascade)
+  position         Int
+  text             String
+  embeddingModel   String?
+
+  @@unique([correspondenceId, position])
+  @@map("letter_chunk")
 }
