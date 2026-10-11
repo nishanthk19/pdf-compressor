@@ -5,6 +5,7 @@ import { chromium } from "playwright";
 import { newLetter, paragraph } from "../public/js/letter-model.js";
 import { exportPdf } from "../src/letter-export.js";
 import { PDFDocument } from "pdf-lib";
+import { mkdir, writeFile } from "node:fs/promises";
 
 // Opt in on a host that permits Chromium subprocesses:
 // LETTER_BROWSER_TEST=1 node --test tests/letter-browser.test.mjs
@@ -65,12 +66,12 @@ test(
     );
     const server = app.listen(0, "127.0.0.1");
     await new Promise((r) => server.once("listening", r));
-    let browser;
+    let browser, page;
     try {
       browser = await chromium.launch({
         executablePath: process.env.LETTER_CHROMIUM_PATH || undefined,
       });
-      const page = await browser.newPage({
+      page = await browser.newPage({
         viewport: { width: 1536, height: 960 },
       });
       const errors = [];
@@ -121,7 +122,7 @@ test(
         /Original letter body/,
       );
       await page.getByRole("button", { name: "More document actions" }).click();
-      await page.getByLabel("Action", { exact: true }).selectOption("template");
+      await page.locator('dialog select[name="action"]').selectOption("template");
       await page.getByRole("button", { name: "Continue", exact: true }).click();
       await page.getByLabel("Name", { exact: true }).fill("Reusable template");
       await page.getByRole("button", { name: "Save", exact: true }).click();
@@ -163,6 +164,9 @@ test(
         (await PDFDocument.load(await exportPdf(letter))).getPageCount() > 1,
       );
     } finally {
+      await mkdir(".artifacts/qa", { recursive: true });
+      await page?.screenshot({ path: ".artifacts/qa/editor.png", fullPage: true }).catch(() => {});
+      if (page) await writeFile(".artifacts/qa/editor.html", await page.content()).catch(() => {});
       await browser?.close();
       server.closeAllConnections();
       await new Promise((r) => server.close(r));

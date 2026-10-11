@@ -51,7 +51,7 @@ for (const input of prompts) {
   const start = performance.now();
   const r = await chatResponse(aiMessages(input), {
     stream: false,
-    maxTokens: 400,
+    maxTokens: 800,
   });
   const b = await r.json();
   results.push({
