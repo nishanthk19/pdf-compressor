@@ -1,7 +1,7 @@
 // Synthetic acceptance fixture only; never use private correspondence in QA.
 import { mkdir, writeFile } from "node:fs/promises";
 import { newLetter, paragraph } from "../public/js/letter-model.js";
-import { exportDocx } from "../src/letter-export.js";
+import { exportDocx, exportPdf } from "../src/letter-export.js";
 const letter = newLetter("blank");
 letter.title = "Letter Studio export acceptance";
 letter.stationery = {
@@ -73,4 +73,5 @@ letter.content.content = [
 ];
 await mkdir(".artifacts/qa", { recursive: true });
 await writeFile(".artifacts/qa/letter-qa.docx", await exportDocx(letter));
+await writeFile(".artifacts/qa/letter-qa.pdf", await exportPdf(letter));
 console.log("Wrote synthetic QA DOCX; visual inspection still required.");

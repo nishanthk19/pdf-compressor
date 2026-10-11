@@ -6,7 +6,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 COPY requirements-word.txt ./
 COPY requirements-letter.txt ./
-ARG INSTALL_LETTER_EXTRACTOR=false
+ARG INSTALL_LETTER_EXTRACTOR=true
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ghostscript ocrmypdf qpdf python3-venv \
@@ -25,7 +25,8 @@ ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 # artifacts and configure LETTER_DOCLING_MODELS before enabling imports.
 RUN if [ "$INSTALL_LETTER_EXTRACTOR" = "true" ]; then \
       python3 -m venv /opt/letter-venv \
-      && /opt/letter-venv/bin/pip install --no-cache-dir -r requirements-letter.txt; \
+      && /opt/letter-venv/bin/pip install --no-cache-dir -r requirements-letter.txt --extra-index-url https://download.pytorch.org/whl/cpu \
+      && /opt/letter-venv/bin/python -c "from pathlib import Path; from docling.utils.model_downloader import download_models; download_models(output_dir=Path('/opt/letter-models'), with_code_formula=False, with_picture_classifier=False, with_rapidocr=False)"; \
     fi
 
 RUN npm ci

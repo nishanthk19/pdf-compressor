@@ -38,6 +38,15 @@ jobs:
       - run: node --test tests/letter-browser.test.mjs
         env:
           LETTER_BROWSER_TEST: "1"
+      - name: Render synthetic exports for visual acceptance
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-writer poppler-utils fonts-liberation
+          node scripts/letter-export-fixture.js
+          mkdir -p .artifacts/qa/word .artifacts/qa/pdf
+          /usr/bin/libreoffice -env:UserInstallation=file:///tmp/letter-qa-lo --headless --convert-to pdf --outdir .artifacts/qa/word .artifacts/qa/letter-qa.docx
+          pdftoppm -scale-to 1400 -png .artifacts/qa/word/letter-qa.pdf .artifacts/qa/word/page
+          pdftoppm -scale-to 1400 -png .artifacts/qa/letter-qa.pdf .artifacts/qa/pdf/page
       - uses: actions/upload-artifact@v4
         if: always()
         with:

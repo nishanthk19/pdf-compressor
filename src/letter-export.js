@@ -27,12 +27,14 @@ import {
 } from "../public/js/letter-model.js";
 import { validateLetter, fail } from "./letter-validation.js";
 import { exportGate } from "./letter-ai.js";
+import { renderViaSocket } from "./letter-render-client.js";
 export { stationeryHtml };
-export async function exportPdf(input) {
+export async function exportPdf(input, { local = false } = {}) {
   const letter = validateLetter(input);
   if (missingFields(letter).length)
     throw fail("Fill all document fields before exporting.");
   return exportGate.run(async () => {
+    if (process.env.LETTER_RENDER_SOCKET && !local) return renderViaSocket(letter);
     const browser = await chromium.launch({
       headless: true,
       chromiumSandbox: process.env.LETTER_CHROMIUM_NO_SANDBOX !== "true",

@@ -3,6 +3,8 @@ import { mkdir, access, constants } from "node:fs/promises";
 import { chromium } from "playwright";
 import { PrismaClient } from "@prisma/client";
 import { aiConfigured, aiProvider } from "../src/letter-ai.js";
+import { exportPdf } from "../src/letter-export.js";
+import { newLetter, paragraph } from "../public/js/letter-model.js";
 const prisma = new PrismaClient(),
   checks = [];
 const check = async (name, fn) => {
@@ -25,6 +27,12 @@ await check("Persistent storage", async () => {
   return "Writable; operator must verify volume survives redeploys";
 });
 await check("Chromium", async () => {
+  if (process.env.LETTER_RENDER_SOCKET) {
+    const fixture = newLetter("blank");
+    fixture.required = [];
+    fixture.content.content = [paragraph("Synthetic export readiness check.")];
+    return (await exportPdf(fixture)).length + " isolated worker PDF bytes";
+  }
   const b = await chromium.launch({
     executablePath: process.env.LETTER_CHROMIUM_PATH || undefined,
     chromiumSandbox: process.env.LETTER_CHROMIUM_NO_SANDBOX !== "true",
