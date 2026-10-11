@@ -224,6 +224,12 @@ export async function exportDocx(input) {
             ),
           }),
         ];
+      const inlineImages = (n.type === "image" ? [n] : n.content || []).filter((c) => c.type === "image");
+      const imageLine = inlineImages.reduce((largest, c) => {
+        const dimensions = imageDimensions(c.attrs.src);
+        const scale = Math.min(1, Math.min(650, Number(c.attrs.width) || 240) / dimensions.width, ((height - p.margin * 2 - 48) * 3.7795) / dimensions.height);
+        return Math.max(largest, Math.ceil(dimensions.height * scale * 15));
+      }, 0);
       return [
         new Paragraph({
           children: runs(n, { bold: tableHeader || n.type === "heading", fontSize: n.type === "heading" ? [20, 16, 13][Math.min(3, a.level || 1) - 1] : p.fontSize }),
@@ -236,8 +242,8 @@ export async function exportDocx(input) {
           spacing: {
             before: n.type === "heading" ? 320 : 0,
             after: (a.spaceAfter === undefined ? (n.type === "heading" ? 10 : 9) : Number(a.spaceAfter)) * 20,
-            line: Math.round((Number(a.lineHeight) || p.lineHeight) * 240),
-            lineRule: "auto",
+            line: imageLine || Math.round((Number(a.lineHeight) || p.lineHeight) * 240),
+            lineRule: imageLine ? "atLeast" : "auto",
           },
           indent: { left: mm((Number(a.indent) || 0) * 12) },
           bullet:

@@ -32,6 +32,7 @@ letter.content.content = [
   paragraph("Reference: QA/42"),
   paragraph("10 October 2026"),
   paragraph("Dear Test Recipient,"),
+  {type: "paragraph", content: [{type: "image", attrs: {src: fixtureImage, width: 180}}]},
   paragraph(
     "Please arrange the replacement of the sample scanner described below. This synthetic letter verifies searchable text, formatting, tables and explicit page breaks.",
   ),
