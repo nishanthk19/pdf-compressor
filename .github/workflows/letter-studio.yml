@@ -7,8 +7,20 @@ jobs:
   acceptance:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: fixture
+          POSTGRES_PASSWORD: fixture
+          POSTGRES_DB: letter_acceptance
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U fixture -d letter_acceptance"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: postgresql://fixture:fixture@localhost:5432/fixture
+      DATABASE_URL: postgresql://fixture:fixture@localhost:5432/letter_acceptance
+      LETTER_NATIVE_DATABASE_URL: postgresql://fixture:fixture@localhost:5432/letter_acceptance
       LETTER_CHROMIUM_NO_SANDBOX: "true"
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +31,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run check
+      - run: npx prisma db push
+      - run: PGPASSWORD=fixture psql -h localhost -U fixture -d letter_acceptance -v ON_ERROR_STOP=1 -f prisma/letter-studio.sql
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: node --test tests/letter-browser.test.mjs

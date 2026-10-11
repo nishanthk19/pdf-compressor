@@ -128,7 +128,7 @@ export function createLetterRouter({ prisma, auth }) {
     wrap(async (req, res) =>
       res.json(
         await prisma.letterDocument.findMany({
-          where: { userId: req.letterUser, state: { not: "draft" } },
+          where: { userId: req.letterUser },
           orderBy: { updatedAt: "desc" },
           take: 200,
           select: {
@@ -338,7 +338,7 @@ export function createLetterRouter({ prisma, auth }) {
     wrap(async (req, res) =>
       res.json(
         await prisma.letterCorrespondence.findMany({
-          where: { userId: req.letterUser },
+          where: { userId: req.letterUser, state: { not: "draft" } },
           orderBy: { updatedAt: "desc" },
           take: 200,
           select: {

@@ -1,4 +1,5 @@
 import { Editor, Extension, Node } from "@tiptap/core";
+import { closeHistory } from "@tiptap/pm/history";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyle, Color, FontSize } from "@tiptap/extension-text-style";
 import FontFamily from "@tiptap/extension-font-family";
@@ -899,7 +900,10 @@ const actions = {
         type: "paragraph",
         content: [{ type: "text", text: t }],
       }));
+    // Keep acceptance separate from nearby typing and document loading.
+    editor.view.dispatch(closeHistory(editor.state.tr));
     editor.chain().focus().insertContentAt(aiRange, content).run();
+    editor.view.dispatch(closeHistory(editor.state.tr));
     aiProposal = "";
     $("#aiActions").hidden = true;
     notice("Suggestion applied. Undo restores your previous text.");
