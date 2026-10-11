@@ -18,12 +18,12 @@ function fixtureImage() {
     return Buffer.concat([size, body, sum]);
   };
   const header = Buffer.alloc(13);
-  header.writeUInt32BE(120, 0); header.writeUInt32BE(40, 4); header[8] = 8; header[9] = 2;
-  const pixels = Buffer.alloc(40 * 361, 255);
+  header.writeUInt32BE(120, 0); header.writeUInt32BE(40, 4); header[8] = 8; header[9] = 6;
+  const pixels = Buffer.alloc(40 * 481, 255);
   for (let y = 0; y < 40; y++) {
-    pixels[y * 361] = 0;
+    pixels[y * 481] = 0;
     for (let x = 0; x < 120; x++) if (x < 25 || (y > 12 && y < 19 && x < 110)) {
-      const offset = y * 361 + 1 + x * 3;
+      const offset = y * 481 + 1 + x * 4;
       pixels[offset] = 42; pixels[offset + 1] = 76; pixels[offset + 2] = 67;
     }
   }

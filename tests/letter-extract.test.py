@@ -27,7 +27,8 @@ with tempfile.TemporaryDirectory() as folder:
     table.cell(0, 1).text = 'Quantity 1'
     docx.save(root / 'letter.docx')
     for name in ['searchable.pdf', 'scanned.pdf', 'letter.docx']:
-        result = subprocess.run([sys.executable, str(script), str(root / name)], capture_output=True, text=True, timeout=90, check=True)
+        result = subprocess.run([sys.executable, str(script), str(root / name)], capture_output=True, text=True, timeout=90)
+        assert result.returncode == 0, result.stderr
         data = json.loads(result.stdout)
         assert 'sample scanner' in data['text'], (name, data)
         assert 'QA/42' in data['text'], (name, data)

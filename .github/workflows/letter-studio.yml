@@ -37,7 +37,7 @@ jobs:
       - name: Verify lightweight offline extraction and scanned OCR
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends tesseract-ocr-eng python3-venv
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng python3-venv
           python3 -m venv /tmp/letter-extract-qa
           /tmp/letter-extract-qa/bin/pip install PyMuPDF==1.28.2 python-docx==1.2.0
           /tmp/letter-extract-qa/bin/python tests/letter-extract.test.py
