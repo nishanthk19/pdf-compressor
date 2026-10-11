@@ -201,6 +201,7 @@ export async function exportDocx(input) {
             rows: (n.content || []).map(
               (row) =>
                 new TableRow({
+                  cantSplit: true,
                   tableHeader: row.content.some(
                     (c) => c.type === "tableHeader",
                   ),
@@ -232,6 +233,7 @@ export async function exportDocx(input) {
       }, 0);
       return [
         new Paragraph({
+          keepNext: n.type === "heading" || undefined,
           children: runs(n, { bold: tableHeader || n.type === "heading", fontSize: n.type === "heading" ? [20, 16, 13][Math.min(3, a.level || 1) - 1] : p.fontSize }),
           heading:
             n.type === "heading"
