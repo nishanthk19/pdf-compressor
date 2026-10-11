@@ -1,2 +1,0 @@
-# Install in a dedicated Python 3.11/3.12 environment, not the PDF-to-Word venv.
-docling>=2.60,<3
