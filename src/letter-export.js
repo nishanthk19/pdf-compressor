@@ -237,6 +237,7 @@ export async function exportDocx(input) {
             before: n.type === "heading" ? 320 : 0,
             after: (a.spaceAfter === undefined ? (n.type === "heading" ? 10 : 9) : Number(a.spaceAfter)) * 20,
             line: Math.round((Number(a.lineHeight) || p.lineHeight) * 240),
+            lineRule: "auto",
           },
           indent: { left: mm((Number(a.indent) || 0) * 12) },
           bullet:
@@ -286,7 +287,7 @@ export async function exportDocx(input) {
                     width: { size: 25, type: "pct" },
                     children: [
                       new Paragraph({
-                        spacing: { after: 0 },
+                        spacing: { after: 0, line: 900, lineRule: "atLeast" },
                         children: [image(s.logo, 189, 60)],
                       }),
                     ],
@@ -353,7 +354,7 @@ export async function exportDocx(input) {
           document: {
             run: { font: p.font, size: p.fontSize * 2, color: "17222E" },
             paragraph: {
-              spacing: { line: Math.round(p.lineHeight * 240), after: 180 },
+              spacing: { line: Math.round(p.lineHeight * 240), lineRule: "auto", after: 180 },
             },
           },
         },
@@ -398,7 +399,7 @@ export async function exportDocx(input) {
           children: [
             ...blocks(letter.content),
             ...(s.signature
-              ? [new Paragraph({ children: [image(s.signature)] })]
+              ? [new Paragraph({ spacing: { line: 1125, lineRule: "atLeast" }, children: [image(s.signature)] })]
               : []),
           ],
         },
