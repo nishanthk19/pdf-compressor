@@ -105,7 +105,7 @@ export function createLetterRouter({ prisma, auth }) {
       externalEmbeddings:
         process.env.LETTER_SEMANTIC_ENABLED === "true" &&
         embedProvider() === "nvidia",
-      extraction: !!process.env.LETTER_DOCLING_PYTHON,
+      extraction: !!(process.env.LETTER_EXTRACT_PYTHON || process.env.LETTER_DOCLING_PYTHON),
       semantic: process.env.LETTER_SEMANTIC_ENABLED === "true",
     }),
   );
@@ -359,10 +359,7 @@ export function createLetterRouter({ prisma, auth }) {
     user,
     uploadAdmission,
     wrap(async (req, _res, next) => {
-      if (
-        !process.env.LETTER_DOCLING_PYTHON ||
-        !process.env.LETTER_DOCLING_MODELS
-      )
+      if (!(process.env.LETTER_EXTRACT_PYTHON || process.env.LETTER_DOCLING_PYTHON))
         throw fail("Local document extraction has not been configured.", 503);
       if (
         (await prisma.letterCorrespondence.count({

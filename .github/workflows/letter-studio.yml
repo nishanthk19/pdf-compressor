@@ -34,6 +34,13 @@ jobs:
       - run: npx prisma db push
       - run: PGPASSWORD=fixture psql -h localhost -U fixture -d letter_acceptance -v ON_ERROR_STOP=1 -f prisma/letter-studio.sql
       - run: npm test
+      - name: Verify lightweight offline extraction and scanned OCR
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends tesseract-ocr-eng python3-venv
+          python3 -m venv /tmp/letter-extract-qa
+          /tmp/letter-extract-qa/bin/pip install PyMuPDF==1.28.2 python-docx==1.2.0
+          /tmp/letter-extract-qa/bin/python tests/letter-extract.test.py
       - run: npx playwright install --with-deps chromium
       - run: node --test tests/letter-browser.test.mjs
         env:

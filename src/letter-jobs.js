@@ -18,10 +18,10 @@ export function startLetterJobs(prisma) {
       if (!item) return;
       try {
         if (item.filePath && !item.metadata?.textReviewed) {
-          if (!process.env.LETTER_DOCLING_PYTHON)
+          if (!(process.env.LETTER_EXTRACT_PYTHON || process.env.LETTER_DOCLING_PYTHON))
             throw new Error("Document extraction is not configured.");
           const { stdout } = await execute(
-            process.env.LETTER_DOCLING_PYTHON,
+            process.env.LETTER_EXTRACT_PYTHON || process.env.LETTER_DOCLING_PYTHON,
             [
               new URL(
                 "../scripts/letter-extract.py",
@@ -34,7 +34,10 @@ export function startLetterJobs(prisma) {
               maxBuffer: 2_000_000,
               windowsHide: true,
               env: {
-                ...process.env,
+                PATH: process.env.PATH,
+                LANG: "C.UTF-8",
+                HOME: "/tmp",
+                TESSDATA_PREFIX: process.env.TESSDATA_PREFIX,
                 OMP_NUM_THREADS: "1",
                 OPENBLAS_NUM_THREADS: "1",
               },
