@@ -1,0 +1,80 @@
+.live-page-gap,
+.live-page-gap-content,
+.live-page-gap-content > span,
+.live-page-tail {
+  display: block;
+  box-sizing: border-box;
+  user-select: none;
+  font-size: 0;
+  line-height: 0;
+  pointer-events: none;
+}
+.live-page-gap-content {
+  position: relative;
+}
+.live-page-gap-content .stationery {
+  font: 10pt/1.2 Arial;
+  white-space: pre-wrap;
+  color: #546253;
+  position: relative;
+  overflow: hidden;
+}
+.live-page-gap-content .stationery img {
+  max-height: 16mm;
+  max-width: 50mm;
+}
+.live-page-gap-content .live-footer {
+  padding-top: 2mm;
+}
+.live-page-gap-content .live-header {
+  padding-bottom: 6mm;
+}
+.live-page-divider {
+  background: #e9ede7;
+  margin-left: calc(-1 * var(--letter-margin));
+  width: calc(100% + 2 * var(--letter-margin));
+  border-top: 1px solid #dde3dd;
+  border-bottom: 1px solid #dde3dd;
+  box-shadow: inset 0 3px 4px #203d2d08;
+}
+.live-page-label {
+  position: absolute;
+  right: 0;
+  top: 8mm;
+  color: #81907d;
+  font: 9px Arial;
+}
+.paper .paper-header {
+  height: 24mm;
+  min-height: 24mm;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+.paper .paper-footer {
+  height: 14mm;
+  margin-top: 2mm;
+  overflow: hidden;
+}
+.paper .paper-signature {
+  height: 20mm;
+  object-fit: contain;
+  object-position: left;
+}
+.paper .tiptap > .page-break {
+  height: 0;
+  margin: 0;
+  border: 0;
+  overflow: hidden;
+}
+.paper .tiptap {
+  min-height: 0;
+}
+.paper .paper-header,
+.paper .stationery-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 5mm;
+}
+.paper .stationery-layout > div {
+  flex: 1;
+}

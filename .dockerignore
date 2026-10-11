@@ -6,6 +6,7 @@ node_modules.shared-link
 .env
 .env.*
 .artifacts
+data
 test-*.pdf
 test-*.docx
 work-tailwind.exe

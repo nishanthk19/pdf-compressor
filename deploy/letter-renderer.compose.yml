@@ -1,0 +1,24 @@
+services:
+  letter-renderer:
+    image: ${LETTER_RENDER_IMAGE:?Set the verified Letter Studio image}
+    container_name: vibify-letter-renderer
+    command: ["node", "scripts/letter-render-worker.js"]
+    restart: unless-stopped
+    user: "1000:1000"
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 600m
+    cpus: 1
+    pids_limit: 128
+    shm_size: 128m
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=128m,uid=1000,gid=1000"]
+    environment:
+      LETTER_RENDER_SOCKET: /run/letter-renderer/worker.sock
+      LETTER_CHROMIUM_NO_SANDBOX: "true"
+    volumes:
+      - /data/vibify-letter-renderer:/run/letter-renderer
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}

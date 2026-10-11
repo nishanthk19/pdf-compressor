@@ -19,6 +19,9 @@ RUN python3 -m venv /opt/word-venv \
 ENV PDF_WORD_PYTHON=/opt/word-venv/bin/python
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
+# Reuse the existing PDF/Word runtime; NVIDIA handles drafting without local models.
+ENV LETTER_EXTRACT_PYTHON=/opt/word-venv/bin/python
+
 RUN npm ci
 
 COPY . .
@@ -26,8 +29,17 @@ COPY . .
 RUN npm run build \
     && npm prune --omit=dev
 
+# Browser is local; no hosted export or document service.
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+RUN npx playwright install --with-deps chromium \
+    && mkdir -p /data/letters \
+    && chown node:node /data/letters
+
 EXPOSE 3000
 ENV PORT=3000
 ENV NODE_ENV=production
+USER node
 
-CMD ["sh", "-c", "npx prisma db push && node server.js"]
+# Apply reviewed additive migrations separately, after taking a database backup.
+# Do not run schema synchronization (which can drop data) during app startup.
+CMD ["node", "server.js"]
