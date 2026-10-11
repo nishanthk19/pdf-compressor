@@ -139,6 +139,7 @@ export function aiMessages({ action, prompt, text, sources, tone }) {
     {
       role: "user",
       content: JSON.stringify({
+        draftingRules: "Produce a complete professional letter for draft/reply actions (salutation, subject, body, closing); use placeholders for missing details. In a reply, report only what the evidence says. Do not promise to prepare, provide, advise, send or submit anything unless the request explicitly asks you to make that promise. Use [Proposed response or commitment - confirm] instead. For summaries, include only factual source content with citations.",
         request: prompt,
         selectedOrCurrentText: text,
         referenceDocuments: sources.map((s, i) => ({
