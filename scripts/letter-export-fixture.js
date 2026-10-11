@@ -1,34 +1,17 @@
 // Synthetic acceptance fixture only; never use private correspondence in QA.
 import { mkdir, writeFile } from "node:fs/promises";
-import { deflateSync } from "node:zlib";
+import { chromium } from "playwright";
 import { newLetter, paragraph } from "../public/js/letter-model.js";
 import { exportDocx, exportPdf } from "../src/letter-export.js";
 const letter = newLetter("blank");
-// Generate a valid synthetic PNG; the legacy site logos are not valid PNGs.
-function fixtureImage() {
-  const chunk = (type, data) => {
-    const body = Buffer.concat([Buffer.from(type), data]);
-    let crc = 0xffffffff;
-    for (const byte of body) {
-      crc ^= byte;
-      for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
-    }
-    const size = Buffer.alloc(4), sum = Buffer.alloc(4);
-    size.writeUInt32BE(data.length); sum.writeUInt32BE((crc ^ 0xffffffff) >>> 0);
-    return Buffer.concat([size, body, sum]);
-  };
-  const header = Buffer.alloc(13);
-  header.writeUInt32BE(120, 0); header.writeUInt32BE(40, 4); header[8] = 8; header[9] = 6;
-  const pixels = Buffer.alloc(40 * 481, 255);
-  for (let y = 0; y < 40; y++) {
-    pixels[y * 481] = 0;
-    for (let x = 0; x < 120; x++) if (x < 25 || (y > 12 && y < 19 && x < 110)) {
-      const offset = y * 481 + 1 + x * 4;
-      pixels[offset] = 42; pixels[offset + 1] = 76; pixels[offset + 2] = 67;
-    }
-  }
-  return "data:image/png;base64," + Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]), chunk("IHDR", header), chunk("IDAT", deflateSync(pixels)), chunk("IEND", Buffer.alloc(0))]).toString("base64");
-}
+// Browser-generated synthetic PNG tests text and non-square logo fidelity.
+const imageBrowser = await chromium.launch({chromiumSandbox: process.env.LETTER_CHROMIUM_NO_SANDBOX !== "true"});
+let fixtureImage;
+try {
+  const page = await imageBrowser.newPage({viewport: {width: 180, height: 50}});
+  await page.setContent('<body style="margin:0;background:white"><div style="font:bold 30px Arial;color:#2a4c43;padding:5px">VIBIFY QA</div></body>');
+  fixtureImage = 'data:image/png;base64,' + (await page.screenshot()).toString('base64');
+} finally { await imageBrowser.close(); }
 letter.title = "Letter Studio export acceptance";
 letter.stationery = {
   ...letter.stationery,
@@ -37,8 +20,8 @@ letter.stationery = {
   footer: "QA fixture - not for sending",
   firstFooter: "First page footer",
   differentFirst: true,
-  logo: fixtureImage(),
-  signature: fixtureImage(),
+  logo: fixtureImage,
+  signature: fixtureImage,
 };
 letter.content.content = [
   {
