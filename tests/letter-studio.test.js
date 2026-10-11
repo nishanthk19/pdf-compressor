@@ -21,6 +21,25 @@ function filled() {
   return l;
 }
 
+test("resized table columns and heading typography survive HTML and Word export", async () => {
+  const l = newLetter("blank");
+  l.required = [];
+  l.content.content = [
+    { type: "heading", attrs: { level: 1 }, content: [{ type: "text", text: "Heading" }] },
+    { type: "table", content: [{ type: "tableRow", content: [100, 300].map((width) => ({
+      type: "tableHeader", attrs: { colwidth: [width], colspan: 1, rowspan: 1 }, content: [paragraph("Header")],
+    })) }] },
+  ];
+  assert.match(nodeHtml(l.content), /width:25%/);
+  assert.match(nodeHtml(l.content), /width:75%/);
+  const zip = await JSZip.loadAsync(await exportDocx(l));
+  const xml = await zip.file("word/document.xml").async("string");
+  assert.match(xml, /w:sz w:val="40"/);
+  assert.match(xml, /w:fill="EDF1F5"/);
+  assert.match(xml, /w:color="CBD1D8"/);
+  assert.match(xml, /w:gridCol/);
+});
+
 test("multiline fields retain line breaks in HTML and editable Word output", async () => {
   const l = filled();
   l.fields.address = "Operations Office\nHyderabad";

@@ -24,6 +24,7 @@ import {
   resolveFields,
   missingFields,
   stationeryHtml,
+  tableColumnWidths,
 } from "../public/js/letter-model.js";
 import { validateLetter, fail } from "./letter-validation.js";
 import { exportGate } from "./letter-ai.js";
@@ -140,7 +141,7 @@ export async function exportDocx(input) {
         },
       });
     };
-    function runs(n) {
+    function runs(n, base = {}) {
       if (n.type === "hardBreak") return [new TextRun({ break: 1 })];
       if (n.type === "image")
         return [
@@ -150,16 +151,16 @@ export async function exportDocx(input) {
             (height - p.margin * 2 - 48) * 3.7795,
           ),
         ];
-      if (n.type !== "text") return (n.content || []).flatMap(runs);
+      if (n.type !== "text") return (n.content || []).flatMap((c) => runs(c, base));
       const marks = n.marks || [],
         style = marks.find((m) => m.type === "textStyle")?.attrs || {};
       const runOptions = {
-        bold: marks.some((m) => m.type === "bold"),
+        bold: marks.some((m) => m.type === "bold") || base.bold || undefined,
         italics: marks.some((m) => m.type === "italic"),
         underline: marks.some((m) => m.type === "underline") ? {} : undefined,
         strike: marks.some((m) => m.type === "strike"),
         font: style.fontFamily || p.font,
-        size: (parseFloat(style.fontSize) || p.fontSize) * 2,
+        size: (parseFloat(style.fontSize) || base.fontSize || p.fontSize) * 2,
         color: style.color?.replace("#", ""),
       };
       const resolvedRuns = resolveFields(n.text, letter.fields)
@@ -182,7 +183,7 @@ export async function exportDocx(input) {
           : resolvedRuns,
       ].flat();
     }
-    function blocks(n, list = null, level = 0) {
+    function blocks(n, list = null, level = 0, tableHeader = false) {
       const a = n.attrs || {};
       if (n.type === "doc" || n.type === "blockquote" || n.type === "listItem")
         return (n.content || []).flatMap((c) => blocks(c, list, level));
@@ -194,6 +195,9 @@ export async function exportDocx(input) {
         return [
           new Table({
             width: { size: 100, type: "pct" },
+            columnWidths: tableColumnWidths(n)?.map((w, _, values) => Math.round(w / values.reduce((a, b) => a + b, 0) * mm(width - p.margin * 2))),
+            layout: tableColumnWidths(n) ? "fixed" : undefined,
+            borders: Object.fromEntries(["top", "bottom", "left", "right", "insideHorizontal", "insideVertical"].map((side) => [side, { style: "single", size: 4, color: "CBD1D8" }])),
             rows: (n.content || []).map(
               (row) =>
                 new TableRow({
@@ -203,15 +207,17 @@ export async function exportDocx(input) {
                   children: row.content.map(
                     (cell) =>
                       new TableCell({
+                        shading: cell.type === "tableHeader" ? { fill: "EDF1F5" } : undefined,
+                        verticalAlign: "center",
                         columnSpan: cell.attrs?.colspan,
                         rowSpan: cell.attrs?.rowspan,
                         margins: {
-                          top: 100,
-                          bottom: 100,
-                          left: 100,
-                          right: 100,
+                          top: 140,
+                          bottom: 140,
+                          left: 140,
+                          right: 140,
                         },
-                        children: cell.content.flatMap((c) => blocks(c)),
+                        children: cell.content.flatMap((c) => blocks(c, null, 0, cell.type === "tableHeader")),
                       }),
                   ),
                 }),
@@ -220,15 +226,16 @@ export async function exportDocx(input) {
         ];
       return [
         new Paragraph({
-          children: runs(n),
+          children: runs(n, { bold: tableHeader || n.type === "heading", fontSize: n.type === "heading" ? [20, 16, 13][Math.min(3, a.level || 1) - 1] : p.fontSize }),
           heading:
             n.type === "heading"
               ? `Heading${Math.min(3, a.level || 1)}`
               : undefined,
           alignment:
-            AlignmentType[a.textAlign?.toUpperCase()] || AlignmentType.LEFT,
+            AlignmentType[a.textAlign?.toUpperCase()] || (tableHeader ? AlignmentType.CENTER : AlignmentType.LEFT),
           spacing: {
-            after: (Number(a.spaceAfter) || 9) * 20,
+            before: n.type === "heading" ? 320 : 0,
+            after: (a.spaceAfter === undefined ? (n.type === "heading" ? 10 : 9) : Number(a.spaceAfter)) * 20,
             line: Math.round((Number(a.lineHeight) || p.lineHeight) * 240),
           },
           indent: { left: mm((Number(a.indent) || 0) * 12) },

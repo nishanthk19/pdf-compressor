@@ -170,6 +170,11 @@ export function stationeryHtml(letter, index, footer = false) {
       : "")
   );
 }
+export function tableColumnWidths(node) {
+  const cells = node.content?.[0]?.content || [];
+  if (!cells.some((c) => c.attrs?.colwidth?.length)) return null;
+  return cells.flatMap((c) => Array.from({ length: Math.max(1, Number(c.attrs?.colspan) || 1) }, (_, i) => Math.max(20, Number(c.attrs?.colwidth?.[i]) || 100)));
+}
 export function nodeHtml(node, fields = {}) {
   const content = (node.content || []).map((n) => nodeHtml(n, fields)).join("");
   const a = node.attrs || {};
@@ -196,6 +201,10 @@ export function nodeHtml(node, fields = {}) {
   }
   if (node.type === "pageBreak") return '<div class="page-break"></div>';
   if (node.type === "hardBreak") return "<br>";
+  if (node.type === "table") {
+    const widths = tableColumnWidths(node), total = widths?.reduce((a, b) => a + b, 0);
+    return `<table${widths ? ' style="table-layout:fixed"' : ""}>${widths ? `<colgroup>${widths.map((w) => `<col style="width:${w / total * 100}%">`).join("")}</colgroup>` : ""}${content}</table>`;
+  }
   if (node.type === "image")
     return `<img src="${escapeHtml(a.src)}" alt="${escapeHtml(a.alt || "")}" style="width:${Math.min(650, Number(a.width) || 240)}px;max-width:100%">`;
   const tag =

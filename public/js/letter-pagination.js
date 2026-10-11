@@ -71,7 +71,8 @@ export function paginate(
     body.append(block);
     if (fits()) continue;
     block.remove();
-    if (body.childNodes.length) {
+    const splittable = ["TABLE", "UL", "OL", "P", "BLOCKQUOTE"].includes(block.tagName);
+    if (body.childNodes.length && !splittable) {
       next();
       body.append(block);
       if (fits()) continue;
@@ -84,6 +85,8 @@ export function paginate(
       let table;
       const start = () => {
         table = block.cloneNode(false);
+        const columns = block.querySelector(":scope > colgroup");
+        if (columns) table.append(columns.cloneNode(true));
         if (first) table.append(first.cloneNode(true));
         body.append(table);
       };
@@ -92,10 +95,19 @@ export function paginate(
         table.append(row.cloneNode(true));
         if (!fits()) {
           table.lastChild.remove();
-          if (table.querySelectorAll("tr").length <= (first ? 1 : 0))
-            throw new Error(
-              "A table row is taller than a page. Split that row or reduce its content.",
-            );
+          if (table.querySelectorAll("tr").length <= (first ? 1 : 0)) {
+            table.remove();
+            if (!body.children.length) throw new Error("A table row is taller than a page.");
+            // Keep a preceding heading with the first row when starting a new page.
+            const heading = /^H[1-3]$/.test(body.lastElementChild?.tagName || "") ? body.lastElementChild : null;
+            heading?.remove();
+            next();
+            if (heading) body.append(heading);
+            start();
+            table.append(row.cloneNode(true));
+            if (!fits()) throw new Error("A table row is taller than a page.");
+            continue;
+          }
           next();
           start();
           table.append(row.cloneNode(true));
@@ -112,10 +124,10 @@ export function paginate(
         list.append(child.cloneNode(true));
         if (!fits()) {
           list.lastChild.remove();
-          if (!list.children.length)
-            throw new Error(
-              "A list item is taller than a page. Split the item.",
-            );
+          if (!list.children.length) {
+            list.remove();
+            if (!body.children.length) throw new Error("A list item is taller than a page. Split the item.");
+          }
           next();
           list = block.cloneNode(false);
           if (block.tagName === "OL") list.start = count + 1;
@@ -145,8 +157,10 @@ export function paginate(
             low = mid + 1;
           } else high = mid - 1;
         }
-        if (best === start)
+        if (best === start) {
+          if (body.children.length) { next(); continue; }
           throw new Error("Content cannot fit within the page margins.");
+        }
         if (best < length) {
           const boundary = block.textContent.lastIndexOf(" ", best);
           if (boundary > start && boundary + 1 <= best) best = boundary + 1;

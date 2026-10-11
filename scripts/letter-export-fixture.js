@@ -1,5 +1,5 @@
 // Synthetic acceptance fixture only; never use private correspondence in QA.
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { newLetter, paragraph } from "../public/js/letter-model.js";
 import { exportDocx, exportPdf } from "../src/letter-export.js";
 const letter = newLetter("blank");
@@ -11,6 +11,8 @@ letter.stationery = {
   footer: "QA fixture - not for sending",
   firstFooter: "First page footer",
   differentFirst: true,
+  logo: "data:image/png;base64," + (await readFile(new URL("../public/vibify-logo-header.png", import.meta.url))).toString("base64"),
+  signature: "data:image/png;base64," + (await readFile(new URL("../public/vibify-logo-footer.png", import.meta.url))).toString("base64"),
 };
 letter.content.content = [
   {
