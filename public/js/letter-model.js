@@ -192,9 +192,13 @@ export function nodeHtml(node, fields = {}) {
       }
       if (mark.type === "link" && /^https?:\/\//.test(mark.attrs?.href || ""))
         text = `<a href="${escapeHtml(mark.attrs.href)}">${text}</a>`;
+      if (["superscript", "subscript"].includes(mark.type)) {
+        const tag = mark.type === "superscript" ? "sup" : "sub";
+        text = `<${tag}>${text}</${tag}>`;
+      }
       if (mark.type === "textStyle") {
         const m = mark.attrs || {};
-        text = `<span style="${m.fontFamily ? `font-family:${escapeHtml(m.fontFamily)};` : ""}${m.fontSize ? `font-size:${Number.parseFloat(m.fontSize)}pt;` : ""}${/^#[0-9a-f]{6}$/i.test(m.color || "") ? `color:${m.color};` : ""}">${text}</span>`;
+        text = `<span style="${m.fontFamily ? `font-family:${escapeHtml(m.fontFamily)};` : ""}${m.fontSize ? `font-size:${Number.parseFloat(m.fontSize)}pt;` : ""}${/^#[0-9a-f]{6}$/i.test(m.color || "") ? `color:${m.color};` : ""}${/^#[0-9a-f]{6}$/i.test(m.backgroundColor || "") ? `background-color:${m.backgroundColor};` : ""}">${text}</span>`;
       }
     }
     return text;
@@ -206,7 +210,7 @@ export function nodeHtml(node, fields = {}) {
     return `<table${widths ? ' style="table-layout:fixed"' : ""}>${widths ? `<colgroup>${widths.map((w) => `<col style="width:${w / total * 100}%">`).join("")}</colgroup>` : ""}${content}</table>`;
   }
   if (node.type === "image")
-    return `<img src="${escapeHtml(a.src)}" alt="${escapeHtml(a.alt || "")}" style="width:${Math.min(650, Number(a.width) || 240)}px;max-width:100%">`;
+    return `<img src="${escapeHtml(a.src)}" alt="${escapeHtml(a.alt || "")}" style="width:${Math.min(650, Number(a.width) || 240)}px;max-width:100%;display:block;margin-left:${a.textAlign === "center" || a.textAlign === "right" ? "auto" : "0"};margin-right:${a.textAlign === "right" ? "0" : "auto"}">`;
   const tag =
     {
       doc: "div",
@@ -222,7 +226,7 @@ export function nodeHtml(node, fields = {}) {
       tableHeader: "th",
       horizontalRule: "hr",
     }[node.type] || "div";
-  const style = `${a.textAlign ? `text-align:${a.textAlign};` : ""}${a.indent ? `margin-left:${Number(a.indent) * 12}mm;` : ""}${a.lineHeight ? `line-height:${Number(a.lineHeight)};` : ""}${a.spaceAfter ? `margin-bottom:${Number(a.spaceAfter)}pt;` : ""}`;
+  const style = `${a.textAlign ? `text-align:${a.textAlign};` : ""}${a.indent ? `margin-left:${Number(a.indent) * 12}mm;` : ""}${a.lineHeight ? `line-height:${Number(a.lineHeight)};` : ""}${a.spaceAfter != null ? `margin-bottom:${Number(a.spaceAfter)}pt;` : ""}${a.spaceBefore != null ? `margin-top:${Number(a.spaceBefore)}pt;` : ""}${a.firstLine ? `text-indent:${Number(a.firstLine)}pt;` : ""}${a.keepNext ? "break-after:avoid;" : ""}${/^#[0-9a-f]{6}$/i.test(a.backgroundColor || "") ? `background-color:${a.backgroundColor};` : ""}${["top", "middle", "bottom"].includes(a.verticalAlign) ? `vertical-align:${a.verticalAlign};` : ""}`;
   return `<${tag}${style ? ` style="${style}"` : ""}${["td", "th"].includes(tag) ? ` colspan="${Number(a.colspan) || 1}" rowspan="${Number(a.rowspan) || 1}"` : ""}>${content || (tag === "p" ? "<br>" : "")}</${tag}>`;
 }
 export const PRINT_CSS = `*{box-sizing:border-box}body{margin:0;color:#17222e}p{margin:0 0 9pt;orphans:2;widows:2}h1,h2,h3{color:#111;break-after:avoid;margin:16pt 0 10pt}h1{font-size:20pt}h2{font-size:16pt}h3{font-size:13pt}table{border-collapse:collapse;width:100%;margin:12pt 0}td,th{border:1px solid #cbd1d8;padding:7pt;vertical-align:top}th{background:#edf1f5}tr{break-inside:avoid}img{max-width:100%;height:auto}blockquote{margin-left:12mm}a{color:inherit}ul,ol{padding-left:8mm}.page-break{break-after:page;height:0} .stationery{font:10pt Arial;white-space:pre-wrap}.stationery-layout{display:flex;align-items:flex-start;gap:5mm}.stationery-layout>div{flex:1}.stationery img{max-height:16mm;max-width:50mm}.signature{max-height:20mm;max-width:50mm}`;

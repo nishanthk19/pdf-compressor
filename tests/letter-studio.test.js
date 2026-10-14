@@ -21,6 +21,28 @@ function filled() {
   return l;
 }
 
+test("Word ribbon formatting survives validation, HTML and editable DOCX", async () => {
+  const l = filled();
+  l.content.content = [
+    { type: "paragraph", attrs: { spaceBefore: 6, spaceAfter: 0, firstLine: 24, keepNext: true }, content: [
+      { type: "text", text: "Highlighted", marks: [{ type: "textStyle", attrs: { backgroundColor: "#fff176", fontSize: "14pt" } }] },
+      { type: "text", text: "2", marks: [{ type: "superscript" }] },
+      { type: "text", text: "n", marks: [{ type: "subscript" }] },
+    ] },
+    { type: "horizontalRule" },
+    { type: "table", content: [{ type: "tableRow", content: [{ type: "tableCell", attrs: { backgroundColor: "#cfe8ff", verticalAlign: "middle" }, content: [paragraph("Shaded cell")] }] }] },
+  ];
+  assert.doesNotThrow(() => validateLetter(l));
+  const html = nodeHtml(l.content);
+  for (const pattern of [/background-color:#fff176/, /<sup>2<\/sup>/, /<sub>n<\/sub>/, /margin-top:6pt/, /margin-bottom:0pt/, /text-indent:24pt/, /break-after:avoid/, /vertical-align:middle/, /background-color:#cfe8ff/]) assert.match(html, pattern);
+  const zip = await JSZip.loadAsync(await exportDocx(l)), xml = await zip.file("word/document.xml").async("string");
+  for (const pattern of [/w:fill="fff176"/, /w:vertAlign w:val="superscript"/, /w:vertAlign w:val="subscript"/, /w:before="120"/, /w:after="0"/, /w:firstLine="480"/, /w:keepNext/, /w:fill="cfe8ff"/, /w:vAlign w:val="center"/, /w:pBdr/]) assert.match(xml, pattern);
+  for (const [key, value] of [["spaceBefore",37],["firstLine",73],["backgroundColor","red;position:fixed"],["verticalAlign","unsafe"],["keepNext","yes"]]) {
+    const bad = structuredClone(l); bad.content.content[0].attrs[key] = value;
+    assert.throws(() => validateLetter(bad));
+  }
+});
+
 test("resized table columns and heading typography survive HTML and Word export", async () => {
   const l = newLetter("blank");
   l.required = [];

@@ -159,6 +159,9 @@ export async function exportDocx(input) {
         italics: marks.some((m) => m.type === "italic"),
         underline: marks.some((m) => m.type === "underline") ? {} : undefined,
         strike: marks.some((m) => m.type === "strike"),
+        superScript: marks.some((m) => m.type === "superscript"),
+        subScript: marks.some((m) => m.type === "subscript"),
+        shading: style.backgroundColor ? { fill: style.backgroundColor.slice(1) } : undefined,
         font: style.fontFamily || p.font,
         size: (parseFloat(style.fontSize) || base.fontSize || p.fontSize) * 2,
         color: style.color?.replace("#", ""),
@@ -191,6 +194,8 @@ export async function exportDocx(input) {
         return (n.content || []).flatMap((c) => blocks(c, n.type, level + 1));
       if (n.type === "pageBreak")
         return [new Paragraph({ pageBreakBefore: true })];
+      if (n.type === "horizontalRule")
+        return [new Paragraph({ border: { bottom: { style: "single", size: 6, color: "748079" } }, spacing: { before: 120, after: 120 } })];
       if (n.type === "table")
         return [
           new Table({
@@ -208,8 +213,8 @@ export async function exportDocx(input) {
                   children: row.content.map(
                     (cell) =>
                       new TableCell({
-                        shading: cell.type === "tableHeader" ? { fill: "EDF1F5" } : undefined,
-                        verticalAlign: "center",
+                        shading: cell.attrs?.backgroundColor ? { fill: cell.attrs.backgroundColor.slice(1) } : cell.type === "tableHeader" ? { fill: "EDF1F5" } : undefined,
+                        verticalAlign: cell.attrs?.verticalAlign === "middle" ? "center" : cell.attrs?.verticalAlign || "top",
                         columnSpan: cell.attrs?.colspan,
                         rowSpan: cell.attrs?.rowspan,
                         margins: {
@@ -233,7 +238,7 @@ export async function exportDocx(input) {
       }, 0);
       return [
         new Paragraph({
-          keepNext: n.type === "heading" || undefined,
+          keepNext: n.type === "heading" || a.keepNext || undefined,
           children: runs(n, { bold: tableHeader || n.type === "heading", fontSize: n.type === "heading" ? [20, 16, 13][Math.min(3, a.level || 1) - 1] : p.fontSize }),
           heading:
             n.type === "heading"
@@ -242,12 +247,12 @@ export async function exportDocx(input) {
           alignment:
             AlignmentType[a.textAlign?.toUpperCase()] || (tableHeader ? AlignmentType.CENTER : AlignmentType.LEFT),
           spacing: {
-            before: n.type === "heading" ? 320 : 0,
+            before: a.spaceBefore != null ? Number(a.spaceBefore) * 20 : n.type === "heading" ? 320 : 0,
             after: (a.spaceAfter === undefined ? (n.type === "heading" ? 10 : 9) : Number(a.spaceAfter)) * 20,
             line: imageLine || Math.round((Number(a.lineHeight) || p.lineHeight) * 240),
             lineRule: imageLine ? "atLeast" : "auto",
           },
-          indent: { left: mm((Number(a.indent) || 0) * 12) },
+          indent: { left: mm((Number(a.indent) || 0) * 12), firstLine: (Number(a.firstLine) || 0) * 20 },
           bullet:
             list === "bulletList"
               ? { level: Math.min(8, level - 1) }

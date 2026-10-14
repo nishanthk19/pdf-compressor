@@ -61,6 +61,8 @@ export function validateLetter(input) {
             "strike",
             "link",
             "textStyle",
+            "superscript",
+            "subscript",
             "code",
           ].includes(m.type)
         )
@@ -73,6 +75,8 @@ export function validateLetter(input) {
             throw fail("Unsupported font.");
           if (a.color && !/^#[0-9a-f]{6}$/i.test(a.color))
             throw fail("Use a six-digit text color.");
+          if (a.backgroundColor && !/^#[0-9a-f]{6}$/i.test(a.backgroundColor))
+            throw fail("Use a six-digit highlight color.");
           if (
             a.fontSize &&
             !/^([8-9]|[1-6][0-9]|7[0-2])(?:\.\d)?(?:pt)?$/.test(
@@ -99,6 +103,8 @@ export function validateLetter(input) {
       "indent",
       "lineHeight",
       "spaceAfter",
+      "spaceBefore",
+      "firstLine",
       "width",
       "colspan",
       "rowspan",
@@ -113,9 +119,17 @@ export function validateLetter(input) {
     if (
       n.attrs?.indent > 4 ||
       n.attrs?.lineHeight > 2.5 ||
-      n.attrs?.spaceAfter > 36
+      n.attrs?.spaceAfter > 36 ||
+      n.attrs?.spaceBefore > 36 ||
+      n.attrs?.firstLine > 72
     )
       throw fail("Paragraph spacing is out of range.");
+    if (n.attrs?.backgroundColor && !/^#[0-9a-f]{6}$/i.test(n.attrs.backgroundColor))
+      throw fail("Use a six-digit cell color.");
+    if (n.attrs?.verticalAlign && !["top", "middle", "bottom"].includes(n.attrs.verticalAlign))
+      throw fail("Invalid cell alignment.");
+    if (n.attrs?.keepNext != null && typeof n.attrs.keepNext !== "boolean")
+      throw fail("Invalid paragraph pagination.");
     (n.content || []).forEach((c) => walk(c, depth + 1));
   }
   walk(input.content);

@@ -56,10 +56,12 @@ export const LivePages = Extension.create({
               margin = letter.page.margin;
             const usable = (height - margin * 2 - 46) * PX,
               gap = (margin * 2 + 46) * PX + 24;
+            // CSS zoom is a view preference, never a change to pagination geometry.
+            const zoom = Number.parseFloat(getComputedStyle(view.dom.closest("#paper")).zoom) || 1;
             const old = [...view.dom.querySelectorAll("[data-live-gap]")].map(
               (n) => ({
                 pos: +n.dataset.liveGap,
-                height: n.getBoundingClientRect().height,
+                height: n.getBoundingClientRect().height / zoom,
               }),
             );
             const before = (pos) =>
@@ -67,7 +69,7 @@ export const LivePages = Extension.create({
             const top = view.dom.getBoundingClientRect().top;
             const yAt = (pos) => {
               try {
-                return view.coordsAtPos(pos).top - top - before(pos);
+                return (view.coordsAtPos(pos).top - top) / zoom - before(pos);
               } catch {
                 return 0;
               }
@@ -138,19 +140,27 @@ export const LivePages = Extension.create({
               added += size;
               boundary += usable + gap;
             };
-            for (const { node, pos } of targets) {
+            for (const [targetIndex, { node, pos }] of targets.entries()) {
               const dom = view.nodeDOM(pos);
               if (!(dom instanceof HTMLElement)) continue;
               const rect = dom.getBoundingClientRect(),
-                start = rect.top - top - before(pos),
+                start = (rect.top - top) / zoom - before(pos),
                 inside = old
                   .filter((g) => g.pos > pos && g.pos < pos + node.nodeSize)
                   .reduce((n, g) => n + g.height, 0);
-              const blockHeight = rect.height - inside,
+              const blockHeight = rect.height / zoom - inside,
                 end = start + blockHeight + added;
               if (node.type.name === "pageBreak") {
                 addGap(pos, Math.max(0, boundary - start - added));
                 continue;
+              }
+              if (node.attrs.keepNext || node.type.name === "heading") {
+                const nextTarget = targets[targetIndex + 1], nextDom = nextTarget && view.nodeDOM(nextTarget.pos);
+                const nextLine = nextDom instanceof HTMLElement ? Number.parseFloat(getComputedStyle(nextDom).lineHeight) || 22 : 0;
+                if (nextLine && blockHeight + nextLine <= usable && end + nextLine > boundary + 1 && start + added > boundary - usable + 1) {
+                  addGap(pos, boundary - start - added);
+                  continue;
+                }
               }
               if (end <= boundary + 1) continue;
               if (blockHeight <= usable) {
@@ -184,7 +194,7 @@ export const LivePages = Extension.create({
             }
             const rect = view.dom.getBoundingClientRect(),
               naturalHeight =
-                rect.height - old.reduce((n, g) => n + g.height, 0);
+                rect.height / zoom - old.reduce((n, g) => n + g.height, 0);
             const reserve = letter.stationery.signature ? 20 * PX : 0;
             const tail = Math.max(
               0,

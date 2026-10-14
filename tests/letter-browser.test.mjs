@@ -93,9 +93,10 @@ test(
           .inputValue(),
         "Recovery test",
       );
-      await page
-        .getByRole("button", { name: "Draft letter", exact: true })
-        .click();
+      await page.getByRole("tab", {name:"View",exact:true}).click();
+      await page.getByRole("button", {name:"Assistant pane",exact:true}).click();
+      await page.getByRole("tab", {name:"Home",exact:true}).click();
+      await page.getByRole("button", { name: "Formalize", exact: true }).click();
       await page
         .getByRole("button", { name: "Accept suggestion", exact: true })
         .waitFor();
