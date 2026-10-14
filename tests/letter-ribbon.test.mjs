@@ -103,7 +103,7 @@ test("Word ribbon GUI: formatting, find, table controls, zoom, panes and recover
     assert.equal(await doc.locator("tr:not([data-live-gap])").count(),4);
     await page.getByRole("button",{name:"Cell appearance",exact:true}).click();
     await page.getByLabel("Cell shading",{exact:true}).fill("#cfe8ff");
-    await page.getByLabel("Vertical alignment",{exact:true}).selectOption("middle");
+    await page.getByRole("combobox",{name:"Vertical alignment",exact:true}).selectOption("middle");
     await page.getByRole("button",{name:"Apply",exact:true}).click();
     assert.match(await doc.innerHTML(),/background-color: rgb\(207, 232, 255\)/);
     await page.getByRole("tab",{name:"View",exact:true}).click();
