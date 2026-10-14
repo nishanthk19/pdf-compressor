@@ -131,7 +131,10 @@ $("#studio").innerHTML =
 <div class="ruler" aria-hidden="true">${Array.from({ length: 12 }, (_, i) => `<span>${i * 2}</span>`).join("")}</div><div class="canvas"><article class="paper" id="paper"><div class="paper-header" id="letterhead"></div><div id="editor"></div><img id="signature" class="paper-signature" alt="Signature" hidden><div class="paper-footer" id="letterfooter"></div></article><div id="printPreview" hidden></div></div><footer class="bottom"><span id="metrics">0 words</span><span id="pageMetrics">A4 · Portrait</span><span>English · Private workspace</span></footer></main>
 <aside class="right"><div class="assistant-title"><span class="spark">✧</span><h2>Writing assistant</h2></div><p>A thoughtful first draft. A sharper final word.</p><span class="status-pill" id="aiStatus">Checking AI…</span><label>What would you like to write?<textarea id="prompt" placeholder="Draft a reply confirming receipt and requesting the missing enclosures…"></textarea></label><div class="ai-chips"><button data-ai="draft">Draft letter</button><button data-ai="reply">Draft reply</button><button data-ai="formalize">Formalize</button><button data-ai="shorten">Shorten</button><button data-ai="summarize">Summarize</button></div><label>Writing tone<select id="tone"><option>Professional</option><option>Formal</option><option>Firm and courteous</option><option>Warm</option><option>Concise</option></select></label><button class="primary" data-action="generate" id="generate">✧ Create suggestion</button><button data-action="cancelAI" hidden id="cancelAI">Cancel generation</button><div id="aiResult" class="ai-result" aria-live="polite"></div><div class="ai-actions" id="aiActions" hidden><button data-action="acceptAI" class="primary">Accept suggestion</button><button data-action="rejectAI">Discard</button></div><div id="aiSources"></div><section class="memory-box"><h3>Correspondence memory</h3><p>Find a previous letter and use it as context. Sources stay visible beside every suggestion.</p><input id="memoryQuery" aria-label="Search correspondence" placeholder="Search your letters…"><div id="memorySources"></div><button data-action="import">＋ Import correspondence</button><button data-action="contextDrafts">Choose draft context</button><small id="draftContext">No other drafts selected</small></section></aside></div>`;
 $(".bottom").insertAdjacentHTML("beforebegin", '<section id="typingBar" class="typing-bar" aria-label="AI drafting progress" hidden><span class="typing-indicator" aria-hidden="true">✧</span><div><strong id="typingStatus" role="status"></strong><div id="draftSources" class="draft-sources"></div></div><button id="stopDraft" data-action="cancelAI">Stop & restore</button><button id="undoDraft" data-action="undoDraft" hidden>Undo draft</button><button id="dismissDraft" data-action="dismissDraft" hidden aria-label="Dismiss drafting status">×</button></section>');
+$("#studio").inert = true;
+$("#studio").setAttribute("aria-busy", "true");
 const editor = new Editor({
+  editable: false,
   element: $("#editor"),
   extensions: [
     StarterKit.configure({
@@ -1390,4 +1393,10 @@ try {
 } catch (err) {
   paint();
   notice(err.message);
+} finally {
+  editor.setEditable(true, false);
+  editor.commands.refreshLetterPages();
+  $("#studio").inert = false;
+  $("#studio").setAttribute("aria-busy", "false");
+  $("#studio").dataset.ready = "true";
 }

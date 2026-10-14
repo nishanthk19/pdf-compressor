@@ -16,6 +16,7 @@ test("AI popup streams into the page, requires consent, restores on stop/failure
     page.on("pageerror",e=>errors.push(e.message));
     const base=`http://127.0.0.1:${server.address().port}`;
     await page.goto(base+"/letter-studio.html");
+    await page.locator('#studio[data-ready="true"]').waitFor();
     const doc=page.getByRole("textbox",{name:"Letter document",exact:true});
     await doc.fill("Original body.");
     await page.getByRole("button",{name:"Save document",exact:true}).click();
@@ -55,6 +56,7 @@ test("AI popup streams into the page, requires consent, restores on stop/failure
     assert.match(await doc.innerText(),/Please share the remaining enclosures/);
     await page.getByRole("button",{name:"Save document",exact:true}).click();
     await page.waitForTimeout(1500); await page.reload();
+    await page.locator('#studio[data-ready="true"]').waitFor();
     assert.match(await doc.innerText(),/Please share the remaining enclosures/);
     assert.deepEqual(errors,[]);
   } finally {await browser?.close(); server.closeAllConnections(); await new Promise(r=>server.close(r));}
@@ -72,6 +74,7 @@ test("Word ribbon GUI: formatting, find, table controls, zoom, panes and recover
     const errors=[]; page.on("pageerror",e=>errors.push(e.message));
     const base = `http://127.0.0.1:${server.address().port}`;
     await page.goto(base+"/letter-studio.html");
+    await page.locator('#studio[data-ready="true"]').waitFor();
     const doc=page.getByRole("textbox",{name:"Letter document",exact:true});
     await doc.fill("alpha beta alpha");
     await doc.press("ControlOrMeta+a");
@@ -120,6 +123,7 @@ test("Word ribbon GUI: formatting, find, table controls, zoom, panes and recover
     const documents=await (await fetch(base+"/api/letters/documents")).json();
     assert.ok(documents.some(d=>JSON.stringify(d.data.content).includes("superscript") && JSON.stringify(d.data.content).includes("#cfe8ff")));
     await page.reload();
+    await page.locator('#studio[data-ready="true"]').waitFor();
     assert.match(await doc.innerHTML(),/<sup>/);
     assert.equal(await doc.locator("tr:not([data-live-gap])").count(),4);
     await page.getByRole("tab",{name:"Home",exact:true}).focus();
