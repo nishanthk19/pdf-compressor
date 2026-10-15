@@ -54,6 +54,7 @@ export const LivePages = Extension.create({
             // frame. Commit those DOM mutations before dispatching pagination
             // decorations, otherwise the older state can replace fresh input.
             if (view.composing) return;
+            view.domObserver.forceFlush();
             view.domObserver.flush();
             const letter = options.getLetter();
             if (!letter) return;
