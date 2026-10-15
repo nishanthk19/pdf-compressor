@@ -18,9 +18,13 @@ test("AI popup streams into the page, requires consent, restores on stop/failure
     await page.goto(base+"/letter-studio.html");
     await page.locator('#studio[data-ready="true"]').waitFor();
     const doc=page.getByRole("textbox",{name:"Letter document",exact:true});
-    await doc.fill("Original body.");
+    await doc.press("ControlOrMeta+a");
+    await doc.pressSequentially("Original body.");
+    assert.equal(await doc.innerText(),"Original body.","native typing must reach the document");
     await page.getByRole("button",{name:"Save document",exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('#saveState').textContent.includes('Revision'));
+    const originalSaved=await (await fetch(base+"/api/letters/documents")).json();
+    assert.match(JSON.stringify(originalSaved[0].data.content),/Original body/,"immediate save must retain native input");
     async function prepare(prompt) {
       await page.getByRole("button",{name:"✧ AI draft",exact:true}).click();
       await page.getByRole("textbox",{name:"What should the letter say?",exact:true}).fill(prompt);
@@ -76,7 +80,8 @@ test("Word ribbon GUI: formatting, find, table controls, zoom, panes and recover
     await page.goto(base+"/letter-studio.html");
     await page.locator('#studio[data-ready="true"]').waitFor();
     const doc=page.getByRole("textbox",{name:"Letter document",exact:true});
-    await doc.fill("alpha beta alpha");
+    await doc.press("ControlOrMeta+a");
+    await doc.pressSequentially("alpha beta alpha");
     await doc.press("ControlOrMeta+a");
     await page.getByRole("button",{name:"Bold",exact:true}).click();
     await page.getByRole("button",{name:"Superscript",exact:true}).click();
