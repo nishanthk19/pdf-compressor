@@ -50,6 +50,11 @@ export const LivePages = Extension.create({
           };
           const measure = () => {
             if (disposed || !view.dom.isConnected) return;
+            // Chromium can defer parsing a native edit until after a layout
+            // frame. Commit those DOM mutations before dispatching pagination
+            // decorations, otherwise the older state can replace fresh input.
+            if (view.composing) return;
+            view.domObserver.flush();
             const letter = options.getLetter();
             if (!letter) return;
             const [width, height] = pageDimensions(letter.page),

@@ -283,6 +283,7 @@ function paint() {
 }
 async function save() {
   if (aiTyping) throw new Error("Finish or stop AI drafting before saving. Your original is preserved.");
+  editor.view.domObserver.flush();
   if (!config.signedIn) {
     if (!record) record = crypto.randomUUID();
     const d = {
@@ -1118,6 +1119,7 @@ async function memorySearch() {
 }
 async function openDraftPopup(action = "draft") {
   if (aiAbort) return notice("Stop the current generation first.");
+  editor.view.domObserver.flush();
   const range = { from: editor.state.selection.from, to: editor.state.selection.to };
 const pending = dialog("Draft a letter with AI", `<p class="draft-intro">Describe your letter. Watch it take shape directly on the page.</p><label>What should the letter say?<textarea name="prompt" rows="5" maxlength="8000" required placeholder="Write a formal request for approval. Explain the purpose, include the reference number, and ask for a reply by Friday.">${e($("#prompt").value)}</textarea></label><div class="draft-examples"><button type="button" data-example="request">Request</button><button type="button" data-example="reply">Reply</button><button type="button" data-example="reminder">Reminder</button><button type="button" data-example="notice">Notice</button></div><div class="field-grid"><label>Tone<select name="tone">${["Professional", "Formal", "Firm and courteous", "Warm", "Concise"].map(t => `<option ${t === $("#tone").value ? "selected" : ""}>${t}</option>`).join("")}</select></label><label>Write into<select name="placement"><option value="insert">Insert at cursor — keep existing text</option>${range.from !== range.to ? '<option value="selection">Replace selected text</option>' : ""}<option value="body">Replace letter body</option></select></label></div><p class="draft-context">Uses your current letter details and selected correspondence context. Existing letterhead and footer stay unchanged. Stop restores the original; Undo removes a completed draft.</p>${config.externalAI ? '<label class="draft-consent"><input type="checkbox" name="accepted" required> Allow this prompt, current text and relevant correspondence excerpts to be processed by an external AI service.</label>' : ""}`, "Start writing");
   const d = $("#dialog");
