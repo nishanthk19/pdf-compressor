@@ -79,6 +79,7 @@ test(
       await page.goto(
         "http://127.0.0.1:" + server.address().port + "/letter-studio.html",
       );
+      await page.locator('#studio[data-ready="true"]').waitFor();
       await page
         .getByRole("textbox", { name: "Letter document", exact: true })
         .fill("Original letter body.");
@@ -87,15 +88,17 @@ test(
         .fill("Recovery test");
       await page.waitForTimeout(1800);
       await page.reload();
+      await page.locator('#studio[data-ready="true"]').waitFor();
       assert.equal(
         await page
           .getByRole("textbox", { name: "Document title" })
           .inputValue(),
         "Recovery test",
       );
-      await page
-        .getByRole("button", { name: "Draft letter", exact: true })
-        .click();
+      await page.getByRole("tab", {name:"View",exact:true}).click();
+      await page.getByRole("button", {name:"Assistant pane",exact:true}).click();
+      await page.getByRole("tab", {name:"Home",exact:true}).click();
+      await page.getByRole("button", { name: "Formalize", exact: true }).click();
       await page
         .getByRole("button", { name: "Accept suggestion", exact: true })
         .waitFor();

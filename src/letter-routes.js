@@ -100,7 +100,7 @@ export function createLetterRouter({ prisma, auth }) {
       signedIn: !!req.letterUser,
       userId: req.letterUser,
       ai: aiReady(),
-      aiProvider: aiProvider(),
+      aiProvider: aiProvider() === "nvidia" ? "external" : "local",
       externalAI: aiProvider() === "nvidia",
       externalEmbeddings:
         process.env.LETTER_SEMANTIC_ENABLED === "true" &&
@@ -551,7 +551,7 @@ export function createLetterRouter({ prisma, auth }) {
         );
       if (aiProvider() === "nvidia" && req.body.externalConsent !== true)
         throw fail(
-          "Confirm sending this request and relevant correspondence excerpts to NVIDIA.",
+          "Confirm sending this request and relevant correspondence excerpts to the external AI service.",
           400,
         );
       const sources = await searchMemory(prisma, req.letterUser, prompt, {

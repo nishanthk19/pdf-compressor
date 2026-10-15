@@ -42,7 +42,7 @@ jobs:
           /tmp/letter-extract-qa/bin/pip install PyMuPDF==1.28.2 python-docx==1.2.0
           /tmp/letter-extract-qa/bin/python tests/letter-extract.test.py
       - run: npx playwright install --with-deps chromium
-      - run: node --test tests/letter-browser.test.mjs
+      - run: node --test tests/letter-browser.test.mjs tests/letter-ribbon.test.mjs
         env:
           LETTER_BROWSER_TEST: "1"
       - name: Render synthetic exports for visual acceptance

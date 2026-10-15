@@ -1,0 +1,116 @@
+/* Word-style ribbon. View controls never change exported page dimensions. */
+.center .word-ribbon { display:block; flex:none; padding:0; background:#fffefa; }
+.ribbon-tabs { display:flex; align-items:center; gap:2px; padding:0 12px; border-bottom:1px solid var(--line); overflow:auto; }
+.word-ribbon .ribbon-tabs [role=tab] { height:36px; border-radius:0; padding:7px 13px; flex:none; border:0; border-bottom:3px solid transparent; background:transparent; }
+.word-ribbon .ribbon-tabs [aria-selected=true] { color:var(--green); font-weight:700; border-bottom-color:var(--green); }
+.word-ribbon [hidden],.find-pane[hidden],.center .ruler[hidden] { display:none!important; }
+.quick-actions { display:flex; margin-left:auto; border-left:1px solid var(--line); padding-left:8px; flex:none; }
+.quick-actions button>span:last-child { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.ribbon-panel { display:flex; align-items:stretch; overflow-x:auto; padding:8px 12px 4px; min-height:116px; gap:0; }
+.ribbon-group { display:flex; flex-direction:column; flex:none; min-width:110px; border-right:1px solid var(--line); padding:0 8px; }
+.ribbon-group:last-child { border-right:0; }
+.ribbon-controls { display:flex; flex-wrap:wrap; gap:4px; align-content:start; align-items:center; max-width:270px; min-height:74px; flex:1; }
+.ribbon-group.font-group .ribbon-controls { max-width:none; display:block; }
+.ribbon-group[aria-label="Clipboard"] .ribbon-controls { max-width:185px; }
+.ribbon-group[aria-label="Paragraph"] .ribbon-controls { max-width:230px; }
+.word-ribbon [data-word="grow"]>span:last-child,.word-ribbon [data-word="shrink"]>span:last-child { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.document-bar>div:first-child { flex:1; min-width:0; }
+.document-bar .title { width:100%; }
+.document-bar .doc-tools { flex:none; }
+.ribbon-caption { display:block; text-align:center; color:var(--muted); font-size:10px; padding-top:5px; margin-top:auto; }
+.ribbon-row { display:flex; align-items:center; gap:4px; margin-bottom:4px; }
+.word-ribbon .ribbon-group button { display:inline-flex; align-items:center; gap:4px; height:30px; padding:5px 7px; font-size:11px; white-space:nowrap; border:1px solid transparent; }
+.ribbon-icon { font-size:15px; min-width:16px; text-align:center; }
+.ribbon-row.compact button>span:last-child { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.word-ribbon button[aria-pressed=true] { background:#e0ecdf; border-color:#adccb9; color:#145038; }
+.word-ribbon .ribbon-select { display:flex; flex-direction:column; gap:3px; font-size:10px; margin:0; }
+.word-ribbon select { height:29px; font-size:11px; padding:4px 6px; }
+.word-ribbon #font { width:140px; }
+.word-ribbon #fontSize { width:58px; }
+.word-ribbon .compact>label { display:flex; align-items:center; font-size:13px; gap:2px; }
+.word-ribbon input[type=color] { width:25px; height:27px; padding:2px; }
+.word-ribbon .ribbon-tabs button:focus-visible { outline:2px solid var(--green); outline-offset:-4px; }
+.word-ribbon button:disabled { cursor:not-allowed; }
+.find-pane { flex:none; padding:10px 18px; border-bottom:1px solid var(--line); background:#f6f9f4; display:flex; flex-wrap:wrap; gap:9px; align-items:end; }
+.find-pane label { font-size:11px; display:flex; flex-direction:column; gap:4px; }
+.find-pane>div>label { flex-direction:row; align-items:center; }
+.find-top { display:flex; align-items:center; gap:8px; align-self:center; }
+.find-top button { padding:4px 8px; }
+.find-buttons { display:flex; gap:5px; }
+.find-buttons button { font-size:11px; }
+.find-pane output { font-size:11px; flex-basis:100%; color:var(--muted); }
+.word-statistics { display:grid; grid-template-columns:1fr auto; gap:12px; }
+.word-statistics dd { font-weight:bold; margin:0; }
+.table-picker-preview { text-align:center; font-size:64px; color:var(--green); background:#f0f5ed; border-radius:8px; margin-bottom:15px; }
+.show-formatting .tiptap p:after { content:"¶"; color:#8aa99b; font-size:.85em; pointer-events:none; }
+.show-formatting .tiptap p:empty:after { display:inline; }
+.workspace.hide-library { grid-template-columns:minmax(400px,1fr) 300px; }
+.workspace.hide-library>.left { display:none; }
+.workspace.hide-assistant { grid-template-columns:232px minmax(400px,1fr); }
+.workspace.hide-assistant>.right { display:none; }
+.workspace.hide-library.hide-assistant { grid-template-columns:minmax(400px,1fr); }
+@media(max-width:1100px) {
+  .ribbon-panel { min-height:112px; }
+  .word-ribbon .ribbon-tabs [role=tab] { padding:7px 10px; }
+  .find-pane { max-height:180px; overflow:auto; }
+}
+@media(max-width:760px) {
+  .workspace .document-bar { flex-wrap:wrap; gap:8px; }
+  .workspace .document-bar>div:first-child { flex-basis:100%; }
+  .workspace .document-bar .doc-tools { width:100%; justify-content:space-between; }
+}
+@media print { .word-ribbon,.find-pane { display:none!important; } .show-formatting .tiptap p:after { content:none; } }
+
+/* A document-first workspace, with discoverable commands and direct drafting. */
+.word-ribbon .command-search { margin-left:auto; flex:none; border:1px solid var(--line); border-radius:5px; padding:5px 10px; font-size:11px; color:var(--muted); }
+.quick-actions { margin-left:6px; }
+.word-ribbon .style-gallery { display:grid; grid-template-columns:1fr 1fr; gap:3px; width:185px; }
+.word-ribbon .style-gallery button { height:29px; background:white; border:1px solid var(--line); justify-content:center; }
+.style-gallery .style-1 { font-weight:700; color:var(--green); }
+.style-gallery .style-2 { font-weight:600; }
+.style-gallery .style-3 { font-style:italic; }
+.word-ribbon .style-gallery button[aria-pressed=true] { border-color:var(--green); background:#edf4ef; }
+.ribbon-group[aria-label="Editing"] .ribbon-controls { max-width:125px; }
+.ribbon-group[aria-label="Clipboard"] .ribbon-controls { max-width:150px; }
+.word-ribbon .ribbon-tabs { background:#f6f8fa; }
+.word-ribbon .ribbon-panel { background:#fcfcfd; }
+.workspace .canvas { background:#e5e8ed; }
+.workspace .paper { box-shadow:0 2px 7px #24334a26; border:1px solid #d8dde4; }
+.top-actions .ai-launch { color:white; background:var(--green); border-color:var(--green); font-weight:600; }
+.draft-dialog { width:min(640px,calc(100vw - 24px)); padding:28px; }
+.draft-dialog h2 { font-size:24px; margin-bottom:8px; }
+.draft-dialog .draft-intro { color:var(--muted); margin-bottom:22px; }
+.draft-dialog textarea { min-height:140px; line-height:1.6; resize:vertical; }
+.draft-dialog form { gap:12px; }
+.draft-dialog .draft-intro { margin:0 0 10px; }
+.draft-dialog .draft-context { margin:4px 0; }
+.draft-examples { display:flex; gap:6px; flex-wrap:wrap; margin:-6px 0 18px; }
+.draft-examples button { padding:5px 12px; font-size:12px; border-radius:16px; background:#f3f7f4; }
+.draft-context { font-size:12px; line-height:1.6; color:var(--muted); }
+.draft-dialog .draft-consent { display:block; font-size:12px; line-height:1.6; background:#f5f7fa; padding:12px; border-radius:8px; }
+.draft-consent input { width:auto; display:inline; margin-right:6px; }
+.typing-bar { display:flex; gap:14px; align-items:center; padding:12px 20px; flex:none; background:#edf6f0; border-top:1px solid #c5dfcf; }
+.typing-bar>div { flex:1; min-width:0; }
+.typing-bar strong { font-size:13px; }
+.typing-bar button { flex:none; font-size:12px; }
+.typing-indicator { font-size:22px; color:var(--green); }
+.ai-typing .typing-indicator { animation:draft-pulse 1s ease-in-out infinite alternate; }
+.draft-sources { display:flex; flex-wrap:wrap; gap:4px; max-height:90px; overflow:auto; }
+.draft-sources:empty { display:none; }
+.draft-sources button.source { font-size:11px; margin:4px 0 0; padding:3px 7px; }
+.command-results,.outline-list { display:flex; flex-direction:column; gap:4px; max-height:330px; overflow:auto; margin-top:12px; }
+.command-results button,.outline-list button { text-align:left; background:#f6f8fa; }
+.ai-typing #paper { outline:2px solid #a9cbb5; }
+@keyframes draft-pulse { to { opacity:.35; } }
+@media(prefers-reduced-motion:reduce) { .ai-typing .typing-indicator { animation:none; } }
+@media(max-width:760px) {
+  .word-ribbon .command-search span { display:none; }
+  .draft-dialog { padding:20px; }
+  .typing-bar { padding:10px; gap:8px; flex-wrap:wrap; }
+  .typing-bar>div { min-width:180px; }
+}
+@media(max-width:1100px) {
+  .workspace.hide-assistant>.right.open,.workspace.hide-library>.left.open { display:flex; }
+}
+.workspace.focus-mode>.left,.workspace.focus-mode>.right { display:none!important; }
+@media print { .typing-bar { display:none!important; } }

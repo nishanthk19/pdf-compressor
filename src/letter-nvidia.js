@@ -4,10 +4,10 @@ import { fail } from "./letter-validation.js";
 const ORIGIN = "https://integrate.api.nvidia.com/v1/";
 export async function nvidia(path, body, signal) {
   const key = process.env.NVIDIA_API_KEY?.trim();
-  if (!key) throw fail("NVIDIA AI is not configured on the server.", 503);
+  if (!key) throw fail("AI is not configured on the server.", 503);
   if (process.env.LETTER_NVIDIA_DATA_TRANSFER_ACCEPTED !== "true")
     throw fail(
-      "NVIDIA data transfer has not been enabled by the operator.",
+      "External AI data transfer has not been enabled by the operator.",
       503,
     );
   const timeout = AbortSignal.timeout(120000);
@@ -24,19 +24,19 @@ export async function nvidia(path, body, signal) {
       signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
     });
   } catch {
-    throw fail("NVIDIA AI connection failed or timed out.", 503);
+    throw fail("AI connection failed or timed out.", 503);
   }
   if (!response.ok) {
     await response.body?.cancel();
     // Never relay upstream bodies, prompts, or credentials to logs/the browser.
     throw fail(
       response.status === 429
-        ? "NVIDIA AI rate limit reached. Please try again later."
+        ? "AI rate limit reached. Please try again later."
         : response.status === 401 || response.status === 403
-          ? "NVIDIA AI server credentials need attention."
+          ? "AI server credentials need attention."
           : response.status === 410
-            ? "The configured NVIDIA model has been retired. Update the server model setting."
-            : "NVIDIA AI is temporarily unavailable.",
+            ? "The configured AI model has been retired. Update the server model setting."
+            : "AI is temporarily unavailable.",
       503,
     );
   }
@@ -58,13 +58,13 @@ export async function* nvidiaTokens(response) {
     try {
       part = JSON.parse(raw);
     } catch {
-      throw fail("Invalid NVIDIA AI stream.", 502);
+      throw fail("Invalid AI response stream.", 502);
     }
-    if (part.error) throw fail("NVIDIA AI could not complete the draft.", 503);
+    if (part.error) throw fail("AI could not complete the draft.", 503);
     const choice = part.choices?.[0];
     if (choice?.finish_reason && choice.finish_reason !== "stop")
       throw fail(
-        "NVIDIA AI returned an incomplete or filtered draft. Please try a shorter request.",
+        "AI returned an incomplete or filtered draft. Please try a shorter request.",
         502,
       );
     return { token: choice?.delta?.content };
@@ -76,7 +76,7 @@ export async function* nvidiaTokens(response) {
         ? decoder.decode()
         : decoder.decode(value, { stream: true });
       if (buffer.length > 200000)
-        throw fail("NVIDIA AI stream is too large.", 502);
+        throw fail("AI response stream is too large.", 502);
       let end;
       while ((end = buffer.indexOf("\n")) >= 0) {
         const line = buffer.slice(0, end).replace(/\r$/, "");
@@ -89,7 +89,7 @@ export async function* nvidiaTokens(response) {
           if (typeof part.token === "string" && part.token) yield part.token;
         }
       }
-      if (done) throw fail("NVIDIA AI stream ended before completion.", 502);
+      if (done) throw fail("AI response stream ended before completion.", 502);
     }
   } finally {
     await reader.cancel().catch(() => {});

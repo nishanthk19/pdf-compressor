@@ -59,7 +59,23 @@ export function paginate(
     clone.append(range.cloneContents());
     return clone;
   }
-  for (let block of blocks) {
+  const keepsNext = n => n && (n.style.breakAfter === "avoid" || /^H[1-3]$/.test(n.tagName));
+  const firstPart = n => {
+    if (n.tagName === "TABLE") {
+      const table = n.cloneNode(false), columns = n.querySelector(":scope > colgroup");
+      if (columns) table.append(columns.cloneNode(true));
+      const rows = [...n.querySelectorAll("tr")];
+      table.append(...rows.slice(0, rows[0]?.querySelector("th") ? 2 : 1).map(r => r.cloneNode(true)));
+      return table;
+    }
+    if (["UL", "OL"].includes(n.tagName)) {
+      const list = n.cloneNode(false); if(n.firstElementChild) list.append(n.firstElementChild.cloneNode(true)); return list;
+    }
+    if (["P", "BLOCKQUOTE"].includes(n.tagName) && textLength(n)) return fragment(n,0,Math.min(textLength(n), (n.textContent.indexOf(" ")+1)||textLength(n)));
+    return n.cloneNode(true);
+  };
+  for (const [blockIndex, original] of blocks.entries()) {
+    let block = original;
     if (block.classList.contains("page-break")) {
       next();
       continue;
@@ -67,6 +83,16 @@ export function paginate(
     if (block.tagName === "IMG") {
       block.style.maxHeight = `${height - margin * 2 - 48}mm`;
       block.style.objectFit = "contain";
+    }
+    if (keepsNext(block) && body.children.length && blocks[blockIndex+1] && !blocks[blockIndex+1].classList.contains("page-break")) {
+      const probes = [block.cloneNode(true)];
+      let i = blockIndex + 1;
+      while (keepsNext(blocks[i]) && i < blocks.length - 1) probes.push(blocks[i++].cloneNode(true));
+      probes.push(firstPart(blocks[i]));
+      body.append(...probes);
+      const overflow = !fits(), groupHeight = probes.at(-1).getBoundingClientRect().bottom - probes[0].getBoundingClientRect().top;
+      probes.forEach(p=>p.remove());
+      if (overflow && groupHeight <= body.clientHeight) next();
     }
     body.append(block);
     if (fits()) continue;

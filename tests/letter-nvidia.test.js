@@ -4,6 +4,20 @@ import { nvidia, nvidiaTokens } from "../src/letter-nvidia.js";
 import { streamDraft, embedding, aiConfigured } from "../src/letter-ai.js";
 import express from "express";
 import { createLetterRouter } from "../src/letter-routes.js";
+import { readFile } from "node:fs/promises";
+
+test("public AI wording is Vibify-branded without removing consent or source access", async () => {
+  const editor = await readFile(new URL("../frontend/letter-studio.js", import.meta.url), "utf8");
+  const catalog = await readFile(new URL("../public/js/catalog.js", import.meta.url), "utf8");
+  assert.doesNotMatch(editor, /nvidia|nvedia|AGPL-3\.0/i);
+  assert.match(editor, /Vibify AI/);
+  assert.match(editor, /Allow external AI processing/);
+  assert.match(editor, /name="accepted" required/);
+  assert.match(editor, /Source code/);
+  assert.doesNotMatch(catalog, />AGPL-3\.0 license</);
+  assert.match(catalog, /blob\/main\/LICENSE/);
+  assert.match(catalog, /Legal information/);
+});
 
 function sse(text) {
   const bytes = new TextEncoder().encode(text);
@@ -128,6 +142,7 @@ test("NVIDIA credentials stay server-side; fixed endpoint, approval, citations, 
       nvidia("chat/completions", {}),
       (e) =>
         /credentials need attention/.test(e.message) &&
+        !/nvidia/i.test(e.message) &&
         !e.message.includes("synthetic"),
     );
     globalThis.fetch = async () => new Response("private", { status: 429 });

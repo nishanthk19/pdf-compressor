@@ -21,6 +21,8 @@ import {
 } from "../public/js/letter-model.js";
 import { paginate } from "../public/js/letter-pagination.js";
 import { LivePages } from "./letter-live-pages.js";
+import { installRibbon, WordFormatting, Superscript, Subscript } from "./letter-ribbon.js";
+import { DirectDraft } from "./letter-direct-draft.js";
 const $ = (s) => document.querySelector(s);
 const printStyle = document.createElement("style");
 document.head.append(printStyle);
@@ -35,6 +37,7 @@ let config = { signedIn: false },
   conflict = false,
   preview = false,
   aiAbort,
+  aiTyping,
   aiProposal = "",
   aiSnapshot = "",
   aiRange,
@@ -106,7 +109,7 @@ const layout = Extension.create({
           spaceAfter: {
             default: null,
             renderHTML: (a) =>
-              a.spaceAfter ? { style: `margin-bottom:${a.spaceAfter}pt` } : {},
+              a.spaceAfter != null ? { style: `margin-bottom:${a.spaceAfter}pt` } : {},
           },
         },
       },
@@ -121,13 +124,17 @@ const pageBreak = Node.create({
   renderHTML: () => ["div", { class: "page-break" }],
 });
 $("#studio").innerHTML =
-  `<header class="top"><a class="brand" href="/">vibify.<small>LETTER STUDIO</small></a><div class="top-actions"><button data-action="library" aria-label="Toggle document library">☰</button><button data-action="assistant">✧ Assistant</button><button data-action="finalize" class="desktop">Mark final</button><button data-action="docx">Word ↓</button><button data-action="pdf" class="primary">Export PDF ↓</button><a id="account" class="avatar" href="/login" aria-label="Sign in">↗</a></div></header>
-<div class="workspace"><aside class="left"><span class="eyebrow">Your workspace</span><h2>Good words. Clear intent.</h2><button class="primary" data-action="new">＋ New letter</button><nav><button data-kind="document" class="active">Documents <span>01</span></button><button data-kind="template">Templates <span>↗</span></button><button data-kind="stationery">Stationery <span>↗</span></button><button data-kind="correspondence">Correspondence <span>↗</span></button></nav><div id="library"></div><div class="left-bottom"><span id="privacy">Your browser, your drafts.</span><a href="/tools/pdf-maker/legacy">Open original PDF Maker</a><a href="https://github.com/nishanthk19/pdf-compressor">Source · AGPL-3.0</a></div></aside>
+`<header class="top"><a class="brand" href="/">vibify.<small>LETTER STUDIO</small></a><div class="top-actions"><button data-action="library" aria-label="Toggle document library">☰</button><button data-action="draftPopup" class="ai-launch">✧ AI draft</button><button data-action="finalize" class="desktop">Mark final</button><button data-action="docx">Word ↓</button><button data-action="pdf" class="primary">Export PDF ↓</button><a id="account" class="avatar" href="/login" aria-label="Sign in">↗</a></div></header>
+<div class="workspace hide-assistant"><aside class="left"><span class="eyebrow">Your workspace</span><h2>Good words. Clear intent.</h2><button class="primary" data-action="new">＋ New letter</button><nav><button data-kind="document" class="active">Documents <span>01</span></button><button data-kind="template">Templates <span>↗</span></button><button data-kind="stationery">Stationery <span>↗</span></button><button data-kind="correspondence">Correspondence <span>↗</span></button></nav><div id="library"></div><div class="left-bottom"><span id="privacy">Your browser, your drafts.</span><a href="/tools/pdf-maker/legacy">Open original PDF Maker</a><a href="https://github.com/nishanthk19/pdf-compressor">Source code</a></div></aside>
 <main class="center"><div class="document-bar"><div><input id="title" class="title" aria-label="Document title" value="Formal letter"><span id="saveState" class="save-state">Draft · Saved on this device</span></div><div class="doc-tools"><button data-action="fields">Letter fields</button><button data-action="page">Page setup</button><button data-action="preview" id="previewButton">Print preview</button><button data-action="more" aria-label="More document actions">•••</button></div></div>
 <div class="ribbon" role="toolbar" aria-label="Document formatting"><select id="style" aria-label="Paragraph style"><option value="0">Normal text</option><option value="1">Heading 1</option><option value="2">Heading 2</option><option value="3">Heading 3</option></select><select id="font" aria-label="Font family">${["Arial", "Times New Roman", "Georgia", "Courier New", "Calibri"].map((f) => `<option>${f}</option>`).join("")}</select><select id="fontSize" aria-label="Font size">${[9, 10, 11, 12, 14, 16, 18, 20, 24, 32, 48].map((n) => `<option ${n === 11 ? "selected" : ""}>${n}</option>`).join("")}</select><span class="divider"></span><button data-command="toggleBold" aria-label="Bold"><b>B</b></button><button data-command="toggleItalic" aria-label="Italic"><i>I</i></button><button data-command="toggleUnderline" aria-label="Underline"><u>U</u></button><button data-command="toggleStrike" aria-label="Strikethrough"><s>S</s></button><input id="color" type="color" value="#17222e" aria-label="Text color"><span class="divider"></span>${["left", "center", "right", "justify"].map((align, i) => `<button data-align="${align}" aria-label="Align ${align}">${["☰", "≡", "☷", "▤"][i]}</button>`).join("")}<button data-command="toggleBulletList" aria-label="Bullet list">• ≡</button><button data-command="toggleOrderedList" aria-label="Numbered list">1. ≡</button><button data-action="indent" aria-label="Increase indent">→|</button><button data-action="outdent" aria-label="Decrease indent">|←</button><button data-action="spacing">Spacing</button><span class="divider"></span><button data-action="table">Table</button><button data-action="image">Image</button><button data-action="link">Link</button><button data-action="break">Page break</button><button data-action="find">Find</button><button data-command="undo" aria-label="Undo">↶</button><button data-command="redo" aria-label="Redo">↷</button></div>
 <div class="ruler" aria-hidden="true">${Array.from({ length: 12 }, (_, i) => `<span>${i * 2}</span>`).join("")}</div><div class="canvas"><article class="paper" id="paper"><div class="paper-header" id="letterhead"></div><div id="editor"></div><img id="signature" class="paper-signature" alt="Signature" hidden><div class="paper-footer" id="letterfooter"></div></article><div id="printPreview" hidden></div></div><footer class="bottom"><span id="metrics">0 words</span><span id="pageMetrics">A4 · Portrait</span><span>English · Private workspace</span></footer></main>
-<aside class="right"><div class="assistant-title"><span class="spark">✧</span><h2>Writing assistant</h2></div><p>A thoughtful first draft. A sharper final word.</p><span class="status-pill" id="aiStatus">Checking local AI…</span><label>What would you like to write?<textarea id="prompt" placeholder="Draft a reply confirming receipt and requesting the missing enclosures…"></textarea></label><div class="ai-chips"><button data-ai="draft">Draft letter</button><button data-ai="reply">Draft reply</button><button data-ai="formalize">Formalize</button><button data-ai="shorten">Shorten</button><button data-ai="summarize">Summarize</button></div><label>Writing tone<select id="tone"><option>Professional</option><option>Formal</option><option>Firm and courteous</option><option>Warm</option><option>Concise</option></select></label><button class="primary" data-action="generate" id="generate">✧ Create suggestion</button><button data-action="cancelAI" hidden id="cancelAI">Cancel generation</button><div id="aiResult" class="ai-result" aria-live="polite"></div><div class="ai-actions" id="aiActions" hidden><button data-action="acceptAI" class="primary">Accept suggestion</button><button data-action="rejectAI">Discard</button></div><div id="aiSources"></div><section class="memory-box"><h3>Correspondence memory</h3><p>Find a previous letter and use it as context. Sources stay visible beside every suggestion.</p><input id="memoryQuery" aria-label="Search correspondence" placeholder="Search your letters…"><div id="memorySources"></div><button data-action="import">＋ Import correspondence</button><button data-action="contextDrafts">Choose draft context</button><small id="draftContext">No other drafts selected</small></section></aside></div>`;
+<aside class="right"><div class="assistant-title"><span class="spark">✧</span><h2>Writing assistant</h2></div><p>A thoughtful first draft. A sharper final word.</p><span class="status-pill" id="aiStatus">Checking AI…</span><label>What would you like to write?<textarea id="prompt" placeholder="Draft a reply confirming receipt and requesting the missing enclosures…"></textarea></label><div class="ai-chips"><button data-ai="draft">Draft letter</button><button data-ai="reply">Draft reply</button><button data-ai="formalize">Formalize</button><button data-ai="shorten">Shorten</button><button data-ai="summarize">Summarize</button></div><label>Writing tone<select id="tone"><option>Professional</option><option>Formal</option><option>Firm and courteous</option><option>Warm</option><option>Concise</option></select></label><button class="primary" data-action="generate" id="generate">✧ Create suggestion</button><button data-action="cancelAI" hidden id="cancelAI">Cancel generation</button><div id="aiResult" class="ai-result" aria-live="polite"></div><div class="ai-actions" id="aiActions" hidden><button data-action="acceptAI" class="primary">Accept suggestion</button><button data-action="rejectAI">Discard</button></div><div id="aiSources"></div><section class="memory-box"><h3>Correspondence memory</h3><p>Find a previous letter and use it as context. Sources stay visible beside every suggestion.</p><input id="memoryQuery" aria-label="Search correspondence" placeholder="Search your letters…"><div id="memorySources"></div><button data-action="import">＋ Import correspondence</button><button data-action="contextDrafts">Choose draft context</button><small id="draftContext">No other drafts selected</small></section></aside></div>`;
+$(".bottom").insertAdjacentHTML("beforebegin", '<section id="typingBar" class="typing-bar" aria-label="AI drafting progress" hidden><span class="typing-indicator" aria-hidden="true">✧</span><div><strong id="typingStatus" role="status"></strong><div id="draftSources" class="draft-sources"></div></div><button id="stopDraft" data-action="cancelAI">Stop & restore</button><button id="undoDraft" data-action="undoDraft" hidden>Undo draft</button><button id="dismissDraft" data-action="dismissDraft" hidden aria-label="Dismiss drafting status">×</button></section>');
+$("#studio").inert = true;
+$("#studio").setAttribute("aria-busy", "true");
 const editor = new Editor({
+  editable: false,
   element: $("#editor"),
   extensions: [
     StarterKit.configure({
@@ -150,6 +157,9 @@ const editor = new Editor({
     }),
     TableKit.configure({ table: { resizable: true } }),
     layout,
+    WordFormatting,
+    Superscript,
+    Subscript,
     pageBreak,
     LivePages.configure({
       getLetter: () => letter,
@@ -178,7 +188,7 @@ const editor = new Editor({
       "aria-multiline": "true",
     },
   },
-  onUpdate: () => changed(),
+  onUpdate: () => { if (!aiTyping) { changed(); if (!$("#undoDraft").hidden) $("#typingBar").hidden = true; } },
   onSelectionUpdate: () => {
     for (const b of document.querySelectorAll("[data-command]")) {
       const type = b.dataset.command
@@ -189,7 +199,7 @@ const editor = new Editor({
   },
 });
 function snapshot() {
-  return { ...letter, title: $("#title").value, content: editor.getJSON() };
+  return { ...letter, title: $("#title").value, content: aiTyping ? aiTyping.originalState.doc.toJSON() : editor.getJSON() };
 }
 function cache() {
   try {
@@ -272,6 +282,9 @@ function paint() {
   editor.commands.refreshLetterPages();
 }
 async function save() {
+  if (aiTyping) throw new Error("Finish or stop AI drafting before saving. Your original is preserved.");
+  editor.view.domObserver.forceFlush();
+  editor.view.domObserver.flush();
   if (!config.signedIn) {
     if (!record) record = crypto.randomUUID();
     const d = {
@@ -443,8 +456,18 @@ function chooseFile(accept) {
 }
 let aiAction = "draft";
 const actions = {
-  library: () => $(".left").classList.toggle("open"),
-  assistant: () => $(".right").classList.toggle("open"),
+  library: () => {
+    if (matchMedia("(max-width: 1100px)").matches) $(".left").classList.toggle("open");
+    else $(".workspace").classList.toggle("hide-library");
+  },
+  assistant: () => {
+    if (matchMedia("(max-width: 1100px)").matches) $(".right").classList.toggle("open");
+    else $(".workspace").classList.toggle("hide-assistant");
+  },
+  draftPopup: () => openDraftPopup("draft"),
+  undoDraft: () => { editor.commands.undo(); $("#typingBar").hidden = true; },
+  dismissDraft: () => { $("#typingBar").hidden = true; },
+  pageMargin: (margin) => { letter.page.margin = margin; paint(); changed(); },
   async new() {
     const d = $("#dialog");
     d.innerHTML = `<h2>Begin with a little structure.</h2><p>Choose a starting point. Every detail is yours to change.</p><div class="template-grid">${["blank", "formal", "request", "reply", "reminder", "notice", "covering"].map((k) => `<button data-template="${k}"><strong>${k[0].toUpperCase() + k.slice(1)}</strong><small>${{ blank: "A clean page for your ideas.", formal: "Clear, professional correspondence.", request: "Make a well-structured request.", reply: "Respond with context and clarity.", reminder: "A courteous follow-up.", notice: "Communicate an official update.", covering: "Introduce enclosed documents." }[k]}</small></button>`).join("")}</div><div class="modal-actions"><button data-close>Cancel</button></div>`;
@@ -883,7 +906,7 @@ const actions = {
         selectedDrafts.length + " draft(s) explicitly selected";
     }
   },
-  generate: () => generateAI(),
+  generate: () => ["draft", "reply"].includes(aiAction) ? openDraftPopup(aiAction) : generateAI(),
   cancelAI: () => aiAbort?.abort(),
   acceptAI() {
     if (!aiProposal) return;
@@ -1095,7 +1118,35 @@ async function memorySearch() {
     $("#memorySources").append(div);
   }
 }
-async function generateAI() {
+async function openDraftPopup(action = "draft") {
+  if (aiAbort) return notice("Stop the current generation first.");
+  editor.view.domObserver.forceFlush();
+  editor.view.domObserver.flush();
+  const range = { from: editor.state.selection.from, to: editor.state.selection.to };
+const pending = dialog("Draft a letter with AI", `<p class="draft-intro">Describe your letter. Watch it take shape directly on the page.</p><label>What should the letter say?<textarea name="prompt" rows="5" maxlength="8000" required placeholder="Write a formal request for approval. Explain the purpose, include the reference number, and ask for a reply by Friday.">${e($("#prompt").value)}</textarea></label><div class="draft-examples"><button type="button" data-example="request">Request</button><button type="button" data-example="reply">Reply</button><button type="button" data-example="reminder">Reminder</button><button type="button" data-example="notice">Notice</button></div><div class="field-grid"><label>Tone<select name="tone">${["Professional", "Formal", "Firm and courteous", "Warm", "Concise"].map(t => `<option ${t === $("#tone").value ? "selected" : ""}>${t}</option>`).join("")}</select></label><label>Write into<select name="placement"><option value="insert">Insert at cursor — keep existing text</option>${range.from !== range.to ? '<option value="selection">Replace selected text</option>' : ""}<option value="body">Replace letter body</option></select></label></div><p class="draft-context">Uses your current letter details and selected correspondence context. Existing letterhead and footer stay unchanged. Stop restores the original; Undo removes a completed draft.</p>${config.externalAI ? '<label class="draft-consent"><input type="checkbox" name="accepted" required> Allow this prompt, current text and relevant correspondence excerpts to be processed by an external AI service.</label>' : ""}`, "Start writing");
+  const d = $("#dialog");
+  d.classList.add("draft-dialog");
+  const examples = {
+    request: "Draft a formal request for [approval or information]. Explain [reason], reference [previous correspondence], and request a response by [date].",
+    reply: "Reply to the selected correspondence. Acknowledge the points raised, explain [our position], and clearly state the next steps.",
+    reminder: "Write a courteous reminder about [pending matter]. Refer to [earlier letter and date], explain the impact of the delay, and ask for action by [date].",
+    notice: "Draft an official notice about [subject]. State who it applies to, the effective date, required action, and contact details.",
+  };
+  d.querySelectorAll("[data-example]").forEach(b => b.onclick = () => {
+    d.querySelector('[name="prompt"]').value = examples[b.dataset.example];
+    d.querySelector('[name="prompt"]').focus();
+  });
+  const data = await pending;
+  if (!data) return;
+  $("#prompt").value = data.prompt;
+  $("#tone").value = data.tone;
+  aiAction = action;
+  await generateAI({ direct: true, approved: !!data.accepted, range: data.placement === "body"
+    ? { from: 0, to: editor.state.doc.content.size }
+    : data.placement === "selection" ? range : { from: range.from, to: range.from } });
+}
+
+async function generateAI(options = {}) {
   if (!config.ai) {
     notice(
       "AI is awaiting server configuration and quality validation. Your editor is ready to use.",
@@ -1103,11 +1154,11 @@ async function generateAI() {
     return;
   }
   if (aiAbort) return;
-  if (config.externalAI) {
+  if (config.externalAI && !options.approved) {
     const consent = await dialog(
-      "Send this AI request to NVIDIA?",
-      '<p>Your prompt, selected text (or current letter), and relevant excerpts retrieved from your correspondence will be sent to NVIDIA for processing. Originals and document storage remain on the VPS. Do not submit confidential information without permission.</p><label><input type="checkbox" name="accepted" required> I agree to send this request and its context to NVIDIA.</label>',
-      "Send to NVIDIA",
+      "Allow external AI processing?",
+      '<p>Your prompt, selected text (or current letter), and relevant excerpts retrieved from your correspondence will be sent to our external AI service for processing. Originals and document storage remain on the VPS. Do not submit confidential information without permission.</p><label><input type="checkbox" name="accepted" required> I agree to external processing of this request and its context.</label>',
+      "Create suggestion",
     );
     if (!consent) return;
     if (aiAbort) return;
@@ -1125,6 +1176,22 @@ async function generateAI() {
   $("#aiActions").hidden = true;
   $("#aiSources").replaceChildren();
   aiAbort = new AbortController();
+  let completed = false, previewFrame;
+  if (options.direct) {
+    clearTimeout(saveTimer);
+    aiTyping = new DirectDraft(editor, options.range);
+    $(".workspace").classList.add("ai-typing");
+    for (const selector of [".ribbon", ".document-bar", ".left", ".top-actions"]) $(selector).inert = true;
+    $("#typingBar").hidden = false;
+    $("#stopDraft").hidden = false;
+    $("#undoDraft").hidden = true;
+    $("#dismissDraft").hidden = true;
+    $("#draftSources").replaceChildren();
+    $("#typingStatus").textContent = "AI is writing into your document…";
+    $("#paper").hidden = false;
+    $("#printPreview").hidden = true;
+    preview = false;
+  }
   $("#cancelAI").hidden = false;
   $("#generate").disabled = true;
   try {
@@ -1156,8 +1223,14 @@ async function generateAI() {
       if (part.error) throw new Error(part.error);
       if (part.token) {
         aiProposal += part.token;
-        $("#aiResult").textContent = aiProposal;
+        if (options.direct) {
+          if (!previewFrame) previewFrame = requestAnimationFrame(() => {
+            previewFrame = null;
+            aiTyping?.preview(aiProposal);
+          });
+        } else $("#aiResult").textContent = aiProposal;
       }
+      if (part.done) completed = true;
       if (part.sources)
         for (const source of part.sources) {
           const b = document.createElement("button");
@@ -1168,7 +1241,8 @@ async function generateAI() {
               ? viewDraftSource(source.id)
               : viewSource(source.id)
             ).catch((err) => notice(err.message));
-          $("#aiSources").append(b);
+          $(options.direct ? "#draftSources" : "#aiSources").append(b);
+          if (options.direct) { const copy=b.cloneNode(true); copy.onclick=b.onclick; $("#aiSources").append(copy); }
         }
     };
     while (true) {
@@ -1182,18 +1256,46 @@ async function generateAI() {
         if (row.trim()) read(row);
       }
     }
+    buffer += decoder.decode();
     if (buffer.trim()) read(buffer);
-    $("#aiActions").hidden = !aiProposal;
+    if (!completed || !aiProposal.trim()) throw new Error("AI did not return a complete draft. Your original document is unchanged.");
+    if (options.direct) {
+      cancelAnimationFrame(previewFrame);
+      aiTyping.finish(aiProposal);
+      $("#aiResult").textContent = "Draft written into the document. Review it carefully; use Undo to remove it.";
+      notice("Draft complete. Review the text or Undo to restore the original.");
+    } else $("#aiActions").hidden = !aiProposal;
   } catch (err) {
+    completed = false;
+    if (options.direct) aiTyping?.restore();
     if (err.name !== "AbortError") notice(err.message);
+    else if (options.direct) notice("Drafting stopped. Your original document was restored.");
     aiProposal = "";
     $("#aiActions").hidden = true;
   } finally {
+    cancelAnimationFrame(previewFrame);
+    if (options.direct) {
+      aiTyping = null;
+      $(".workspace").classList.remove("ai-typing");
+      for (const selector of [".ribbon", ".document-bar", ".left", ".top-actions"]) $(selector).inert = false;
+      $("#typingBar").hidden = !completed;
+      $("#stopDraft").hidden = true;
+      $("#undoDraft").hidden = !completed;
+      $("#dismissDraft").hidden = !completed;
+      if (completed) $("#typingStatus").textContent = "Draft ready — review before exporting";
+      if (completed) changed();
+      else {
+        metrics(); editor.commands.refreshLetterPages();
+        if (dirty > saved) saveTimer = setTimeout(() => save().catch(err => notice(err.message)), 1200);
+      }
+    }
     aiAbort = null;
     $("#cancelAI").hidden = true;
     $("#generate").disabled = false;
   }
 }
+installRibbon(editor, { actions, dialog, notice, getLetter: snapshot, save, documentText });
+
 document.addEventListener("click", async (event) => {
   const button = event.target.closest("button");
   if (!button) return;
@@ -1206,7 +1308,8 @@ document.addEventListener("click", async (event) => {
     if (button.dataset.kind) await refreshLibrary(button.dataset.kind);
     if (button.dataset.ai) {
       aiAction = button.dataset.ai;
-      await generateAI();
+      if (["draft", "reply"].includes(aiAction)) await openDraftPopup(aiAction);
+      else await generateAI();
     }
   } catch (err) {
     notice(err.message);
@@ -1239,7 +1342,7 @@ $("#memoryQuery").oninput = () => {
 };
 window.addEventListener("beforeunload", (event) => {
   cache();
-  if (config.signedIn && dirty > saved) {
+  if (aiTyping || (config.signedIn && dirty > saved)) {
     event.preventDefault();
     event.returnValue = "";
   }
@@ -1254,19 +1357,19 @@ document.addEventListener("keydown", (event) => {
 });
 try {
   config = await api("/config");
-  const aiLabel = config.externalAI ? "NVIDIA API" : "Local AI";
+  const aiLabel = "Vibify AI";
   $("#aiStatus").textContent = config.ai
     ? `● ${aiLabel} ready`
     : `○ ${aiLabel} awaiting setup`;
   if (config.externalAI)
     $("#aiStatus").title =
-      "AI requests and relevant context are processed by NVIDIA outside this VPS.";
+      "AI requests and relevant context are processed by an external AI service.";
   if (config.externalAI || config.externalEmbeddings) {
     const disclosure = document.createElement("p");
     disclosure.className = "muted";
     disclosure.textContent = config.externalEmbeddings
-      ? "NVIDIA processes AI requests, search queries and indexed correspondence excerpts outside this VPS."
-      : "NVIDIA processes confirmed AI requests and relevant excerpts outside this VPS.";
+      ? "AI requests, search queries and indexed correspondence excerpts are processed by an external AI service."
+      : "Confirmed AI requests and relevant excerpts are processed by an external AI service.";
     $("#aiStatus").after(disclosure);
   }
   $("#account").textContent = config.signedIn ? "●" : "↗";
@@ -1294,4 +1397,10 @@ try {
 } catch (err) {
   paint();
   notice(err.message);
+} finally {
+  editor.setEditable(true, false);
+  editor.commands.refreshLetterPages();
+  $("#studio").inert = false;
+  $("#studio").setAttribute("aria-busy", "false");
+  $("#studio").dataset.ready = "true";
 }
